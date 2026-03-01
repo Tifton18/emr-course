@@ -400,7 +400,9 @@ async function loadExamResults(){
       const submittedAt=f.submittedAt?.stringValue||'';
       const def=EXAM_DEFS.find(d=>d.label===label);
       console.log('Row:', {name, label, pct, score, total, defFound:!!def});
-      if(!name||!def)return;
+      console.log('EXAM_DEFS labels:', EXAM_DEFS.map(d=>d.label));
+      console.log('label charCodes:', [...label].map(c=>c.charCodeAt(0)));
+      if(!name||!def){ console.log('SKIPPED - name empty?', !name, 'def not found?', !def); return; }
       if(!examResults[name])examResults[name]={};
       const existing=examResults[name][def.assignId];
       if(!existing||pct>existing.pct){
