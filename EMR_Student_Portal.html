@@ -348,8 +348,8 @@ const CATEGORIES = [
 // Leave name as "" for unassigned slots
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
-  { id: "TFD-001", name: "test" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-001", name: "" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -462,9 +462,10 @@ function attemptSignIn() {
     return;
   }
 
-  // Success
+  // Success — save to localStorage so they stay signed in
   currentSession = { id: match.id, name: match.name };
   currentStudent = match.name;
+  try { localStorage.setItem('tfd_session', JSON.stringify(currentSession)); } catch(e) {}
   document.getElementById("signInModal").classList.add("hidden");
 
   // Show portal header
@@ -487,6 +488,7 @@ function signOut() {
   currentStudent = "";
   studentScores = {};
   window._trackerCatData = {};
+  try { localStorage.removeItem('tfd_session'); } catch(e) {}
   document.getElementById("portalHeader").classList.remove("visible");
   document.getElementById("signInHeroBtn").style.display = "";
   document.querySelector(".main").style.display = "none";
@@ -739,8 +741,39 @@ function letterColor(l) {
 
 // Sign-in handled by modal — see attemptSignIn()
 
-// Show sign-in on load
-// Main content hidden until signed in
+// Check for saved session on load
+(function() {
+  try {
+    const saved = localStorage.getItem('tfd_session');
+    if (saved) {
+      const session = JSON.parse(saved);
+      // Verify the saved session still exists in the roster
+      const match = STUDENT_ROSTER.find(s =>
+        s.id === session.id &&
+        s.name.trim().toLowerCase() === session.name.trim().toLowerCase() &&
+        s.name.trim() !== ""
+      );
+      if (match) {
+        currentSession = { id: match.id, name: match.name };
+        currentStudent = match.name;
+        // Show portal header
+        const header = document.getElementById("portalHeader");
+        header.classList.add("visible");
+        document.getElementById("portalAvatar").textContent = match.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+        document.getElementById("portalUserName").textContent = match.name;
+        document.getElementById("portalUserId").textContent = "Student ID: " + match.id;
+        document.getElementById("signInHeroBtn").style.display = "none";
+        document.querySelector(".main").style.display = "block";
+        loadStudentData(match.name);
+        return;
+      } else {
+        localStorage.removeItem('tfd_session');
+      }
+    }
+  } catch(e) {}
+  // No valid saved session — show sign-in button
+  renderExams();
+})();
 </script>
 </body>
 </html>
