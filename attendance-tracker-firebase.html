@@ -317,7 +317,33 @@ let examResults={};
 
 function setSyncStatus(s,text){document.getElementById('syncBar').className=s;const l=document.getElementById('syncLabel');l.className=s;l.textContent=text;}
 function scheduleSave(){setSyncStatus('syncing','Saving…');clearTimeout(saveTimer);saveTimer=setTimeout(saveToFirebase,800);}
-async function saveToFirebase(){try{await DOC_REF.set(data);setSyncStatus('saved','✓ Saved');setTimeout(()=>setSyncStatus('',''),2000);}catch(e){setSyncStatus('error','✗ Save failed');}}
+async function saveToFirebase(){
+  try{
+    // Deep clone and ensure scores keys are strings (Firestore rejects numeric keys)
+    const clean = JSON.parse(JSON.stringify(data));
+    if(clean.scores){
+      const fixedScores={};
+      Object.entries(clean.scores).forEach(([k,v])=>{ fixedScores[String(k)]=v; });
+      clean.scores=fixedScores;
+    }
+    // Ensure attendance studentId keys are strings too
+    if(clean.attendance){
+      const fixedAtt={};
+      Object.entries(clean.attendance).forEach(([date,rec])=>{
+        const fixedRec={};
+        Object.entries(rec||{}).forEach(([sid,status])=>{ fixedRec[String(sid)]=status; });
+        fixedAtt[date]=fixedRec;
+      });
+      clean.attendance=fixedAtt;
+    }
+    await DOC_REF.set(clean);
+    setSyncStatus('saved','✓ Saved');
+    setTimeout(()=>setSyncStatus('',''),2000);
+  }catch(e){
+    console.error('Save failed:',e.code, e.message);
+    setSyncStatus('error','✗ Save failed: '+e.message);
+  }
+}
 
 // ── FETCH EXAM RESULTS FROM FIRESTORE ─────────────────
 async function loadExamResults(){
@@ -365,11 +391,10 @@ async function loadFromFirebase(){
       if(!data.assignments)data.assignments=[];
       if(!data.scores)data.scores={};
       if(!data.examStatus)data.examStatus={};
-      if(!data.examStatus)data.examStatus={};
     }else{
       data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));
       data.className='My Class';data.attendance={};data.assignments=[];data.scores={};data.examStatus={};
-      await DOC_REF.set(data);
+      await DOC_REF.set(JSON.parse(JSON.stringify(data)));
     }
   }catch(e){setSyncStatus('error','✗ Connection failed');data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));}
   await loadExamResults();
@@ -383,7 +408,6 @@ async function loadFromFirebase(){
       if(!data.attendance)data.attendance={};
       if(!data.assignments)data.assignments=[];
       if(!data.scores)data.scores={};
-      if(!data.examStatus)data.examStatus={};
       if(!data.examStatus)data.examStatus={};
       document.getElementById('classNameDisplay').textContent=data.className;
       renderCurrent();updateTodayCount();
@@ -647,8 +671,29 @@ function renderExamToggles(){
 function toggleExam(assignId,open){
   if(!data.examStatus)data.examStatus={};
   data.examStatus[assignId]=open;
-  scheduleSave();
-  renderExamToggles();
+  renderExamToggles(); // update UI immediately
+  // Save just the examStatus field directly for reliability
+  setSyncStatus('syncing','Saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      const clean = JSON.parse(JSON.stringify(data));
+      await DOC_REF.set(clean);
+      setSyncStatus('saved','✓ Saved');
+      setTimeout(()=>setSyncStatus('',''),2000);
+    }catch(e){
+      console.error('toggleExam save error:',e.code, e.message);
+      // Try update instead of set as fallback
+      try{
+        await DOC_REF.update({examStatus: data.examStatus});
+        setSyncStatus('saved','✓ Saved');
+        setTimeout(()=>setSyncStatus('',''),2000);
+      }catch(e2){
+        console.error('toggleExam update fallback error:',e2.code, e2.message);
+        setSyncStatus('error','✗ Save failed — check Firestore rules');
+      }
+    }
+  }, 300);
 }
 
 async function refreshExamResults(){
