@@ -143,6 +143,25 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .att-bar-bg{background:#1e3a5f}
 }
 
+
+  /* Reset modal */
+  .reset-overlay { position:fixed;inset:0;background:rgba(15,25,50,0.7);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(4px);padding:20px; }
+  .reset-overlay.hidden { display:none; }
+  .reset-card { background:#fff;border-radius:20px;padding:36px;max-width:460px;width:100%;box-shadow:0 24px 64px rgba(15,25,50,0.25);border-top:4px solid #dc2626; }
+  .reset-title { font-size:20px;font-weight:700;color:#1e3a5f;margin-bottom:8px; }
+  .reset-sub { font-size:14px;color:#6b82a0;line-height:1.6;margin-bottom:24px; }
+  .reset-options { display:flex;flex-direction:column;gap:10px;margin-bottom:24px; }
+  .reset-option { display:flex;align-items:flex-start;gap:12px;background:#f0f6ff;border:2px solid #bfdbfe;border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color 0.2s; }
+  .reset-option:hover { border-color:#2563eb; }
+  .reset-option input[type=checkbox] { margin-top:2px;width:16px;height:16px;accent-color:#dc2626;flex-shrink:0;cursor:pointer; }
+  .reset-option-label { font-size:14px;color:#1e3a5f;font-weight:600; }
+  .reset-option-desc { font-size:12px;color:#6b82a0;margin-top:2px; }
+  .reset-warning { background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;font-size:13px;color:#b91c1c;margin-bottom:20px; }
+  .reset-actions { display:flex;gap:10px; }
+  .btn-reset-confirm { flex:1;background:#dc2626;color:#fff;border:none;border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Georgia,serif;transition:background 0.2s; }
+  .btn-reset-confirm:hover { background:#b91c1c; }
+  .btn-reset-cancel { flex:1;background:#f0f6ff;color:#4a6080;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:15px;cursor:pointer;font-family:Georgia,serif;transition:all 0.2s; }
+  .btn-reset-cancel:hover { border-color:#2563eb;color:#2563eb; }
 </style>
 </head>
 <body>
@@ -224,6 +243,50 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   </div>
 </div>
 
+<!-- RESET MODAL -->
+<div class="reset-overlay hidden" id="resetModal">
+  <div class="reset-card">
+    <div class="reset-title">↺ Reset for New Course</div>
+    <div class="reset-sub">Select what to clear. This cannot be undone — export a report first if you need to keep records.</div>
+    <div class="reset-options">
+      <label class="reset-option">
+        <input type="checkbox" id="resetStudents" />
+        <div>
+          <div class="reset-option-label">Students</div>
+          <div class="reset-option-desc">Remove all student names from the roster</div>
+        </div>
+      </label>
+      <label class="reset-option">
+        <input type="checkbox" id="resetAttendance" checked />
+        <div>
+          <div class="reset-option-label">Attendance Records</div>
+          <div class="reset-option-desc">Clear all attendance data for all dates</div>
+        </div>
+      </label>
+      <label class="reset-option">
+        <input type="checkbox" id="resetGrades" checked />
+        <div>
+          <div class="reset-option-label">Assignments &amp; Grades</div>
+          <div class="reset-option-desc">Remove all assignments and entered scores</div>
+        </div>
+      </label>
+      <label class="reset-option">
+        <input type="checkbox" id="resetClassName" />
+        <div>
+          <div class="reset-option-label">Course Name</div>
+          <div class="reset-option-desc">Reset the class name back to "My Class"</div>
+        </div>
+      </label>
+    </div>
+    <div class="reset-warning">⚠ This will permanently delete the selected data from Firebase. Export your report before resetting.</div>
+    <div class="reset-actions">
+      <button class="btn-reset-cancel" onclick="closeReset()">Cancel</button>
+      <button class="btn-reset-confirm" onclick="confirmReset()">Reset Selected</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="bottom-bar">
   <div class="legend">
     <span style="color:#4ade80">P — Present</span>
@@ -232,6 +295,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <span style="color:#6366f1">E — Excused</span>
   </div>
   <button class="export-btn" onclick="exportReport()">⬇ Export / Print</button>
+  <button class="export-btn" onclick="resetCourse()" style="border-color:#fca5a5;color:#dc2626;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#f0f6ff'">↺ Reset for New Course</button>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -630,6 +694,61 @@ async function refreshExamResults(){
   setSyncStatus('saved','✓ Refreshed');setTimeout(()=>setSyncStatus('',''),2000);
   renderGradesTab();
   if(activeTab==='summary')renderSummary();
+}
+
+
+// ── COURSE RESET ──────────────────────────────────────
+function resetCourse(){
+  document.getElementById('resetModal').classList.remove('hidden');
+}
+function closeReset(){
+  document.getElementById('resetModal').classList.add('hidden');
+}
+async function confirmReset(){
+  const clearStudents   = document.getElementById('resetStudents').checked;
+  const clearAttendance = document.getElementById('resetAttendance').checked;
+  const clearGrades     = document.getElementById('resetGrades').checked;
+  const clearClassName  = document.getElementById('resetClassName').checked;
+
+  if(!clearStudents && !clearAttendance && !clearGrades && !clearClassName){
+    alert('Please select at least one item to reset.');
+    return;
+  }
+
+  closeReset();
+  setSyncStatus('syncing','Resetting…');
+
+  if(clearStudents)   { data.students=[]; }
+  if(clearAttendance) { data.attendance={}; }
+  if(clearGrades)     { data.assignments=[]; data.scores={}; }
+  if(clearClassName)  { data.className='My Class'; document.getElementById('classNameDisplay').textContent='My Class'; }
+
+  // Also clear exam results from Firebase if resetting students
+  if(clearStudents){
+    try{
+      // Delete all docs in examResults collection
+      const snap = await db.collection('examResults').get();
+      const batch = db.batch();
+      snap.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+    }catch(e){ console.error('Could not clear examResults:',e); }
+  }
+
+  try{
+    const clean = JSON.parse(JSON.stringify(data));
+    if(clean.scores){
+      const fs={};Object.entries(clean.scores).forEach(([k,v])=>{fs[String(k)]=v;});clean.scores=fs;
+    }
+    await DOC_REF.set(clean);
+    setSyncStatus('saved','✓ Reset complete');
+    setTimeout(()=>setSyncStatus('',''),3000);
+  }catch(e){
+    setSyncStatus('error','✗ Reset failed');
+    console.error(e);
+  }
+
+  examResults={};
+  renderCurrent();
 }
 
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
