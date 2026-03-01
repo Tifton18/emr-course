@@ -908,8 +908,7 @@ async function fetchExamQuestions(examLabel) {
     const resp = await fetch(file);
     const html = await resp.text();
     // Extract questions array from the file
-    const match = html.match(/const questions = (\[[\s\S]*?\]);\s*
-\s*const SECTION_COLORS/);
+    const match = html.match(/const questions = ([\s\S]*?);\s*const SECTION_COLORS/);
     if (!match) return null;
     const questions = eval(match[1]); // safe — our own file
     EXAM_QUESTION_CACHE[examLabel] = questions;
