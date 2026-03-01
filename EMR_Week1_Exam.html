@@ -230,7 +230,7 @@ const FB_CONFIG = {
   authDomain:"class-attendance-72cd9.firebaseapp.com",
   projectId:"class-attendance-72cd9",
 };
-const EXAM_PASSWORD   = "tfd-041301"; // ← change this to control access
+const EXAM_PASSWORD   = "tfd-week1"; // ← change this to control access
 const LETTERS         = ["A","B","C","D","E"];
 
 // ── QUESTION DATA ────────────────────────────────────
@@ -365,11 +365,20 @@ async function finishExam() {
   const timeUsed = TOTAL_TIME - timeLeft;
   const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
 
+  // Serialize answers for Firebase storage
+  const answersData = answers.map((ans, i) => {
+    const q = questions[i];
+    if (ans === null || ans === undefined) return { type: q.type, given: null };
+    if (q.type === 'matching') return { type: 'matching', given: ans };
+    return { type: q.type, given: ans };
+  });
+
   const subData = {
     examLabel: EXAM_LABEL,
     name: studentName,
     score, total, pct, timeUsed,
     questionResults,
+    answersData,
     submittedAt: new Date().toISOString(),
   };
 
@@ -377,6 +386,12 @@ async function finishExam() {
   render();
 
   const result = await submitToFirebase(subData);
+  console.log('Submit result:', result);
+  if (!result.success) {
+    console.error('SUBMIT FAILED:', result.error);
+  } else {
+    console.log('Submit SUCCESS - score saved to Firebase');
+  }
   phase = "results";
   window._submitResult = result;
   window._examScore = {score,total,pct};
@@ -387,10 +402,12 @@ async function finishExam() {
 // ── RENDER ───────────────────────────────────────────
 function render() {
   const root = document.getElementById("root");
-  if (phase === "intro")       root.innerHTML = renderIntro();
+  if (phase === "review_intro")  root.innerHTML = renderReviewIntro();
+  else if (phase === "review")   root.innerHTML = renderReview();
+  else if (phase === "intro")    root.innerHTML = renderIntro();
   else if (phase === "submitting") root.innerHTML = renderSubmitting();
-  else if (phase === "results") root.innerHTML = renderResults();
-  else                          root.innerHTML = renderExam();
+  else if (phase === "results")  root.innerHTML = renderResults();
+  else                           root.innerHTML = renderExam();
   attachEvents();
 }
 
@@ -582,34 +599,38 @@ function attachEvents() {
   const nameInput = document.getElementById("nameInput");
   const beginBtn  = document.getElementById("beginBtn");
   if (nameInput) {
-    nameInput.value = studentName;
+    nameInput.value = REVIEW_MODE ? REVIEW_NAME : studentName;
     const passwordInput = document.getElementById("passwordInput");
     const passwordError = document.getElementById("passwordError");
     function updateBeginBtn(){
-      const ready = !!studentName && !!passwordInput.value.trim();
-      beginBtn.disabled = !ready;
-      beginBtn.classList.toggle("active", ready);
+      const ready = !!nameInput.value.trim() && !!passwordInput.value.trim();
+      if(beginBtn){ beginBtn.disabled = !ready; beginBtn.classList.toggle("active", ready); }
     }
     nameInput.addEventListener("input", e=>{
-      studentName = e.target.value.trim();
-      nameInput.classList.toggle("has-value", !!studentName);
+      if(!REVIEW_MODE){ studentName = e.target.value.trim(); nameInput.classList.toggle("has-value", !!studentName); }
       updateBeginBtn();
     });
     nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") passwordInput.focus(); });
-    passwordInput.addEventListener("input", ()=>{ passwordError.style.display="none"; updateBeginBtn(); });
-    passwordInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName&&passwordInput.value.trim()) beginExam(); });
+    passwordInput.addEventListener("input", ()=>{ if(passwordError) passwordError.style.display="none"; updateBeginBtn(); });
+    passwordInput.addEventListener("keydown", e=>{
+      if(e.key==="Enter" && nameInput.value.trim() && passwordInput.value.trim()){
+        REVIEW_MODE ? handleReviewBegin() : beginExam();
+      }
+    });
   }
   if (beginBtn) {
-    beginBtn.classList.toggle("active", false);
+    if(!REVIEW_MODE){ beginBtn.classList.toggle("active", false); }
     beginBtn.addEventListener("click", ()=>{
-      if(!studentName) return;
       const pwInput = document.getElementById("passwordInput");
       const pwError = document.getElementById("passwordError");
+      const revError = document.getElementById("reviewError");
       if(pwInput && pwInput.value.trim() !== EXAM_PASSWORD){
         if(pwError){ pwError.style.display="block"; }
         if(pwInput){ pwInput.value=""; pwInput.focus(); }
         return;
       }
+      if(REVIEW_MODE){ handleReviewBegin(); return; }
+      if(!studentName) return;
       beginExam();
     });
   }
@@ -701,6 +722,22 @@ function attachEvents() {
   updateTimerUI();
 }
 
+async function handleReviewBegin() {
+  const nameVal = document.getElementById("nameInput")?.value.trim() || REVIEW_NAME;
+  const root = document.getElementById("root");
+  if(root) root.innerHTML = `<div style="min-height:100vh;background:#f0f6ff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;"><div style="font-size:18px;color:#4a6080;">Loading your results…</div></div>`;
+  reviewData = await loadReviewData(nameVal);
+  if (!reviewData) {
+    phase = "review_intro";
+    render();
+    const revError = document.getElementById("reviewError");
+    if(revError) revError.style.display = "block";
+    return;
+  }
+  phase = "review";
+  render();
+}
+
 function beginExam() {
   initShuffles();
   phase = "exam";
@@ -708,9 +745,149 @@ function beginExam() {
   startTimer();
 }
 
+// ── REVIEW MODE ──────────────────────────────────────
+const REVIEW_MODE = new URLSearchParams(window.location.search).get('review') === '1';
+const REVIEW_NAME = decodeURIComponent(new URLSearchParams(window.location.search).get('name') || '');
+let reviewData = null; // loaded from Firebase
+
+async function loadReviewData(name) {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents:runQuery?key=${FB_CONFIG.apiKey}`;
+    const body = {
+      structuredQuery: {
+        from: [{ collectionId: "examResults" }],
+        where: {
+          compositeFilter: {
+            op: "AND",
+            filters: [
+              { fieldFilter: { field: { fieldPath: "name" }, op: "EQUAL", value: { stringValue: name } } },
+              { fieldFilter: { field: { fieldPath: "examLabel" }, op: "EQUAL", value: { stringValue: EXAM_LABEL } } }
+            ]
+          }
+        }
+      }
+    };
+    const resp = await fetch(url, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    const results = await resp.json();
+    // Find the best score submission
+    let best = null;
+    for (const item of results) {
+      if (!item.document) continue;
+      const f = item.document.fields;
+      const pct = parseInt(f.pct?.integerValue || 0);
+      if (!best || pct > best.pct) {
+        best = {
+          pct,
+          score: parseInt(f.score?.integerValue || 0),
+          total: parseInt(f.total?.integerValue || 0),
+          answersData: f.answersData?.stringValue ? JSON.parse(f.answersData.stringValue) : null,
+          submittedAt: f.submittedAt?.stringValue || "",
+        };
+      }
+    }
+    return best;
+  } catch(e) {
+    console.error("loadReviewData error:", e);
+    return null;
+  }
+}
+
+function renderReviewIntro() {
+  return `
+    <div class="intro-wrap">
+      <div class="intro-card">
+        <div class="intro-eyebrow" style="color:#2563eb">Review Mode</div>
+        <div class="intro-title" style="font-size:32px">${EXAM_LABEL}</div>
+        <div class="intro-sub">Enter your name and password to review your submitted answers</div>
+        <label class="name-label">Student Name</label>
+        <input class="name-input" id="nameInput" type="text" value="${REVIEW_NAME}" placeholder="Enter your full name..." autocomplete="off">
+        <label class="name-label" style="margin-top:4px;">Exam Password</label>
+        <input class="name-input" id="passwordInput" type="password" placeholder="Enter the exam password..." autocomplete="off">
+        <div id="passwordError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">Incorrect password. Please try again.</div>
+        <div id="reviewError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">No submission found for that name. Make sure it matches exactly.</div>
+        <br>
+        <button class="btn-begin active" id="beginBtn" style="background:#2563eb">Load My Results</button>
+      </div>
+    </div>`;
+}
+
+function renderReview() {
+  const rd = reviewData;
+  if (!rd) return `<div style="padding:40px;text-align:center;color:#f87171">No submission data found.</div>`;
+
+  const lc = rd.pct >= 70 ? '#16a34a' : '#dc2626';
+  const passed = rd.pct >= 70;
+
+  // Build question review
+  let qHtml = '';
+  questions.forEach((q, i) => {
+    const savedAns = rd.answersData ? rd.answersData[i] : null;
+    const givenAns = savedAns?.given ?? null;
+    const correct = scoreQuestion(q, givenAns);
+    const ic = correct ? '#16a34a' : '#dc2626';
+    const ibg = correct ? '#f0fdf4' : '#fef2f2';
+    const ibd = correct ? '#bbf7d0' : '#fecaca';
+
+    qHtml += `<div style="background:${ibg};border:2px solid ${ibd};border-radius:12px;padding:20px 24px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-size:12px;color:#6b82a0;letter-spacing:2px;text-transform:uppercase;">Question ${i+1}</span>
+        <span style="font-weight:700;color:${ic};font-size:14px;">${correct ? '✓ Correct' : '✗ Incorrect'} · ${q.points} pt${q.points>1?'s':''}</span>
+      </div>
+      <div style="font-size:16px;color:#1e3a5f;line-height:1.6;margin-bottom:16px;">${q.stem}</div>`;
+
+    if (q.type === 'mc' || q.type === 'best2') {
+      const correctIdxs = q.type === 'mc' ? [q.answer] : q.answers;
+      const givenIdxs = Array.isArray(givenAns) ? givenAns : [];
+      qHtml += q.options.map((opt, oi) => {
+        const isCorrect = correctIdxs.includes(oi);
+        const isGiven = givenIdxs.includes(oi);
+        let bg = '#ffffff', border = '#bfdbfe', color = '#1e3a5f', prefix = '';
+        if (isCorrect && isGiven)  { bg = '#dcfce7'; border = '#16a34a'; color = '#166534'; prefix = '✓ '; }
+        else if (isCorrect)        { bg = '#dcfce7'; border = '#16a34a'; color = '#166534'; prefix = '✓ '; }
+        else if (isGiven)          { bg = '#fee2e2'; border = '#dc2626'; color = '#991b1b'; prefix = '✗ '; }
+        return `<div style="background:${bg};border:2px solid ${border};border-radius:8px;padding:10px 14px;margin-bottom:6px;color:${color};font-size:14px;">${prefix}${opt}</div>`;
+      }).join('');
+      if (givenIdxs.length === 0) qHtml += `<div style="color:#93adc8;font-size:13px;font-style:italic;">No answer selected</div>`;
+    } else if (q.type === 'matching') {
+      const givenPairs = Array.isArray(givenAns) ? givenAns : [];
+      qHtml += q.pairs.map((pair, pi) => {
+        const given = givenPairs[pi];
+        const isCorrect = given === pair.def;
+        return `<div style="display:flex;gap:12px;align-items:center;margin-bottom:8px;">
+          <div style="flex:1;background:#e6f0fb;border-radius:6px;padding:8px 12px;font-size:13px;font-weight:700;color:#1e3a5f;">${pair.term}</div>
+          <div style="flex:2;background:${isCorrect?'#dcfce7':'#fee2e2'};border:1px solid ${isCorrect?'#16a34a':'#dc2626'};border-radius:6px;padding:8px 12px;font-size:13px;color:${isCorrect?'#166534':'#991b1b'};">
+            ${given || '<em style="color:#93adc8">No answer</em>'} ${isCorrect ? '✓' : `✗ (correct: ${pair.def})`}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    qHtml += `</div>`;
+  });
+
+  return `
+    <div style="min-height:100vh;background:#f0f6ff;padding:32px 16px;font-family:Georgia,serif;">
+      <div style="max-width:760px;margin:0 auto;">
+        <div style="background:#fff;border-radius:16px;padding:28px 32px;margin-bottom:24px;border:2px solid ${ibd};box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+          <div style="font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">Exam Review · ${EXAM_LABEL}</div>
+          <div style="font-size:42px;font-weight:700;color:${lc};">${rd.pct}%</div>
+          <div style="font-size:16px;color:#4a6080;margin-top:4px;">${rd.score} / ${rd.total} points · ${passed ? '✓ Passed' : '✗ Did not pass'}</div>
+          <div style="font-size:12px;color:#93adc8;margin-top:8px;">Submitted ${new Date(rd.submittedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div>
+        </div>
+        ${qHtml}
+        <div style="text-align:center;margin-top:24px;">
+          <a href="${window.location.pathname.split('?')[0]}" style="color:#6b82a0;font-size:13px;">← Back to Portal</a>
+        </div>
+      </div>
+    </div>`;
+}
+
 // ── BOOT ─────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("root").innerHTML = "";
+  if (REVIEW_MODE) {
+    phase = "review_intro";
+  }
   render();
 });
 </script>
