@@ -278,14 +278,15 @@ let currentStudent = "";
 // ── FETCH EXAM STATUS FROM TRACKER ───────────────────
 async function fetchExamStatus() {
   try {
-    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/main?key=${FB.apiKey}`;
+    // Read from dedicated examStatus doc (smaller, faster, avoids large doc issues)
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/examStatus?key=${FB.apiKey}`;
     const resp = await fetch(url);
+    if (resp.status === 404) { examStatus = {}; return; }
     if (!resp.ok) return;
     const doc = await resp.json();
     const fields = doc.fields || {};
-    const statusMap = fields.examStatus?.mapValue?.fields || {};
     examStatus = {};
-    Object.entries(statusMap).forEach(([k,v]) => {
+    Object.entries(fields).forEach(([k,v]) => {
       examStatus[k] = v.booleanValue === true;
     });
   } catch(e) {
