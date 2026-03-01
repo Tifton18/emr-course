@@ -176,7 +176,8 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .analysis-overview-label { font-size:12px;color:#6b82a0;margin-top:4px; }
 
   /* Instructor login */
-  .login-overlay { position:fixed;inset:0;background:linear-gradient(160deg,#1a2744 0%,#1e3a6e 40%,#1a2744 100%);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px; }
+  .login-overlay { position:fixed;inset:0;background:linear-gradient(160deg,#1a2744 0%,#1e3a6e 40%,#1a2744 100%);display:none;align-items:center;justify-content:center;z-index:10000;padding:20px; }
+  .login-overlay.visible { display:flex !important; }
   .login-overlay.hidden { display:none; }
   .login-card { background:#fff;border-radius:20px;padding:40px 36px;max-width:400px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.4);border-top:4px solid #dc2626; }
   .login-logo { text-align:center;margin-bottom:20px; }
@@ -202,6 +203,28 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 <div id="syncBar"></div>
 <div id="syncLabel">Connecting…</div>
 <div id="loadingOverlay"><div class="spinner"></div><p>Connecting to cloud…</p></div>
+
+<!-- INSTRUCTOR LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo"><div class="login-logo-circle">🔒</div></div>
+    <div class="login-title">Instructor Sign In</div>
+    <div class="login-sub">Tifton Fire Department · EMR Program</div>
+    <label class="login-label" for="loginPw">Password</label>
+    <input class="login-input" id="loginPw" type="password" placeholder="Enter instructor password…" autocomplete="off" />
+    <div class="login-error" id="loginError">Incorrect password. Please try again.</div>
+    <button class="login-btn" onclick="attemptInstructorLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- INSTRUCTOR BAR -->
+<div class="instructor-bar hidden" id="instructorBar">
+  <div>
+    <div class="instructor-bar-name">👨‍🏫 Instructor</div>
+    <div class="instructor-bar-sub">Tifton Fire Department · EMR Program</div>
+  </div>
+  <button class="btn-instructor-signout" onclick="instructorSignOut()">Sign Out</button>
+</div>
 
 <div class="header">
   <div class="header-top">
@@ -414,14 +437,14 @@ function attemptInstructorLogin() {
   }
   err.style.display = 'none';
   try { sessionStorage.setItem('tfd_instructor', '1'); } catch(e) {}
-  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('loginOverlay').classList.remove('visible');
   document.getElementById('instructorBar').classList.remove('hidden');
 }
 
 function instructorSignOut() {
   try { sessionStorage.removeItem('tfd_instructor'); } catch(e) {}
   document.getElementById('instructorBar').classList.add('hidden');
-  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('loginOverlay').classList.add('visible');
   document.getElementById('loginPw').value = '';
   document.getElementById('loginError').style.display = 'none';
 }
@@ -1053,15 +1076,17 @@ function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt
 loadFromFirebase();
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Check for existing instructor session
   try {
     if (sessionStorage.getItem('tfd_instructor') === '1') {
-      document.getElementById('loginOverlay').classList.add('hidden');
+      // Already signed in — show bar, keep overlay hidden
       document.getElementById('instructorBar').classList.remove('hidden');
+    } else {
+      // Not signed in — show login overlay
+      document.getElementById('loginOverlay').classList.add('visible');
     }
-  } catch(e) {}
-
-  // Enter key on password field
+  } catch(e) {
+    document.getElementById('loginOverlay').classList.add('visible');
+  }
   const pw = document.getElementById('loginPw');
   if (pw) pw.addEventListener('keydown', e => { if (e.key === 'Enter') attemptInstructorLogin(); });
 });
