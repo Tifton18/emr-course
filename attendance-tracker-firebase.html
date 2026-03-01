@@ -196,7 +196,10 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   <div class="tab-panel" id="panel-grades">
     <div class="grades-layout">
       <div class="assignments-panel">
-        <div class="panel-title">Assignments</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="panel-title" style="margin-bottom:0">Assignments</div>
+          <button onclick="refreshExamResults()" style="background:none;border:1px solid #2a2a3e;border-radius:6px;color:#5b5b7b;padding:4px 10px;cursor:pointer;font-size:11px;font-family:Georgia,serif;transition:all 0.2s" onmouseover="this.style.borderColor='#6366f1';this.style.color='#a5b4fc'" onmouseout="this.style.borderColor='#2a2a3e';this.style.color='#5b5b7b'" title="Refresh exam scores from Firebase">⟳ Refresh Exams</button>
+        </div>
         <div class="weights-info">
           <div class="weights-title">Category Weights</div>
           <div class="weights-row"><span class="weights-label" style="color:#818cf8">● Quizzes</span><span class="weights-val">10%</span></div>
@@ -261,9 +264,53 @@ let data={className:'My Class',students:[],attendance:{},assignments:[],scores:{
 let saveTimer=null, selectedDate=todayStr(), activeTab='attendance';
 let addFormOpen={quiz:false,test:false,exam:false};
 
+// Exam definitions — labels must match what the exam files submit to Firebase
+const EXAM_DEFS=[
+  {label:'Week 1 Exam',  category:'test', assignId:'__exam_week1__'},
+  {label:'Midterm Exam', category:'exam', assignId:'__exam_midterm__'},
+];
+// examResults: studentName (lowercase) -> { assignId -> {pct,score,total,submittedAt} }
+let examResults={};
+
 function setSyncStatus(s,text){document.getElementById('syncBar').className=s;const l=document.getElementById('syncLabel');l.className=s;l.textContent=text;}
 function scheduleSave(){setSyncStatus('syncing','Saving…');clearTimeout(saveTimer);saveTimer=setTimeout(saveToFirebase,800);}
 async function saveToFirebase(){try{await DOC_REF.set(data);setSyncStatus('saved','✓ Saved');setTimeout(()=>setSyncStatus('',''),2000);}catch(e){setSyncStatus('error','✗ Save failed');}}
+
+// ── FETCH EXAM RESULTS FROM FIRESTORE ─────────────────
+async function loadExamResults(){
+  try{
+    const url=`https://firestore.googleapis.com/v1/projects/class-attendance-72cd9/databases/(default)/documents:runQuery?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`;
+    const body={structuredQuery:{from:[{collectionId:'examResults'}]}};
+    const resp=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    if(!resp.ok)return;
+    const rows=await resp.json();
+    examResults={};
+    // Keep only the BEST score per student per exam
+    rows.forEach(row=>{
+      if(!row.document)return;
+      const f=row.document.fields||{};
+      const name=(f.name?.stringValue||'').toLowerCase().trim();
+      const label=f.examLabel?.stringValue||'';
+      const pct=parseInt(f.pct?.integerValue||0);
+      const score=parseInt(f.score?.integerValue||0);
+      const total=parseInt(f.total?.integerValue||0);
+      const submittedAt=f.submittedAt?.stringValue||'';
+      const def=EXAM_DEFS.find(d=>d.label===label);
+      if(!name||!def)return;
+      if(!examResults[name])examResults[name]={};
+      const existing=examResults[name][def.assignId];
+      if(!existing||pct>existing.pct){
+        examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category};
+      }
+    });
+  }catch(e){console.error('loadExamResults error:',e);}
+}
+
+// Get exam score for a student (matched by name, case-insensitive)
+function getExamScore(studentName,assignId){
+  const key=studentName.toLowerCase().trim();
+  return examResults[key]?.[assignId]||null;
+}
 
 async function loadFromFirebase(){
   try{
@@ -280,6 +327,7 @@ async function loadFromFirebase(){
       await DOC_REF.set(data);
     }
   }catch(e){setSyncStatus('error','✗ Connection failed');data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));}
+  await loadExamResults();
   document.getElementById('loadingOverlay').style.display='none';
   document.getElementById('classNameDisplay').textContent=data.className;
   setSyncStatus('saved','✓ Connected');setTimeout(()=>setSyncStatus('',''),2000);
@@ -379,7 +427,42 @@ function removeAssignment(aid){
 
 function renderGradesGrid(){
   const container=document.getElementById('gradesGrid');
-  if(data.assignments.length===0){container.innerHTML=`<div class="no-assignments">Add assignments on the left to start entering scores.</div>`;return;}
+
+  // Build exam results table
+  let examHtml='';
+  if(EXAM_DEFS.length>0){
+    examHtml+=`<div style="margin-bottom:20px;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#5b5b7b;margin-bottom:10px;">Exam Results (auto-synced)</div>
+      <table class="grades-table"><thead><tr><th>Student</th>`;
+    EXAM_DEFS.forEach(d=>{
+      const cat=CATEGORIES.find(c=>c.id===d.category);
+      examHtml+=`<th class="center" style="color:${cat?cat.color:'#fff'}">${d.label}<br><span style="color:#3a3a5e;font-size:9px">/${100} pts</span></th>`;
+    });
+    examHtml+=`<th class="center">Best Score</th></tr></thead><tbody>`;
+    data.students.forEach((student,idx)=>{
+      examHtml+=`<tr class="sgrow"><td class="td-name"><span style="color:#3a3a5e;font-size:11px;margin-right:8px">${String(idx+1).padStart(2,'0')}</span>${escHtml(student.name)}</td>`;
+      let bestPct=null;
+      EXAM_DEFS.forEach(d=>{
+        const er=getExamScore(student.name,d.assignId);
+        const cat=CATEGORIES.find(c=>c.id===d.category);
+        const lc=er?( er.pct>=80?'#4ade80':er.pct>=70?'#86efac':er.pct>=60?'#fbbf24':'#f87171'):'#3a3a5e';
+        if(er&&(bestPct===null||er.pct>bestPct))bestPct=er.pct;
+        examHtml+=`<td class="center">
+          ${er
+            ?`<div style="font-weight:bold;color:${lc}">${er.pct}%</div><div style="font-size:11px;color:#5b5b7b">${er.score}/${er.total} pts</div>`
+            :`<span style="color:#3a3a5e;font-size:13px;">—</span>`}
+        </td>`;
+      });
+      const blc=bestPct!==null?(bestPct>=80?'#4ade80':bestPct>=70?'#86efac':bestPct>=60?'#fbbf24':'#f87171'):'#5b5b7b';
+      examHtml+=`<td class="center"><span class="avg-badge" style="color:${blc};border-color:${blc}33;background:${blc}11">${bestPct!==null?bestPct+'%':'—'}</span></td></tr>`;
+    });
+    examHtml+=`</tbody></table></div>`;
+  }
+
+  if(data.assignments.length===0){
+    container.innerHTML=examHtml+`<div class="no-assignments" style="margin-top:8px">Add manual assignments on the left to enter additional scores.</div>`;
+    return;
+  }
   let html=`<table class="grades-table"><thead><tr><th>Student</th>`;
   CATEGORIES.forEach(cat=>{const ca=data.assignments.filter(a=>a.category===cat.id);ca.forEach(a=>{html+=`<th class="center" style="color:${cat.color}">${escHtml(a.name)}<br><span style="color:#3a3a5e;font-size:9px">/${a.points} pts</span></th>`;});});
   html+=`<th class="center">Avg</th><th class="center">Grade</th></tr></thead><tbody>`;
@@ -389,10 +472,20 @@ function renderGradesGrid(){
     CATEGORIES.forEach(cat=>{const ca=data.assignments.filter(a=>a.category===cat.id);ca.forEach(a=>{const scored=getScore(student.id,a.id);html+=`<td class="center"><div class="pts-input-wrap"><input class="pts-scored" type="number" min="0" max="${a.points}" value="${scored===null?'':scored}" placeholder="—" onchange="setScore(${student.id},'${a.id}',this.value,${a.points})"/><span class="pts-denom">/${a.points}</span></div></td>`;});});
     html+=`<td class="center"><span class="avg-badge" style="color:${lc};border-color:${lc}33;background:${lc}11">${avg===null?'—':avg+'%'}</span></td><td class="center"><span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span></td></tr>`;
   });
-  html+=`</tbody></table>`;container.innerHTML=html;
+  html+=`</tbody></table>`;container.innerHTML=examHtml+html;
 }
 
-function getScore(studentId,assignId){const sid=String(studentId);if(!data.scores[sid])return null;const v=data.scores[sid][assignId];return(v===undefined||v===null||v==='')?null:v;}
+function getScore(studentId,assignId){
+  // Check if this is an exam assignment
+  const examDef=EXAM_DEFS.find(d=>d.assignId===assignId);
+  if(examDef){
+    const student=data.students.find(s=>s.id===studentId);
+    if(!student)return null;
+    const er=getExamScore(student.name,assignId);
+    return er?er.pct:null; // exam scores stored as pct (0-100)
+  }
+  const sid=String(studentId);if(!data.scores[sid])return null;const v=data.scores[sid][assignId];return(v===undefined||v===null||v==='')?null:v;
+}
 function setScore(studentId,assignId,value,maxPts){
   const sid=String(studentId);if(!data.scores[sid])data.scores[sid]={};
   const num=parseFloat(value);
@@ -403,10 +496,19 @@ function setScore(studentId,assignId,value,maxPts){
 
 function calcWeightedAverage(studentId){
   let totalWeight=0,weightedSum=0;
+  const student=data.students.find(s=>s.id===studentId);
   CATEGORIES.forEach(cat=>{
-    const ca=data.assignments.filter(a=>a.category===cat.id);if(ca.length===0)return;
+    const ca=data.assignments.filter(a=>a.category===cat.id);
+    // Also include exam defs for this category
+    const examCat=EXAM_DEFS.filter(d=>d.category===cat.id);
     let earned=0,possible=0,hasAny=false;
     ca.forEach(a=>{const s=getScore(studentId,a.id);if(s!==null){earned+=s;possible+=a.points;hasAny=true;}});
+    // Exam scores come in as pct (0-100), treat as /100
+    examCat.forEach(d=>{
+      if(!student)return;
+      const er=getExamScore(student.name,d.assignId);
+      if(er!==null){earned+=er.pct;possible+=100;hasAny=true;}
+    });
     if(!hasAny||possible===0)return;
     weightedSum+=(earned/possible)*100*cat.weight;totalWeight+=cat.weight;
   });
@@ -415,9 +517,16 @@ function calcWeightedAverage(studentId){
 function avgToLetter(avg){if(avg===null)return'—';if(avg>=90)return'A';if(avg>=80)return'B';if(avg>=70)return'C';if(avg>=60)return'D';return'F';}
 function letterToColor(letter){return{A:'#4ade80',B:'#86efac',C:'#fbbf24',D:'#f97316',F:'#f87171','—':'#5b5b7b'}[letter]||'#5b5b7b';}
 function getCatAverage(studentId,catId){
-  const ca=data.assignments.filter(a=>a.category===catId);if(ca.length===0)return null;
+  const ca=data.assignments.filter(a=>a.category===catId);
+  const student=data.students.find(s=>s.id===studentId);
+  const examCat=EXAM_DEFS.filter(d=>d.category===catId);
   let earned=0,possible=0,hasAny=false;
   ca.forEach(a=>{const s=getScore(studentId,a.id);if(s!==null){earned+=s;possible+=a.points;hasAny=true;}});
+  examCat.forEach(d=>{
+    if(!student)return;
+    const er=getExamScore(student.name,d.assignId);
+    if(er!==null){earned+=er.pct;possible+=100;hasAny=true;}
+  });
   if(!hasAny||possible===0)return null;return Math.round((earned/possible)*100);
 }
 
@@ -459,6 +568,14 @@ function addStudent(){const name=document.getElementById('newStudentInput').valu
 document.getElementById('newStudentInput').addEventListener('keydown',e=>{if(e.key==='Enter')addStudent();if(e.key==='Escape')cancelAdd();});
 
 function exportReport(){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-summary').classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));renderSummary();setTimeout(()=>window.print(),100);}
+
+async function refreshExamResults(){
+  setSyncStatus('syncing','Refreshing exams…');
+  await loadExamResults();
+  setSyncStatus('saved','✓ Refreshed');setTimeout(()=>setSyncStatus('',''),2000);
+  renderGradesTab();
+  if(activeTab==='summary')renderSummary();
+}
 
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
