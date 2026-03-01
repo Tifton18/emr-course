@@ -645,8 +645,10 @@ function getCatAverage(studentId,catId){
   examCat.forEach(d=>{
     if(!student)return;
     const er=getExamScore(student.name,d.assignId);
+    console.log(`getCatAverage: student="${student.name}" cat="${catId}" exam="${d.assignId}" er=`,er,' examResults keys=',Object.keys(examResults));
     if(er!==null){earned+=er.pct;possible+=100;hasAny=true;}
   });
+  console.log(`getCatAverage result: student="${student?.name}" cat="${catId}" earned=${earned} possible=${possible} hasAny=${hasAny}`);
   if(!hasAny||possible===0)return null;return Math.round((earned/possible)*100);
 }
 
