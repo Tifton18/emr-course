@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Attendance & Grades Tracker</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0a0f; color: #e8e4dc; font-family: 'Georgia','Times New Roman',serif; min-height: 100vh; }
+
+#syncBar { position:fixed;top:0;left:0;right:0;height:3px;z-index:999;background:transparent;transition:background 0.4s; }
+#syncBar.syncing { background:linear-gradient(90deg,#6366f1,#a5b4fc,#6366f1);background-size:200%;animation:shimmer 1s infinite; }
+#syncBar.saved { background:#4ade80;animation:fadeBar 1.5s forwards; }
+#syncBar.error { background:#f87171; }
+@keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
+@keyframes fadeBar{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+#syncLabel { position:fixed;top:10px;right:16px;font-size:11px;letter-spacing:1px;color:#5b5b7b;z-index:1000;text-transform:uppercase;transition:color 0.3s; }
+#syncLabel.syncing{color:#a5b4fc} #syncLabel.saved{color:#4ade80} #syncLabel.error{color:#f87171}
+
+.header { border-bottom:1px solid #1e1e2e;padding:32px 32px 0;background:linear-gradient(180deg,#0d0d18 0%,#0a0a0f 100%);margin-top:3px; }
+.header-top { display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px; }
+.header-label { font-size:11px;letter-spacing:3px;color:#5b5b7b;text-transform:uppercase;margin-bottom:6px; }
+#classNameDisplay { font-size:28px;font-weight:normal;cursor:pointer;letter-spacing:-0.5px;background:none;border:none;color:#e8e4dc;font-family:'Georgia',serif;display:inline-block; }
+#classNameInput { font-size:28px;font-family:'Georgia',serif;background:transparent;border:none;border-bottom:2px solid #6366f1;color:#e8e4dc;outline:none;width:300px;display:none; }
+.today-count { text-align:right;font-size:13px;color:#5b5b7b; }
+.today-count .big { font-size:22px;color:#e8e4dc; }
+.tabs { display:flex; }
+.tab-btn { background:none;border:none;padding:10px 20px;color:#5b5b7b;border-bottom:2px solid transparent;cursor:pointer;font-size:13px;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s;font-family:'Georgia',serif; }
+.tab-btn.active { color:#a5b4fc;border-bottom-color:#6366f1; }
+
+.content { padding:28px 32px; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+.date-row { display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
+#datePicker { background:#12121f;border:1px solid #2a2a3e;border-radius:8px;color:#e8e4dc;padding:10px 14px;font-size:14px;cursor:pointer;font-family:'Georgia',serif;outline:none; }
+.date-label { color:#5b5b7b;font-size:13px; }
+.mark-all-row { margin-left:auto;display:flex;gap:8px;flex-wrap:wrap; }
+.mark-all-btn { padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;letter-spacing:1px;text-transform:uppercase;transition:opacity 0.2s; }
+.mark-all-btn:hover { opacity:0.8; }
+
+.student-list { display:flex;flex-direction:column;gap:8px; }
+.student-row { display:flex;align-items:center;gap:16px;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:10px;padding:14px 18px;border-left:3px solid #1a1a2e;transition:border-color 0.2s; }
+.student-num { width:28px;text-align:center;color:#3a3a5e;font-size:12px; }
+.student-name { flex:1;font-size:15px; }
+.status-btns { display:flex;gap:6px; }
+.status-btn { width:36px;height:36px;border-radius:8px;border:1px solid #2a2a3e;background:transparent;color:#3a3a5e;cursor:pointer;font-size:12px;font-weight:bold;transition:all 0.15s; }
+.remove-btn { background:none;border:none;color:#2a2a3e;cursor:pointer;font-size:20px;padding:0 4px;transition:color 0.2s;line-height:1; }
+.remove-btn:hover { color:#f87171; }
+
+.add-row { margin-top:16px; }
+.add-form { display:flex;gap:10px; }
+#newStudentInput { flex:1;background:#12121f;border:1px solid #6366f1;border-radius:8px;color:#e8e4dc;padding:12px 16px;font-size:14px;outline:none;font-family:'Georgia',serif; }
+.btn-primary { background:#6366f1;border:none;border-radius:8px;color:#fff;padding:12px 20px;cursor:pointer;font-size:14px;font-family:'Georgia',serif; }
+.btn-secondary { background:#1a1a2e;border:1px solid #2a2a3e;border-radius:8px;color:#5b5b7b;padding:12px 16px;cursor:pointer;font-size:14px;font-family:'Georgia',serif; }
+#addStudentTrigger { background:none;border:1px dashed #2a2a3e;border-radius:10px;color:#3a3a5e;padding:14px 18px;cursor:pointer;font-size:13px;width:100%;transition:all 0.2s;font-family:'Georgia',serif; }
+#addStudentTrigger:hover { border-color:#6366f1;color:#a5b4fc; }
+
+.grades-layout { display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap; }
+.assignments-panel { flex:0 0 310px;min-width:260px; }
+.grades-grid-panel { flex:1;min-width:300px; }
+.panel-title { font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#5b5b7b;margin-bottom:14px; }
+
+.weights-info { background:#0e0e1a;border:1px solid #1a1a2e;border-radius:10px;padding:14px;margin-bottom:20px; }
+.weights-title { font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#5b5b7b;margin-bottom:10px; }
+.weights-row { display:flex;justify-content:space-between;align-items:center;padding:3px 0; }
+.weights-label { font-size:12px; }
+.weights-val { font-size:12px;color:#5b5b7b; }
+
+.category-block { margin-bottom:18px; }
+.category-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; }
+.category-label { display:flex;align-items:center;gap:8px;font-size:13px; }
+.cat-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.weight-badge { font-size:11px;color:#5b5b7b;background:#12121f;border:1px solid #2a2a3e;border-radius:20px;padding:2px 8px; }
+.add-assign-btn { background:none;border:1px solid #2a2a3e;border-radius:6px;color:#5b5b7b;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Georgia',serif;transition:all 0.2s; }
+.add-assign-btn:hover { border-color:#6366f1;color:#a5b4fc; }
+
+.assignment-item { display:flex;align-items:center;gap:8px;background:#0e0e1a;border:1px solid #1a1a2e;border-radius:8px;padding:8px 12px;margin-bottom:5px; }
+.assign-name { flex:1;font-size:13px;color:#c8c4bc; }
+.assign-points { font-size:11px;color:#5b5b7b;white-space:nowrap; }
+.remove-assign-btn { background:none;border:none;color:#2a2a3e;cursor:pointer;font-size:16px;line-height:1;transition:color 0.2s;padding:0 2px;flex-shrink:0; }
+.remove-assign-btn:hover { color:#f87171; }
+
+.add-assign-form { display:flex;gap:6px;margin-top:6px;flex-wrap:wrap; }
+.assign-name-input { flex:1;min-width:80px;background:#12121f;border:1px solid #6366f1;border-radius:6px;color:#e8e4dc;padding:7px 10px;font-size:13px;outline:none;font-family:'Georgia',serif; }
+.assign-pts-input { width:56px;background:#12121f;border:1px solid #2a2a3e;border-radius:6px;color:#e8e4dc;padding:7px 8px;font-size:13px;outline:none;font-family:'Georgia',serif;text-align:center; }
+.btn-tiny { background:#6366f1;border:none;border-radius:6px;color:#fff;padding:7px 12px;cursor:pointer;font-size:12px;font-family:'Georgia',serif; }
+.btn-tiny-sec { background:#1a1a2e;border:1px solid #2a2a3e;border-radius:6px;color:#5b5b7b;padding:7px 10px;cursor:pointer;font-size:12px;font-family:'Georgia',serif; }
+.no-assigns-msg { font-size:12px;color:#3a3a5e;padding:2px 0 8px 16px; }
+
+.grades-table-wrap { overflow-x:auto; }
+table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
+.grades-table th { background:#0e0e1a;color:#5b5b7b;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid #1a1a2e;white-space:nowrap;font-weight:normal; }
+.grades-table th.center,.grades-table td.center { text-align:center; }
+.grades-table tr.sgrow { border-bottom:1px solid #0e0e1a; }
+.grades-table tr.sgrow:hover td { background:#0e0e1a44; }
+.grades-table td { padding:10px 12px;vertical-align:middle; }
+.td-name { font-size:14px; }
+.pts-input-wrap { display:flex;align-items:center;justify-content:center;gap:3px; }
+.pts-scored { width:40px;background:#12121f;border:1px solid #2a2a3e;border-radius:5px;color:#e8e4dc;padding:5px 4px;font-size:12px;text-align:center;outline:none;font-family:'Georgia',serif;transition:border-color 0.2s; }
+.pts-scored:focus { border-color:#6366f1; }
+.pts-denom { color:#3a3a5e;font-size:11px; }
+.avg-badge { display:inline-flex;align-items:center;justify-content:center;min-width:52px;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;border:1px solid; }
+.letter-badge { display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:14px;font-weight:bold;border:2px solid; }
+.no-assignments { color:#3a3a5e;font-size:13px;padding:20px 0;text-align:center; }
+
+.summary-meta { margin-bottom:20px;color:#5b5b7b;font-size:13px; }
+.summary-row { background:#0e0e1a;border:1px solid #1a1a2e;border-radius:10px;padding:16px 20px;margin-bottom:8px; }
+.summary-top { display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap; }
+.summary-att-pill { font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid; }
+.summary-stats { display:flex;gap:8px;padding-left:44px;flex-wrap:wrap;align-items:center;margin-bottom:10px; }
+.stat-pill { padding:4px 12px;border-radius:6px;font-size:12px; }
+.att-bar-wrap { flex:1;min-width:80px;display:flex;align-items:center;padding-left:8px; }
+.att-bar-bg { flex:1;height:4px;background:#1a1a2e;border-radius:2px;overflow:hidden; }
+.att-bar-fill { height:100%;border-radius:2px;transition:width 0.3s; }
+.no-data { padding-left:44px;color:#3a3a5e;font-size:12px;margin-bottom:6px; }
+.summary-grades-row { padding-left:44px;display:flex;gap:10px;flex-wrap:wrap;align-items:center; }
+.summary-cat-pill { font-size:12px;padding:4px 12px;border-radius:6px;border:1px solid; }
+
+.bottom-bar { padding:0 32px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px; }
+.legend { display:flex;gap:16px;color:#3a3a5e;font-size:11px;letter-spacing:1px;flex-wrap:wrap; }
+.export-btn { background:#1a1a2e;border:1px solid #2a2a3e;border-radius:8px;color:#a5b4fc;padding:8px 16px;cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-family:'Georgia',serif;transition:all 0.2s; }
+.export-btn:hover { background:#22223a;border-color:#6366f1; }
+
+#loadingOverlay { position:fixed;inset:0;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px; }
+.spinner { width:36px;height:36px;border-radius:50%;border:3px solid #1a1a2e;border-top-color:#6366f1;animation:spin 0.8s linear infinite; }
+@keyframes spin{to{transform:rotate(360deg)}}
+#loadingOverlay p { color:#5b5b7b;font-size:13px;letter-spacing:2px;text-transform:uppercase; }
+
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#0a0a0f} ::-webkit-scrollbar-thumb{background:#2a2a3e;border-radius:3px}
+
+@media print {
+  body{background:#fff;color:#000}
+  #syncBar,#syncLabel,#loadingOverlay{display:none!important}
+  .header{background:#fff;border-bottom:2px solid #000}
+  .header-label{color:#666} #classNameDisplay{color:#000}
+  .tabs,.date-row,.mark-all-row,.remove-btn,.add-row,.bottom-bar,
+  #panel-attendance,#panel-grades{display:none!important}
+  #panel-summary{display:block!important}
+  .summary-row{background:#fff;border:1px solid #ccc;break-inside:avoid}
+  .today-count,.today-count .big{color:#000}
+  .stat-pill{border:1px solid #ccc;color:#000!important;background:#f5f5f5!important}
+  .att-bar-bg{background:#e0e0e0}
+}
+</style>
+</head>
+<body>
+
+<div id="syncBar"></div>
+<div id="syncLabel">Connecting…</div>
+<div id="loadingOverlay"><div class="spinner"></div><p>Connecting to cloud…</p></div>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-label">Class Register</div>
+      <span id="classNameDisplay" title="Click to rename"></span>
+      <input type="text" id="classNameInput" />
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div class="today-count"><div class="big" id="todayCount">0/0</div><div>present today</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('attendance',this)">Attendance</button>
+    <button class="tab-btn" onclick="switchTab('grades',this)">Grades</button>
+    <button class="tab-btn" onclick="switchTab('summary',this)">Summary</button>
+  </div>
+</div>
+
+<div class="content">
+  <!-- ATTENDANCE -->
+  <div class="tab-panel active" id="panel-attendance">
+    <div class="date-row">
+      <input type="date" id="datePicker" />
+      <span class="date-label" id="dateLabel"></span>
+      <div class="mark-all-row">
+        <button class="mark-all-btn" style="background:#052e16;border:1px solid #4ade8040;color:#4ade80" onclick="markAll('present')">All Present</button>
+        <button class="mark-all-btn" style="background:#2d0707;border:1px solid #f8717140;color:#f87171" onclick="markAll('absent')">All Absent</button>
+        <button class="mark-all-btn" style="background:#2d1f07;border:1px solid #fbbf2440;color:#fbbf24" onclick="markAll('late')">All Late</button>
+        <button class="mark-all-btn" style="background:#1e1b4b;border:1px solid #818cf840;color:#818cf8" onclick="markAll('excused')">All Excused</button>
+      </div>
+    </div>
+    <div class="student-list" id="attendanceList"></div>
+    <div class="add-row">
+      <div class="add-form" id="addForm" style="display:none;">
+        <input type="text" id="newStudentInput" placeholder="Student name…" />
+        <button class="btn-primary" onclick="addStudent()">Add</button>
+        <button class="btn-secondary" onclick="cancelAdd()">Cancel</button>
+      </div>
+      <button id="addStudentTrigger" onclick="showAddForm()">+ Add Student</button>
+    </div>
+  </div>
+
+  <!-- GRADES -->
+  <div class="tab-panel" id="panel-grades">
+    <div class="grades-layout">
+      <div class="assignments-panel">
+        <div class="panel-title">Assignments</div>
+        <div class="weights-info">
+          <div class="weights-title">Category Weights</div>
+          <div class="weights-row"><span class="weights-label" style="color:#818cf8">● Quizzes</span><span class="weights-val">10%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#fbbf24">● Tests</span><span class="weights-val">40%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#f87171">● Exams</span><span class="weights-val">50%</span></div>
+        </div>
+        <div id="assignmentCategories"></div>
+      </div>
+      <div class="grades-grid-panel">
+        <div class="panel-title">Student Scores</div>
+        <div class="grades-table-wrap"><div id="gradesGrid"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="tab-panel" id="panel-summary">
+    <div class="summary-meta" id="summaryMeta"></div>
+    <div id="summaryList"></div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <div class="legend">
+    <span style="color:#4ade80">P — Present</span>
+    <span style="color:#f87171">A — Absent</span>
+    <span style="color:#fbbf24">L — Late</span>
+    <span style="color:#818cf8">E — Excused</span>
+  </div>
+  <button class="export-btn" onclick="exportReport()">⬇ Export / Print</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  authDomain:"class-attendance-72cd9.firebaseapp.com",
+  projectId:"class-attendance-72cd9",
+  storageBucket:"class-attendance-72cd9.firebasestorage.app",
+  messagingSenderId:"477253197401",
+  appId:"1:477253197401:web:e1fe63718610b671dddb48"
+});
+const db=firebase.firestore();
+const DOC_REF=db.collection('tracker').doc('main');
+
+const STATUS_CONFIG={
+  present:{label:'P',color:'#4ade80',bg:'#052e16'},
+  absent:{label:'A',color:'#f87171',bg:'#2d0707'},
+  late:{label:'L',color:'#fbbf24',bg:'#2d1f07'},
+  excused:{label:'E',color:'#818cf8',bg:'#1e1b4b'},
+};
+const STATUSES=['present','absent','late','excused'];
+const CATEGORIES=[
+  {id:'quiz',label:'Quizzes',color:'#818cf8',weight:0.10},
+  {id:'test',label:'Tests',color:'#fbbf24',weight:0.40},
+  {id:'exam',label:'Exams',color:'#f87171',weight:0.50},
+];
+const DEFAULT_STUDENTS=['Alex Johnson','Brianna Smith','Carlos Rivera','Diana Chen','Ethan Williams','Fiona Patel','George Kim','Hannah Moore'];
+
+let data={className:'My Class',students:[],attendance:{},assignments:[],scores:{}};
+let saveTimer=null, selectedDate=todayStr(), activeTab='attendance';
+let addFormOpen={quiz:false,test:false,exam:false};
+
+function setSyncStatus(s,text){document.getElementById('syncBar').className=s;const l=document.getElementById('syncLabel');l.className=s;l.textContent=text;}
+function scheduleSave(){setSyncStatus('syncing','Saving…');clearTimeout(saveTimer);saveTimer=setTimeout(saveToFirebase,800);}
+async function saveToFirebase(){try{await DOC_REF.set(data);setSyncStatus('saved','✓ Saved');setTimeout(()=>setSyncStatus('',''),2000);}catch(e){setSyncStatus('error','✗ Save failed');}}
+
+async function loadFromFirebase(){
+  try{
+    const snap=await DOC_REF.get();
+    if(snap.exists){
+      data=snap.data();
+      if(!data.attendance)data.attendance={};
+      if(!data.students)data.students=[];
+      if(!data.assignments)data.assignments=[];
+      if(!data.scores)data.scores={};
+    }else{
+      data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));
+      data.className='My Class';data.attendance={};data.assignments=[];data.scores={};
+      await DOC_REF.set(data);
+    }
+  }catch(e){setSyncStatus('error','✗ Connection failed');data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));}
+  document.getElementById('loadingOverlay').style.display='none';
+  document.getElementById('classNameDisplay').textContent=data.className;
+  setSyncStatus('saved','✓ Connected');setTimeout(()=>setSyncStatus('',''),2000);
+  DOC_REF.onSnapshot(snap=>{
+    if(snap.exists&&!snap.metadata.hasPendingWrites){
+      const inc=snap.data();if(!inc)return;
+      data=inc;
+      if(!data.attendance)data.attendance={};
+      if(!data.assignments)data.assignments=[];
+      if(!data.scores)data.scores={};
+      document.getElementById('classNameDisplay').textContent=data.className;
+      renderCurrent();updateTodayCount();
+    }
+  });
+  renderAttendance();updateTodayCount();
+}
+
+function switchTab(name,btn){
+  activeTab=name;
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');btn.classList.add('active');
+  renderCurrent();
+}
+function renderCurrent(){
+  if(activeTab==='attendance')renderAttendance();
+  else if(activeTab==='grades')renderGradesTab();
+  else if(activeTab==='summary')renderSummary();
+}
+
+const display=document.getElementById('classNameDisplay');
+const nameInput=document.getElementById('classNameInput');
+display.addEventListener('click',()=>{nameInput.value=data.className;display.style.display='none';nameInput.style.display='inline-block';nameInput.focus();});
+nameInput.addEventListener('blur',commitClassName);
+nameInput.addEventListener('keydown',e=>{if(e.key==='Enter')commitClassName();});
+function commitClassName(){data.className=nameInput.value.trim()||'My Class';display.textContent=data.className;display.style.display='inline-block';nameInput.style.display='none';scheduleSave();}
+
+function todayStr(){return new Date().toISOString().split('T')[0];}
+function formatDate(str){return new Date(str+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+const dp=document.getElementById('datePicker');
+dp.value=selectedDate;
+document.getElementById('dateLabel').textContent=formatDate(selectedDate);
+dp.addEventListener('change',()=>{selectedDate=dp.value;document.getElementById('dateLabel').textContent=formatDate(selectedDate);renderAttendance();});
+
+function updateTodayCount(){const rec=data.attendance[todayStr()]||{};const p=Object.values(rec).filter(v=>v==='present').length;document.getElementById('todayCount').textContent=p+'/'+data.students.length;}
+
+function renderAttendance(){
+  const list=document.getElementById('attendanceList'),rec=data.attendance[selectedDate]||{};
+  list.innerHTML='';
+  data.students.forEach((student,idx)=>{
+    const status=rec[student.id]||null;
+    const row=document.createElement('div');row.className='student-row';row.style.borderLeftColor=status?STATUS_CONFIG[status].color:'#1a1a2e';
+    row.innerHTML=`<div class="student-num">${String(idx+1).padStart(2,'0')}</div><div class="student-name">${escHtml(student.name)}</div>
+      <div class="status-btns">${STATUSES.map(s=>{const a=status===s,cfg=STATUS_CONFIG[s];return`<button class="status-btn" style="border-color:${a?cfg.color:'#2a2a3e'};background:${a?cfg.bg:'transparent'};color:${a?cfg.color:'#3a3a5e'}" onclick="setStatus(${student.id},'${s}')">${cfg.label}</button>`;}).join('')}</div>
+      <button class="remove-btn" onclick="removeStudent(${student.id})">×</button>`;
+    list.appendChild(row);
+  });
+  updateTodayCount();
+}
+function setStatus(sid,status){if(!data.attendance[selectedDate])data.attendance[selectedDate]={};const cur=data.attendance[selectedDate][sid];if(cur===status)delete data.attendance[selectedDate][sid];else data.attendance[selectedDate][sid]=status;scheduleSave();renderAttendance();}
+function markAll(status){if(!data.attendance[selectedDate])data.attendance[selectedDate]={};data.students.forEach(s=>data.attendance[selectedDate][s.id]=status);scheduleSave();renderAttendance();}
+
+/* ── GRADES ── */
+function renderGradesTab(){renderAssignmentManager();renderGradesGrid();}
+
+function renderAssignmentManager(){
+  const container=document.getElementById('assignmentCategories');container.innerHTML='';
+  CATEGORIES.forEach(cat=>{
+    const assigns=data.assignments.filter(a=>a.category===cat.id);
+    const isOpen=addFormOpen[cat.id];
+    const block=document.createElement('div');block.className='category-block';
+    let html=`<div class="category-header">
+      <div class="category-label"><div class="cat-dot" style="background:${cat.color}"></div><span style="color:${cat.color}">${cat.label}</span><span class="weight-badge">${Math.round(cat.weight*100)}%</span></div>
+      <button class="add-assign-btn" onclick="toggleAddForm('${cat.id}')">+ Add</button></div>`;
+    if(assigns.length===0&&!isOpen)html+=`<div class="no-assigns-msg">No assignments yet</div>`;
+    assigns.forEach(a=>{html+=`<div class="assignment-item"><div class="assign-name">${escHtml(a.name)}</div><div class="assign-points">${a.points} pts</div><button class="remove-assign-btn" onclick="removeAssignment('${a.id}')">×</button></div>`;});
+    if(isOpen)html+=`<div class="add-assign-form"><input class="assign-name-input" id="aname-${cat.id}" placeholder="Assignment name…"/><input class="assign-pts-input" id="apts-${cat.id}" type="number" min="1" max="999" placeholder="Pts" title="Total points possible"/><button class="btn-tiny" onclick="addAssignment('${cat.id}')">Add</button><button class="btn-tiny-sec" onclick="toggleAddForm('${cat.id}')">✕</button></div>`;
+    block.innerHTML=html;container.appendChild(block);
+    if(isOpen){const ni=document.getElementById('aname-'+cat.id);if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')addAssignment(cat.id);});}}
+  });
+}
+
+function toggleAddForm(catId){addFormOpen[catId]=!addFormOpen[catId];renderGradesTab();}
+function addAssignment(catId){
+  const nameEl=document.getElementById('aname-'+catId),ptsEl=document.getElementById('apts-'+catId);
+  const name=nameEl?nameEl.value.trim():'',pts=parseInt(ptsEl?ptsEl.value:'0');
+  if(!name||!pts||pts<1){if(nameEl)nameEl.style.borderColor='#f87171';return;}
+  data.assignments.push({id:'a'+Date.now(),name,points:pts,category:catId});
+  addFormOpen[catId]=false;scheduleSave();renderGradesTab();
+}
+function removeAssignment(aid){
+  if(!confirm('Remove this assignment? All student scores will be lost.'))return;
+  data.assignments=data.assignments.filter(a=>a.id!==aid);
+  Object.keys(data.scores).forEach(sid=>{if(data.scores[sid])delete data.scores[sid][aid];});
+  scheduleSave();renderGradesTab();
+}
+
+function renderGradesGrid(){
+  const container=document.getElementById('gradesGrid');
+  if(data.assignments.length===0){container.innerHTML=`<div class="no-assignments">Add assignments on the left to start entering scores.</div>`;return;}
+  let html=`<table class="grades-table"><thead><tr><th>Student</th>`;
+  CATEGORIES.forEach(cat=>{const ca=data.assignments.filter(a=>a.category===cat.id);ca.forEach(a=>{html+=`<th class="center" style="color:${cat.color}">${escHtml(a.name)}<br><span style="color:#3a3a5e;font-size:9px">/${a.points} pts</span></th>`;});});
+  html+=`<th class="center">Avg</th><th class="center">Grade</th></tr></thead><tbody>`;
+  data.students.forEach((student,idx)=>{
+    const avg=calcWeightedAverage(student.id),letter=avgToLetter(avg),lc=letterToColor(letter);
+    html+=`<tr class="sgrow"><td class="td-name"><span style="color:#3a3a5e;font-size:11px;margin-right:8px">${String(idx+1).padStart(2,'0')}</span>${escHtml(student.name)}</td>`;
+    CATEGORIES.forEach(cat=>{const ca=data.assignments.filter(a=>a.category===cat.id);ca.forEach(a=>{const scored=getScore(student.id,a.id);html+=`<td class="center"><div class="pts-input-wrap"><input class="pts-scored" type="number" min="0" max="${a.points}" value="${scored===null?'':scored}" placeholder="—" onchange="setScore(${student.id},'${a.id}',this.value,${a.points})"/><span class="pts-denom">/${a.points}</span></div></td>`;});});
+    html+=`<td class="center"><span class="avg-badge" style="color:${lc};border-color:${lc}33;background:${lc}11">${avg===null?'—':avg+'%'}</span></td><td class="center"><span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span></td></tr>`;
+  });
+  html+=`</tbody></table>`;container.innerHTML=html;
+}
+
+function getScore(studentId,assignId){const sid=String(studentId);if(!data.scores[sid])return null;const v=data.scores[sid][assignId];return(v===undefined||v===null||v==='')?null:v;}
+function setScore(studentId,assignId,value,maxPts){
+  const sid=String(studentId);if(!data.scores[sid])data.scores[sid]={};
+  const num=parseFloat(value);
+  if(value===''||isNaN(num))delete data.scores[sid][assignId];
+  else data.scores[sid][assignId]=Math.min(Math.max(num,0),maxPts);
+  scheduleSave();renderGradesGrid();
+}
+
+function calcWeightedAverage(studentId){
+  let totalWeight=0,weightedSum=0;
+  CATEGORIES.forEach(cat=>{
+    const ca=data.assignments.filter(a=>a.category===cat.id);if(ca.length===0)return;
+    let earned=0,possible=0,hasAny=false;
+    ca.forEach(a=>{const s=getScore(studentId,a.id);if(s!==null){earned+=s;possible+=a.points;hasAny=true;}});
+    if(!hasAny||possible===0)return;
+    weightedSum+=(earned/possible)*100*cat.weight;totalWeight+=cat.weight;
+  });
+  if(totalWeight===0)return null;return Math.round(weightedSum/totalWeight);
+}
+function avgToLetter(avg){if(avg===null)return'—';if(avg>=90)return'A';if(avg>=80)return'B';if(avg>=70)return'C';if(avg>=60)return'D';return'F';}
+function letterToColor(letter){return{A:'#4ade80',B:'#86efac',C:'#fbbf24',D:'#f97316',F:'#f87171','—':'#5b5b7b'}[letter]||'#5b5b7b';}
+function getCatAverage(studentId,catId){
+  const ca=data.assignments.filter(a=>a.category===catId);if(ca.length===0)return null;
+  let earned=0,possible=0,hasAny=false;
+  ca.forEach(a=>{const s=getScore(studentId,a.id);if(s!==null){earned+=s;possible+=a.points;hasAny=true;}});
+  if(!hasAny||possible===0)return null;return Math.round((earned/possible)*100);
+}
+
+/* ── SUMMARY ── */
+function getAttStats(studentId){
+  let present=0,absent=0,late=0,excused=0;
+  Object.values(data.attendance).forEach(rec=>{const s=rec[studentId];if(s==='present')present++;else if(s==='absent')absent++;else if(s==='late')late++;else if(s==='excused')excused++;});
+  const total=present+absent+late+excused,pct=total>0?Math.round(((present+late)/total)*100):null;
+  return{present,absent,late,excused,total,pct};
+}
+
+function renderSummary(){
+  const allDates=Object.keys(data.attendance);
+  document.getElementById('summaryMeta').textContent=allDates.length+' session'+(allDates.length!==1?'s':'')+' recorded · '+data.assignments.length+' assignment'+(data.assignments.length!==1?'s':'');
+  const list=document.getElementById('summaryList');list.innerHTML='';
+  data.students.forEach((student,idx)=>{
+    const att=getAttStats(student.id),wavg=calcWeightedAverage(student.id),letter=avgToLetter(wavg),lc=letterToColor(letter);
+    const apc=att.pct===null?'#5b5b7b':att.pct>=80?'#4ade80':att.pct>=60?'#fbbf24':'#f87171';
+    const attStats=att.total>0?`<div class="summary-stats">${[['present','Present'],['absent','Absent'],['late','Late'],['excused','Excused']].map(([k,l])=>{const cfg=STATUS_CONFIG[k];return`<div class="stat-pill" style="background:${cfg.bg};border:1px solid ${cfg.color}30;color:${cfg.color}">${att[k]} ${l}</div>`;}).join('')}<div class="att-bar-wrap"><div class="att-bar-bg"><div class="att-bar-fill" style="width:${att.pct||0}%;background:${apc}"></div></div></div></div>`:`<div class="no-data">No attendance recorded yet</div>`;
+    const catPills=CATEGORIES.map(cat=>{const avg=getCatAverage(student.id,cat.id);if(avg===null)return'';return`<div class="summary-cat-pill" style="color:${cat.color};border-color:${cat.color}40;background:${cat.color}11">${cat.label}: ${avg}%</div>`;}).join('');
+    const gradesRow=data.assignments.length>0?`<div class="summary-grades-row">${catPills||`<span style="color:#3a3a5e;font-size:12px">No scores entered yet</span>`}</div>`:'';
+    const div=document.createElement('div');div.className='summary-row';
+    div.innerHTML=`<div class="summary-top">
+      <div class="student-num">${String(idx+1).padStart(2,'0')}</div>
+      <div class="student-name" style="flex:1;font-size:15px">${escHtml(student.name)}</div>
+      ${att.pct!==null?`<div class="summary-att-pill" style="background:${apc}22;border-color:${apc}40;color:${apc}">Attendance ${att.pct}%</div>`:''}
+      <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+        ${wavg!==null?`<span style="font-size:18px;font-weight:bold;color:${lc}">${wavg}%</span>`:''}
+        <span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span>
+      </div></div>${attStats}${gradesRow}`;
+    list.appendChild(div);
+  });
+}
+
+function removeStudent(id){if(!confirm('Remove this student?'))return;data.students=data.students.filter(s=>s.id!==id);delete data.scores[String(id)];scheduleSave();renderAttendance();}
+function showAddForm(){document.getElementById('addForm').style.display='flex';document.getElementById('addStudentTrigger').style.display='none';document.getElementById('newStudentInput').focus();}
+function cancelAdd(){document.getElementById('addForm').style.display='none';document.getElementById('addStudentTrigger').style.display='block';document.getElementById('newStudentInput').value='';}
+function addStudent(){const name=document.getElementById('newStudentInput').value.trim();if(!name)return;data.students.push({id:Date.now(),name});scheduleSave();cancelAdd();renderAttendance();}
+document.getElementById('newStudentInput').addEventListener('keydown',e=>{if(e.key==='Enter')addStudent();if(e.key==='Escape')cancelAdd();});
+
+function exportReport(){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-summary').classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));renderSummary();setTimeout(()=>window.print(),100);}
+
+function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+loadFromFirebase();
+</script>
+</body>
+</html>

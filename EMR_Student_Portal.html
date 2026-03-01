@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Student Portal</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Georgia', serif;
+  background: #0a0a0f;
+  color: #e8e4dc;
+  min-height: 100vh;
+}
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, #0a0e27 0%, #0f1e3d 50%, #0a1628 100%);
+  padding: 48px 32px 36px;
+  text-align: center;
+  border-bottom: 1px solid #1e2a3a;
+}
+.hero-eyebrow { font-size: 11px; letter-spacing: 5px; color: #64b5f6; text-transform: uppercase; margin-bottom: 12px; }
+.hero-title { font-size: 42px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.hero-sub { font-size: 18px; color: #90caf9; margin-bottom: 28px; }
+
+/* Name lookup */
+.name-bar {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+  max-width: 500px; margin: 0 auto;
+}
+.name-input {
+  flex: 1; min-width: 220px;
+  background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 12px 16px; font-size: 15px; color: #fff;
+  outline: none; font-family: Georgia, serif; transition: border-color 0.2s;
+}
+.name-input:focus { border-color: #2196F3; }
+.name-input::placeholder { color: #4a5568; }
+.btn-lookup {
+  background: #2196F3; color: #fff; border: none; border-radius: 10px;
+  padding: 12px 24px; font-size: 15px; font-weight: 700; cursor: pointer;
+  font-family: Georgia, serif; transition: all 0.2s; white-space: nowrap;
+}
+.btn-lookup:hover { background: #1976D2; transform: translateY(-1px); }
+.btn-lookup:disabled { background: #1a2a3a; color: #4a5568; cursor: default; transform: none; }
+
+/* ── MAIN CONTENT ── */
+.main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+.section-title {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: #5b5b7b; margin-bottom: 20px;
+}
+
+/* ── EXAMS GRID ── */
+.exams-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
+.exam-card {
+  background: #0e0e1a; border: 1px solid #1a1a2e;
+  border-radius: 14px; padding: 24px 28px;
+  display: flex; align-items: center; gap: 24px;
+  flex-wrap: wrap;
+  border-left: 4px solid;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.exam-card:hover { transform: translateX(3px); }
+.exam-icon { font-size: 32px; flex-shrink: 0; }
+.exam-info { flex: 1; min-width: 200px; }
+.exam-name { font-size: 20px; color: #e8e4dc; margin-bottom: 4px; }
+.exam-meta { font-size: 13px; color: #5b5b7b; }
+.exam-meta span { margin-right: 16px; }
+.exam-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; font-size: 11px;
+  letter-spacing: 1px; text-transform: uppercase; border: 1px solid;
+  margin-top: 8px;
+}
+.exam-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.score-display {
+  text-align: center;
+}
+.score-pct { font-size: 28px; font-weight: 700; line-height: 1; }
+.score-label { font-size: 11px; color: #5b5b7b; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.score-detail { font-size: 12px; color: #5b5b7b; margin-top: 2px; }
+.btn-take {
+  background: none; border: 2px solid; border-radius: 10px;
+  padding: 10px 20px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: Georgia, serif; transition: all 0.2s;
+  white-space: nowrap; text-decoration: none; display: inline-block;
+  text-align: center;
+}
+.btn-take:hover { transform: translateY(-2px); }
+
+/* ── MY GRADES PANEL ── */
+.grades-panel {
+  background: #0e0e1a; border: 1px solid #1a1a2e;
+  border-radius: 14px; padding: 28px;
+}
+.grades-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+}
+.overall-avg {
+  display: flex; align-items: center; gap: 16px;
+}
+.avg-circle {
+  width: 72px; height: 72px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; border: 3px solid;
+  flex-shrink: 0;
+}
+.avg-info .avg-pct { font-size: 28px; font-weight: 700; }
+.avg-info .avg-lbl { font-size: 12px; color: #5b5b7b; text-transform: uppercase; letter-spacing: 1px; }
+
+.cat-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid #1a1a2e;
+  flex-wrap: wrap;
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cat-name { flex: 1; font-size: 14px; color: #c8c4bc; min-width: 120px; }
+.cat-weight { font-size: 12px; color: #3a3a5e; }
+.cat-bar-wrap { flex: 2; min-width: 120px; display: flex; align-items: center; gap: 12px; }
+.cat-bar-bg { flex: 1; height: 6px; background: #1a1a2e; border-radius: 3px; overflow: hidden; }
+.cat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+.cat-pct { font-size: 15px; font-weight: 700; min-width: 44px; text-align: right; }
+.cat-entries { font-size: 12px; color: #5b5b7b; min-width: 80px; text-align: right; }
+
+/* Loading / empty states */
+.loading-msg { text-align: center; color: #5b5b7b; font-size: 14px; padding: 32px 0; }
+.spinner-sm { display: inline-block; width: 20px; height: 20px; border: 2px solid #1a1a2e; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-msg { color: #3a3a5e; font-size: 13px; padding: 20px 0; font-style: italic; }
+.notice { background: #12121f; border: 1px solid #2a2a3e; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #5b5b7b; margin-bottom: 20px; }
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#0a0a0f} ::-webkit-scrollbar-thumb{background:#2a2a3e;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Georgia OEMST · NHTSA 2021 Curriculum</div>
+  <div class="hero-title">EMR Student Portal</div>
+  <div class="hero-sub">Emergency Medical Responder Program</div>
+  <div class="name-bar">
+    <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to view your grades…" autocomplete="off" />
+    <button class="btn-lookup" id="lookupBtn" onclick="lookupStudent()">View My Grades</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- EXAMS -->
+  <div class="section-title">Available Exams</div>
+  <div class="exams-grid" id="examsGrid"></div>
+
+  <!-- GRADES -->
+  <div id="gradesSection" style="display:none;">
+    <div class="section-title">My Grade Summary</div>
+    <div class="grades-panel">
+      <div class="grades-panel-header">
+        <div>
+          <div style="font-size:16px;color:#e8e4dc;margin-bottom:4px" id="gradeStudentName"></div>
+          <div style="font-size:12px;color:#5b5b7b">Weighted average across all graded categories</div>
+        </div>
+        <div class="overall-avg">
+          <div class="avg-circle" id="avgCircle">—</div>
+          <div class="avg-info">
+            <div class="avg-pct" id="avgPct">—</div>
+            <div class="avg-lbl">Overall Grade</div>
+          </div>
+        </div>
+      </div>
+      <div id="catRows"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase REST API (no SDK needed for simple reads) -->
+<script>
+const FB = {
+  apiKey: "AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  projectId: "class-attendance-72cd9",
+};
+
+// ── EXAM DEFINITIONS ─────────────────────────────────
+const EXAMS = [
+  {
+    id: "week1",
+    name: "Week 1 Exam",
+    file: "EMR_Week1_Exam.html",
+    questions: 25,
+    time: "25 min",
+    passing: "70%",
+    category: "test",
+    color: "#fbbf24",
+    icon: "📋",
+    weight: "40%",
+    topics: "EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management",
+  },
+  {
+    id: "midterm",
+    name: "Midterm Exam",
+    file: "EMR_Midterm_Exam.html",
+    questions: 50,
+    time: "50 min",
+    passing: "70%",
+    category: "exam",
+    color: "#f87171",
+    icon: "📝",
+    weight: "50%",
+    topics: "All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED",
+  },
+];
+
+const CATEGORIES = [
+  { id:"quiz",  label:"Quizzes", color:"#818cf8", weight:0.10 },
+  { id:"test",  label:"Tests",   color:"#fbbf24", weight:0.40 },
+  { id:"exam",  label:"Exams",   color:"#f87171", weight:0.50 },
+];
+
+// Map category id → exams that feed it
+const CAT_EXAM_MAP = {
+  quiz: [],
+  test: ["week1"],
+  exam: ["midterm"],
+};
+
+// Student scores fetched from Firebase: { [examId]: {pct, score, total, submittedAt} }
+let studentScores = {};
+let currentStudent = "";
+
+// ── RENDER EXAMS GRID ─────────────────────────────────
+function renderExams() {
+  const grid = document.getElementById("examsGrid");
+  grid.innerHTML = EXAMS.map(ex => {
+    const sc = studentScores[ex.id];
+    const scoreHtml = sc
+      ? `<div class="score-display">
+           <div class="score-pct" style="color:${sc.pct>=70?'#4ade80':'#f87171'}">${sc.pct}%</div>
+           <div class="score-label">${sc.pct>=70?'Passed':'Not Passed'}</div>
+           <div class="score-detail">${sc.score}/${sc.total} pts</div>
+         </div>`
+      : `<div class="score-display"><div style="color:#3a3a5e;font-size:13px;">Not taken</div></div>`;
+
+    return `
+      <div class="exam-card" style="border-left-color:${ex.color}">
+        <div class="exam-icon">${ex.icon}</div>
+        <div class="exam-info">
+          <div class="exam-name">${ex.name}</div>
+          <div class="exam-meta">
+            <span>📊 ${ex.questions} questions</span>
+            <span>⏱ ${ex.time}</span>
+            <span>✅ Pass: ${ex.passing}</span>
+          </div>
+          <div class="exam-badge" style="color:${ex.color};border-color:${ex.color}40;background:${ex.color}11">
+            Counts as ${ex.weight} of grade
+          </div>
+          <div style="font-size:12px;color:#3a3a5e;margin-top:6px">${ex.topics}</div>
+        </div>
+        <div class="exam-actions">
+          ${scoreHtml}
+          <a class="btn-take" href="${ex.file}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
+            onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
+            ${sc ? 'Retake' : 'Take Exam'} →
+          </a>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+// ── LOOKUP STUDENT ────────────────────────────────────
+async function lookupStudent() {
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name) return;
+  currentStudent = name;
+
+  const btn = document.getElementById("lookupBtn");
+  btn.disabled = true;
+  btn.textContent = "Loading…";
+
+  studentScores = {};
+  await fetchStudentScores(name);
+
+  btn.disabled = false;
+  btn.textContent = "View My Grades";
+
+  renderExams();
+  renderGrades(name);
+}
+
+async function fetchStudentScores(name) {
+  // Query Firestore examResults collection for this student name
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents:runQuery?key=${FB.apiKey}`;
+    const body = {
+      structuredQuery: {
+        from: [{ collectionId: "examResults" }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: "name" },
+            op: "EQUAL",
+            value: { stringValue: name }
+          }
+        },
+        orderBy: [{ field: { fieldPath: "submittedAt" }, direction: "DESCENDING" }]
+      }
+    };
+    const resp = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) { console.error("Firestore query failed", await resp.text()); return; }
+    const results = await resp.json();
+    // Each result is a document; keep the latest per exam
+    const seen = new Set();
+    for (const item of results) {
+      if (!item.document) continue;
+      const f = item.document.fields;
+      const examLabel = f.examLabel?.stringValue || "";
+      // Map examLabel → examId
+      const ex = EXAMS.find(e => e.name === examLabel);
+      if (!ex || seen.has(ex.id)) continue;
+      seen.add(ex.id);
+      studentScores[ex.id] = {
+        pct: parseInt(f.pct?.integerValue || 0),
+        score: parseInt(f.score?.integerValue || 0),
+        total: parseInt(f.total?.integerValue || 0),
+        submittedAt: f.submittedAt?.stringValue || "",
+        category: f.category?.stringValue || ex.category,
+      };
+    }
+  } catch(e) {
+    console.error("fetchStudentScores error:", e);
+  }
+
+  // Also pull grades from the tracker's scores collection for quizzes/tests/exams
+  await fetchTrackerScores(name);
+}
+
+// Pull grades entered manually in the attendance tracker
+async function fetchTrackerScores(name) {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/main?key=${FB.apiKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const doc = await resp.json();
+    const fields = doc.fields || {};
+
+    // Find this student in the roster
+    const studentsArr = fields.students?.arrayValue?.values || [];
+    let studentId = null;
+    for (const sv of studentsArr) {
+      const sf = sv.mapValue?.fields || {};
+      const n = sf.name?.stringValue || "";
+      if (n.toLowerCase() === name.toLowerCase()) {
+        studentId = sf.id?.integerValue || sf.id?.stringValue || null;
+        break;
+      }
+    }
+    if (!studentId) return;
+    studentId = String(studentId);
+
+    // Get scores map
+    const scoresMap = fields.scores?.mapValue?.fields || {};
+    const studentScoreFields = scoresMap[studentId]?.mapValue?.fields || {};
+
+    // Get assignments
+    const assignArr = fields.assignments?.arrayValue?.values || [];
+    const assignments = assignArr.map(av => {
+      const af = av.mapValue?.fields || {};
+      return {
+        id: af.id?.stringValue || "",
+        name: af.name?.stringValue || "",
+        points: parseInt(af.points?.integerValue || 1),
+        category: af.category?.stringValue || "",
+      };
+    });
+
+    // Build category averages from tracker assignments
+    if (!window._trackerCatData) window._trackerCatData = {};
+    CATEGORIES.forEach(cat => {
+      const catAssigns = assignments.filter(a => a.category === cat.id);
+      if (catAssigns.length === 0) return;
+      let earned = 0, possible = 0, hasAny = false;
+      catAssigns.forEach(a => {
+        const sv = studentScoreFields[a.id];
+        const val = sv?.integerValue !== undefined ? parseInt(sv.integerValue)
+                  : sv?.doubleValue !== undefined ? parseFloat(sv.doubleValue) : null;
+        if (val !== null) { earned += val; possible += a.points; hasAny = true; }
+      });
+      if (hasAny && possible > 0) {
+        window._trackerCatData[cat.id] = {
+          pct: Math.round((earned / possible) * 100),
+          earned, possible,
+          entries: catAssigns.filter(a => {
+            const sv = studentScoreFields[a.id];
+            return sv?.integerValue !== undefined || sv?.doubleValue !== undefined;
+          }).length,
+          total: catAssigns.length,
+        };
+      }
+    });
+  } catch(e) {
+    console.error("fetchTrackerScores error:", e);
+  }
+}
+
+// ── RENDER GRADES ─────────────────────────────────────
+function renderGrades(name) {
+  const section = document.getElementById("gradesSection");
+  section.style.display = "block";
+  document.getElementById("gradeStudentName").textContent = name;
+
+  const catData = window._trackerCatData || {};
+
+  // Merge exam scores into catData
+  Object.entries(studentScores).forEach(([examId, sc]) => {
+    const ex = EXAMS.find(e => e.id === examId);
+    if (!ex) return;
+    const catId = ex.category;
+    if (!catData[catId]) catData[catId] = { pct: sc.pct, entries: 1, total: 1 };
+    else {
+      // Blend: if we already have tracker entries, weight equally
+      catData[catId].pct = Math.round((catData[catId].pct + sc.pct) / 2);
+      catData[catId].entries = (catData[catId].entries || 0) + 1;
+    }
+  });
+
+  // Weighted overall
+  let totalWeight = 0, weightedSum = 0;
+  CATEGORIES.forEach(cat => {
+    if (catData[cat.id]) {
+      weightedSum += catData[cat.id].pct * cat.weight;
+      totalWeight += cat.weight;
+    }
+  });
+  const overall = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : null;
+  const letter = pctToLetter(overall);
+  const lc = letterColor(letter);
+
+  const circle = document.getElementById("avgCircle");
+  circle.textContent = letter;
+  circle.style.color = lc;
+  circle.style.borderColor = lc;
+  circle.style.background = lc + "11";
+  document.getElementById("avgPct").textContent = overall !== null ? overall + "%" : "—";
+  document.getElementById("avgPct").style.color = lc;
+
+  // Category rows
+  const rows = document.getElementById("catRows");
+  if (Object.keys(catData).length === 0) {
+    rows.innerHTML = `<div class="empty-msg">No grades found for "${name}". Make sure your name matches exactly what you used on your exams.</div>`;
+    return;
+  }
+
+  rows.innerHTML = CATEGORIES.map(cat => {
+    const d = catData[cat.id];
+    const pct = d ? d.pct : null;
+    const pc = pct !== null ? (pct >= 80 ? "#4ade80" : pct >= 60 ? "#fbbf24" : "#f87171") : "#3a3a5e";
+    const entryText = d ? `${d.entries || "?"}/${d.total || "?"} graded` : "No grades yet";
+    return `
+      <div class="cat-row">
+        <div class="cat-dot" style="background:${cat.color}"></div>
+        <div class="cat-name" style="color:${cat.color}">${cat.label}</div>
+        <div class="cat-weight">${Math.round(cat.weight * 100)}%</div>
+        <div class="cat-bar-wrap">
+          <div class="cat-bar-bg">
+            <div class="cat-bar-fill" style="width:${pct || 0}%;background:${pc}"></div>
+          </div>
+          <div class="cat-pct" style="color:${pc}">${pct !== null ? pct + "%" : "—"}</div>
+        </div>
+        <div class="cat-entries">${entryText}</div>
+      </div>`;
+  }).join("");
+}
+
+function pctToLetter(pct) {
+  if (pct === null) return "—";
+  if (pct >= 90) return "A";
+  if (pct >= 80) return "B";
+  if (pct >= 70) return "C";
+  if (pct >= 60) return "D";
+  return "F";
+}
+function letterColor(l) {
+  return {A:"#4ade80",B:"#86efac",C:"#fbbf24",D:"#f97316",F:"#f87171","—":"#5b5b7b"}[l] || "#5b5b7b";
+}
+
+// Enter key on name input
+document.getElementById("nameInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") lookupStudent();
+});
+
+// Initial render with no scores
+renderExams();
+</script>
+</body>
+</html>
