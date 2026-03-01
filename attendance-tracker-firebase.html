@@ -216,17 +216,24 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   <div class="tab-panel" id="panel-grades">
     <div class="grades-layout">
       <div class="assignments-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div class="panel-title" style="margin-bottom:0">Assignments</div>
-          <button onclick="refreshExamResults()" style="background:none;border:1px solid #bfdbfe;border-radius:6px;color:#6b82a0;padding:4px 10px;cursor:pointer;font-size:11px;font-family:Georgia,serif;transition:all 0.2s" onmouseover="this.style.borderColor='#2563eb';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#bfdbfe';this.style.color='#6b82a0'" title="Refresh exam scores from Firebase">⟳ Refresh Exams</button>
-        </div>
+        <div class="panel-title">Grade Management</div>
         <div class="weights-info">
           <div class="weights-title">Category Weights</div>
-          <div class="weights-row"><span class="weights-label" style="color:#6366f1">● Quizzes</span><span class="weights-val">10%</span></div>
-          <div class="weights-row"><span class="weights-label" style="color:#fbbf24">● Tests</span><span class="weights-val">40%</span></div>
-          <div class="weights-row"><span class="weights-label" style="color:#f87171">● Exams</span><span class="weights-val">50%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#818cf8">● Quizzes</span><span class="weights-val">10%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#fbbf24">● Module Exams</span><span class="weights-val">20%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#f97316">● Midterm Exam</span><span class="weights-val">30%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#f87171">● Final Exam</span><span class="weights-val">40%</span></div>
         </div>
-        <div id="assignmentCategories"></div>
+        <div style="margin-top:20px;">
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:10px;">Quiz Scores</div>
+          <div id="assignmentCategories"></div>
+        </div>
+        <div style="margin-top:16px;">
+          <button onclick="refreshExamResults()" style="width:100%;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;color:#4a6080;padding:8px;cursor:pointer;font-size:12px;font-family:Georgia,serif;transition:all 0.2s;letter-spacing:1px;" onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe';this.style.color='#4a6080'">⟳ Refresh Exam Scores</button>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:#93adc8;line-height:1.6;">
+          Module, Midterm &amp; Final exam scores sync automatically from student submissions.
+        </div>
       </div>
       <div class="grades-grid-panel">
         <div class="panel-title">Student Scores</div>
@@ -485,23 +492,31 @@ function setStatus(sid,status){if(!data.attendance[selectedDate])data.attendance
 function markAll(status){if(!data.attendance[selectedDate])data.attendance[selectedDate]={};data.students.forEach(s=>data.attendance[selectedDate][s.id]=status);scheduleSave();renderAttendance();}
 
 /* ── GRADES ── */
-function renderGradesTab(){renderAssignmentManager();renderGradesGrid();}
+function renderGradesTab(){
+  // Only show quiz category in assignment manager
+  renderAssignmentManager();
+  renderGradesGrid();
+}
 
 function renderAssignmentManager(){
-  const container=document.getElementById('assignmentCategories');container.innerHTML='';
-  CATEGORIES.forEach(cat=>{
-    const assigns=data.assignments.filter(a=>a.category===cat.id);
-    const isOpen=addFormOpen[cat.id];
-    const block=document.createElement('div');block.className='category-block';
-    let html=`<div class="category-header">
-      <div class="category-label"><div class="cat-dot" style="background:${cat.color}"></div><span style="color:${cat.color}">${cat.label}</span><span class="weight-badge">${Math.round(cat.weight*100)}%</span></div>
-      <button class="add-assign-btn" onclick="toggleAddForm('${cat.id}')">+ Add</button></div>`;
-    if(assigns.length===0&&!isOpen)html+=`<div class="no-assigns-msg">No assignments yet</div>`;
-    assigns.forEach(a=>{html+=`<div class="assignment-item"><div class="assign-name">${escHtml(a.name)}</div><div class="assign-points">${a.points} pts</div><button class="remove-assign-btn" onclick="removeAssignment('${a.id}')">×</button></div>`;});
-    if(isOpen)html+=`<div class="add-assign-form"><input class="assign-name-input" id="aname-${cat.id}" placeholder="Assignment name…"/><input class="assign-pts-input" id="apts-${cat.id}" type="number" min="1" max="999" placeholder="Pts" title="Total points possible"/><button class="btn-tiny" onclick="addAssignment('${cat.id}')">Add</button><button class="btn-tiny-sec" onclick="toggleAddForm('${cat.id}')">✕</button></div>`;
-    block.innerHTML=html;container.appendChild(block);
-    if(isOpen){const ni=document.getElementById('aname-'+cat.id);if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')addAssignment(cat.id);});}}
-  });
+  const container=document.getElementById('assignmentCategories');
+  container.innerHTML='';
+  // Only manage quizzes manually — exams are auto-synced
+  const cat=CATEGORIES.find(c=>c.id==='quiz');
+  if(!cat)return;
+  const assigns=data.assignments.filter(a=>a.category==='quiz');
+  const isOpen=addFormOpen['quiz'];
+  const block=document.createElement('div');
+  block.className='category-block';
+  let html=`<div class="category-header">
+    <div class="category-label"><div class="cat-dot" style="background:${cat.color}"></div><span style="color:${cat.color}">${cat.label}</span><span class="weight-badge">${Math.round(cat.weight*100)}%</span></div>
+    <button class="add-assign-btn" onclick="toggleAddForm('quiz')">+ Add Quiz</button></div>`;
+  if(assigns.length===0&&!isOpen)html+=`<div class="no-assigns-msg">No quizzes yet — click + Add Quiz</div>`;
+  assigns.forEach(a=>{html+=`<div class="assignment-item"><div class="assign-name">${escHtml(a.name)}</div><div class="assign-points">${a.points} pts</div><button class="remove-assign-btn" onclick="removeAssignment('${a.id}')">×</button></div>`;});
+  if(isOpen)html+=`<div class="add-assign-form"><input class="assign-name-input" id="aname-quiz" placeholder="Quiz name…"/><input class="assign-pts-input" id="apts-quiz" type="number" min="1" max="999" placeholder="Pts" title="Total points possible"/><button class="btn-tiny" onclick="addAssignment('quiz')">Add</button><button class="btn-tiny-sec" onclick="toggleAddForm('quiz')">✕</button></div>`;
+  block.innerHTML=html;
+  container.appendChild(block);
+  if(isOpen){const ni=document.getElementById('aname-quiz');if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')addAssignment('quiz');});}}
 }
 
 function toggleAddForm(catId){addFormOpen[catId]=!addFormOpen[catId];renderGradesTab();}
@@ -521,52 +536,59 @@ function removeAssignment(aid){
 
 function renderGradesGrid(){
   const container=document.getElementById('gradesGrid');
+  const quizAssigns=data.assignments.filter(a=>a.category==='quiz');
 
-  // Build exam results table
-  let examHtml='';
-  if(EXAM_DEFS.length>0){
-    examHtml+=`<div style="margin-bottom:20px;">
-      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:10px;">Exam Results (auto-synced)</div>
-      <table class="grades-table"><thead><tr><th>Student</th>`;
-    EXAM_DEFS.forEach(d=>{
-      const cat=CATEGORIES.find(c=>c.id===d.category);
-      examHtml+=`<th class="center" style="color:${cat?cat.color:'#fff'}">${d.label}<br><span style="color:#93adc8;font-size:9px">/${100} pts</span></th>`;
-    });
-    examHtml+=`<th class="center">Best Score</th></tr></thead><tbody>`;
-    data.students.forEach((student,idx)=>{
-      examHtml+=`<tr class="sgrow"><td class="td-name"><span style="color:#93adc8;font-size:11px;margin-right:8px">${String(idx+1).padStart(2,'0')}</span>${escHtml(student.name)}</td>`;
-      let bestPct=null;
-      EXAM_DEFS.forEach(d=>{
-        const er=getExamScore(student.name,d.assignId);
-        const cat=CATEGORIES.find(c=>c.id===d.category);
-        const lc=er?( er.pct>=80?'#4ade80':er.pct>=70?'#86efac':er.pct>=60?'#fbbf24':'#f87171'):'#93adc8';
-        if(er&&(bestPct===null||er.pct>bestPct))bestPct=er.pct;
-        examHtml+=`<td class="center">
-          ${er
-            ?`<div style="font-weight:bold;color:${lc}">${er.pct}%</div><div style="font-size:11px;color:#6b82a0">${er.score}/${er.total} pts</div>`
-            :`<span style="color:#93adc8;font-size:13px;">—</span>`}
-        </td>`;
-      });
-      const blc=bestPct!==null?(bestPct>=80?'#4ade80':bestPct>=70?'#86efac':bestPct>=60?'#fbbf24':'#f87171'):'#6b82a0';
-      examHtml+=`<td class="center"><span class="avg-badge" style="color:${blc};border-color:${blc}33;background:${blc}11">${bestPct!==null?bestPct+'%':'—'}</span></td></tr>`;
-    });
-    examHtml+=`</tbody></table></div>`;
-  }
-
-  if(data.assignments.length===0){
-    container.innerHTML=examHtml+`<div class="no-assignments" style="margin-top:8px">Add manual assignments on the left to enter additional scores.</div>`;
-    return;
-  }
+  // Single unified table: Student | Quizzes... | Week1 | Week4 | Midterm | Final | Avg | Grade
   let html=`<table class="grades-table"><thead><tr><th>Student</th>`;
-  CATEGORIES.forEach(cat=>{const ca=data.assignments.filter(a=>a.category===cat.id);ca.forEach(a=>{html+=`<th class="center" style="color:${cat.color}">${escHtml(a.name)}<br><span style="color:#93adc8;font-size:9px">/${a.points} pts</span></th>`;});});
+
+  // Quiz columns (manual)
+  quizAssigns.forEach(a=>{
+    const cat=CATEGORIES.find(c=>c.id==='quiz');
+    html+=`<th class="center" style="color:${cat.color}">${escHtml(a.name)}<br><span style="color:#93adc8;font-size:9px">/${a.points} pts</span></th>`;
+  });
+  if(quizAssigns.length===0){
+    html+=`<th class="center" style="color:#818cf8">Quizzes<br><span style="color:#93adc8;font-size:9px">none yet</span></th>`;
+  }
+
+  // Exam columns (auto-synced)
+  EXAM_DEFS.forEach(d=>{
+    const cat=CATEGORIES.find(c=>c.id===d.category);
+    html+=`<th class="center" style="color:${cat?cat.color:'#6b82a0'}">${d.label}<br><span style="color:#93adc8;font-size:9px">auto-synced</span></th>`;
+  });
+
   html+=`<th class="center">Avg</th><th class="center">Grade</th></tr></thead><tbody>`;
+
   data.students.forEach((student,idx)=>{
     const avg=calcWeightedAverage(student.id),letter=avgToLetter(avg),lc=letterToColor(letter);
     html+=`<tr class="sgrow"><td class="td-name"><span style="color:#93adc8;font-size:11px;margin-right:8px">${String(idx+1).padStart(2,'0')}</span>${escHtml(student.name)}</td>`;
-    CATEGORIES.forEach(cat=>{const ca=data.assignments.filter(a=>a.category===cat.id);ca.forEach(a=>{const scored=getScore(student.id,a.id);html+=`<td class="center"><div class="pts-input-wrap"><input class="pts-scored" type="number" min="0" max="${a.points}" value="${scored===null?'':scored}" placeholder="—" onchange="setScore(${student.id},'${a.id}',this.value,${a.points})"/><span class="pts-denom">/${a.points}</span></div></td>`;});});
-    html+=`<td class="center"><span class="avg-badge" style="color:${lc};border-color:${lc}33;background:${lc}11">${avg===null?'—':avg+'%'}</span></td><td class="center"><span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span></td></tr>`;
+
+    // Quiz score inputs
+    if(quizAssigns.length===0){
+      html+=`<td class="center"><span style="color:#93adc8;font-size:12px;">—</span></td>`;
+    } else {
+      quizAssigns.forEach(a=>{
+        const scored=getScore(student.id,a.id);
+        html+=`<td class="center"><div class="pts-input-wrap"><input class="pts-scored" type="number" min="0" max="${a.points}" value="${scored===null?'':scored}" placeholder="—" onchange="setScore(${student.id},'${a.id}',this.value,${a.points})"/><span class="pts-denom">/${a.points}</span></div></td>`;
+      });
+    }
+
+    // Exam score cells (read-only, auto-synced)
+    EXAM_DEFS.forEach(d=>{
+      const er=getExamScore(student.name,d.assignId);
+      const lc=er?(er.pct>=80?'#16a34a':er.pct>=70?'#4ade80':er.pct>=60?'#fbbf24':'#f87171'):'#93adc8';
+      html+=`<td class="center">
+        ${er
+          ?`<div style="font-weight:700;color:${lc};font-size:15px;">${er.pct}%</div><div style="font-size:10px;color:#6b82a0;">${er.score}/${er.total}</div>`
+          :`<span style="color:#93adc8;font-size:13px;">—</span>`}
+      </td>`;
+    });
+
+    html+=`<td class="center"><span class="avg-badge" style="color:${lc};border-color:${lc}33;background:${lc}11">${avg===null?'—':avg+'%'}</span></td>`;
+    html+=`<td class="center"><span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span></td></tr>`;
   });
-  html+=`</tbody></table>`;container.innerHTML=examHtml+html;
+
+  html+=`</tbody></table>`;
+  container.innerHTML=html;
 }
 
 function getScore(studentId,assignId){
