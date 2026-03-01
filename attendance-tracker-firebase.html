@@ -252,6 +252,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       <div style="font-size:13px;color:#4a6080;margin-bottom:24px;line-height:1.7;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;">
         Toggle each exam open or closed. Students can only access an exam on the portal when it is <strong style="color:#16a34a">Open</strong>. Changes take effect instantly.
       </div>
+      <div id="examDebug" style="font-size:11px;color:#dc2626;margin-bottom:12px;word-break:break-all;"></div>
       <div id="examToggles"></div>
     </div>
   </div>
@@ -671,27 +672,22 @@ function renderExamToggles(){
 function toggleExam(assignId,open){
   if(!data.examStatus)data.examStatus={};
   data.examStatus[assignId]=open;
-  renderExamToggles(); // update UI immediately
-  // Save just the examStatus field directly for reliability
+  renderExamToggles();
   setSyncStatus('syncing','Saving…');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     try{
-      const clean = JSON.parse(JSON.stringify(data));
-      await DOC_REF.set(clean);
+      // Try writing ONLY examStatus to a separate small doc to isolate the issue
+      await db.collection('tracker').doc('examStatus').set(data.examStatus);
       setSyncStatus('saved','✓ Saved');
       setTimeout(()=>setSyncStatus('',''),2000);
     }catch(e){
-      console.error('toggleExam save error:',e.code, e.message);
-      // Try update instead of set as fallback
-      try{
-        await DOC_REF.update({examStatus: data.examStatus});
-        setSyncStatus('saved','✓ Saved');
-        setTimeout(()=>setSyncStatus('',''),2000);
-      }catch(e2){
-        console.error('toggleExam update fallback error:',e2.code, e2.message);
-        setSyncStatus('error','✗ Save failed — check Firestore rules');
-      }
+      const msg = e.code+': '+e.message;
+      console.error('toggleExam error:', msg);
+      setSyncStatus('error','✗ '+msg);
+      // Show error on screen for debugging
+      const dbg = document.getElementById('examDebug');
+      if(dbg) dbg.textContent = 'Error: '+msg;
     }
   }, 300);
 }
