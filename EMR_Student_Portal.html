@@ -520,24 +520,30 @@ async function fetchStudentScores(name) {
     });
     if (!resp.ok) { console.error("Firestore query failed", await resp.text()); return; }
     const results = await resp.json();
+    console.log("Portal: examResults query returned", results.length, "rows for name:", name);
     // Each result is a document; keep the latest per exam
     const seen = new Set();
     for (const item of results) {
       if (!item.document) continue;
       const f = item.document.fields;
       const examLabel = f.examLabel?.stringValue || "";
+      const storedName = f.name?.stringValue || "";
+      // pct may be integerValue or stringValue
+      const pct = parseInt(f.pct?.integerValue || f.pct?.doubleValue || f.pct?.stringValue || 0);
+      const score = parseInt(f.score?.integerValue || f.score?.doubleValue || f.score?.stringValue || 0);
+      const total = parseInt(f.total?.integerValue || f.total?.doubleValue || f.total?.stringValue || 0);
+      console.log("Portal: exam row:", { storedName, examLabel, pct, score, total });
       // Map examLabel → examId
       const ex = EXAMS.find(e => e.name === examLabel);
-      if (!ex || seen.has(ex.id)) continue;
+      if (!ex || seen.has(ex.id)) { console.log("Portal: no matching exam for label:", examLabel); continue; }
       seen.add(ex.id);
       studentScores[ex.id] = {
-        pct: parseInt(f.pct?.integerValue || 0),
-        score: parseInt(f.score?.integerValue || 0),
-        total: parseInt(f.total?.integerValue || 0),
+        pct, score, total,
         submittedAt: f.submittedAt?.stringValue || "",
         category: f.category?.stringValue || ex.category,
       };
     }
+    console.log("Portal: studentScores after fetch:", JSON.stringify(studentScores));
   } catch(e) {
     console.error("fetchStudentScores error:", e);
   }
@@ -566,7 +572,8 @@ async function fetchTrackerScores(name) {
         break;
       }
     }
-    if (!studentId) return;
+    console.log('Portal: tracker studentId found:', studentId, 'for name:', name);
+    if (!studentId) { console.log('Portal: student not found in tracker roster for name:', name); return; }
     studentId = String(studentId);
 
     // Get scores map
