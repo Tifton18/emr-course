@@ -349,7 +349,7 @@ const CATEGORIES = [
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
   { id: "TFD-001", name: "" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -406,10 +406,19 @@ function renderExams() {
           ${scoreHtml}
           ${ex.comingSoon
             ? `<span style="font-size:12px;color:#93adc8;border:1px solid #bfdbfe;border-radius:8px;padding:8px 16px;">Coming Soon</span>`
-            : `<a class="btn-take" href="${ex.file}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
-                onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
-                ${sc ? 'Retake' : 'Take Exam'} →
-              </a>`}
+            : sc
+              ? `<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+                  <span style="font-size:12px;font-weight:700;color:#16a34a;border:2px solid #16a34a;border-radius:8px;padding:8px 16px;background:#f0fdf4;white-space:nowrap;">✓ Submitted ${sc.pct}%</span>
+                  <a href="${ex.file}?review=1&name=${encodeURIComponent(currentSession?.name||'')}"
+                     style="font-size:12px;color:#2563eb;border:1px solid #bfdbfe;border-radius:8px;padding:6px 14px;background:#f0f6ff;text-decoration:none;white-space:nowrap;transition:all 0.2s;"
+                     onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe'">
+                     📋 Review Answers
+                  </a>
+                </div>`
+              : `<a class="btn-take" href="${ex.file}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
+                  onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
+                  Take Exam →
+                </a>`}
         </div>
       </div>`;
   }).join("");
