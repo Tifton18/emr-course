@@ -389,20 +389,20 @@ async function loadExamResults(){
     examResults={};
     // Keep only the BEST score per student per exam
     console.log('examResults raw rows:', rows.length);
-    rows.forEach(row=>{
-      if(!row.document)return;
+    console.log('All rows:', JSON.stringify(rows));
+    rows.forEach((row,rowIdx)=>{
+      console.log('Row '+rowIdx+' keys:', Object.keys(row));
+      if(!row.document){ console.log('Row '+rowIdx+' has no document, skipping. Full row:', JSON.stringify(row)); return; }
       const f=row.document.fields||{};
       const name=(f.name?.stringValue||f.studentName?.stringValue||'').toLowerCase().trim();
       const label=(f.examLabel?.stringValue||f.label?.stringValue||'').trim();
-      // pct/score/total may come as integerValue or stringValue depending on how stored
       const pct=parseInt(f.pct?.integerValue||f.pct?.doubleValue||f.pct?.stringValue||0);
       const score=parseInt(f.score?.integerValue||f.score?.doubleValue||f.score?.stringValue||0);
       const total=parseInt(f.total?.integerValue||f.total?.doubleValue||f.total?.stringValue||0);
       const submittedAt=f.submittedAt?.stringValue||'';
       const def=EXAM_DEFS.find(d=>d.label===label);
-      console.log('Row raw fields:', JSON.stringify(f));
-      console.log('Row parsed:', {name, label, pct, score, total, defFound:!!def});
-      if(!name||!def){ console.log('SKIPPED - name empty?', !name, 'def not found?', !def, 'label was:', JSON.stringify(label)); return; }
+      console.log('Row '+rowIdx+' parsed:', {name, label, pct, score, total, defFound:!!def});
+      if(!name||!def){ console.log('SKIPPED row '+rowIdx+' - name empty?', !name, 'def not found?', !def, 'label:', JSON.stringify(label)); return; }
       if(!examResults[name])examResults[name]={};
       const existing=examResults[name][def.assignId];
       if(!existing||pct>existing.pct){
