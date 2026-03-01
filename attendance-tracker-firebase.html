@@ -426,18 +426,6 @@ function instructorSignOut() {
   document.getElementById('loginError').style.display = 'none';
 }
 
-// Check session on load
-(function() {
-  try {
-    if (sessionStorage.getItem('tfd_instructor') === '1') {
-      document.getElementById('loginOverlay').classList.add('hidden');
-      document.getElementById('instructorBar').classList.remove('hidden');
-      return;
-    }
-  } catch(e) {}
-  // Show login
-})();
-
 function setSyncStatus(s,text){document.getElementById('syncBar').className=s;const l=document.getElementById('syncLabel');l.className=s;l.textContent=text;}
 function scheduleSave(){setSyncStatus('syncing','Saving…');clearTimeout(saveTimer);saveTimer=setTimeout(saveToFirebase,800);}
 async function saveToFirebase(){
@@ -1061,10 +1049,19 @@ async function renderAnalysis() {
 
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// Start Firebase load immediately — don't block on auth
 loadFromFirebase();
 
-// Login Enter key
 document.addEventListener('DOMContentLoaded', () => {
+  // Check for existing instructor session
+  try {
+    if (sessionStorage.getItem('tfd_instructor') === '1') {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('instructorBar').classList.remove('hidden');
+    }
+  } catch(e) {}
+
+  // Enter key on password field
   const pw = document.getElementById('loginPw');
   if (pw) pw.addEventListener('keydown', e => { if (e.key === 'Enter') attemptInstructorLogin(); });
 });
