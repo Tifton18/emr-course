@@ -8,21 +8,21 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Georgia', serif;
-  background: #0a0a0f;
-  color: #e8e4dc;
+  background: #f0f6ff;
+  color: #1e3a5f;
   min-height: 100vh;
 }
 
 /* ── HERO ── */
 .hero {
-  background: linear-gradient(135deg, #0a0e27 0%, #0f1e3d 50%, #0a1628 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #dbeafe 50%, #1e3a8a 100%);
   padding: 48px 32px 36px;
   text-align: center;
-  border-bottom: 1px solid #1e2a3a;
+  border-bottom: 1px solid #bfdbfe;
 }
 .hero-eyebrow { font-size: 11px; letter-spacing: 5px; color: #64b5f6; text-transform: uppercase; margin-bottom: 12px; }
-.hero-title { font-size: 42px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-.hero-sub { font-size: 18px; color: #90caf9; margin-bottom: 28px; }
+.hero-title { font-size: 42px; font-weight: 700; color: #1e3a5f; margin-bottom: 6px; }
+.hero-sub { font-size: 18px; color: #1d4ed8; margin-bottom: 28px; }
 
 /* Name lookup */
 .name-bar {
@@ -31,31 +31,31 @@ body {
 }
 .name-input {
   flex: 1; min-width: 220px;
-  background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 10px; padding: 12px 16px; font-size: 15px; color: #fff;
+  background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 10px; padding: 12px 16px; font-size: 15px; color: #1e3a5f;
   outline: none; font-family: Georgia, serif; transition: border-color 0.2s;
 }
 .name-input:focus { border-color: #2196F3; }
-.name-input::placeholder { color: #4a5568; }
+.name-input::placeholder { color: #6b82a0; }
 .btn-lookup {
   background: #2196F3; color: #fff; border: none; border-radius: 10px;
   padding: 12px 24px; font-size: 15px; font-weight: 700; cursor: pointer;
   font-family: Georgia, serif; transition: all 0.2s; white-space: nowrap;
 }
 .btn-lookup:hover { background: #1976D2; transform: translateY(-1px); }
-.btn-lookup:disabled { background: #1a2a3a; color: #4a5568; cursor: default; transform: none; }
+.btn-lookup:disabled { background: #1a2a3a; color: #6b82a0; cursor: default; transform: none; }
 
 /* ── MAIN CONTENT ── */
 .main { max-width: 900px; margin: 0 auto; padding: 40px 24px; }
 .section-title {
   font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-  color: #5b5b7b; margin-bottom: 20px;
+  color: #4a6080; margin-bottom: 20px;
 }
 
 /* ── EXAMS GRID ── */
 .exams-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
 .exam-card {
-  background: #0e0e1a; border: 1px solid #1a1a2e;
+  background: #ffffff; border: 1px solid #bfdbfe;
   border-radius: 14px; padding: 24px 28px;
   display: flex; align-items: center; gap: 24px;
   flex-wrap: wrap;
@@ -65,8 +65,8 @@ body {
 .exam-card:hover { transform: translateX(3px); }
 .exam-icon { font-size: 32px; flex-shrink: 0; }
 .exam-info { flex: 1; min-width: 200px; }
-.exam-name { font-size: 20px; color: #e8e4dc; margin-bottom: 4px; }
-.exam-meta { font-size: 13px; color: #5b5b7b; }
+.exam-name { font-size: 20px; color: #1e3a5f; margin-bottom: 4px; }
+.exam-meta { font-size: 13px; color: #6b82a0; }
 .exam-meta span { margin-right: 16px; }
 .exam-badge {
   display: inline-flex; align-items: center; gap: 6px;
@@ -79,8 +79,8 @@ body {
   text-align: center;
 }
 .score-pct { font-size: 28px; font-weight: 700; line-height: 1; }
-.score-label { font-size: 11px; color: #5b5b7b; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-.score-detail { font-size: 12px; color: #5b5b7b; margin-top: 2px; }
+.score-label { font-size: 11px; color: #6b82a0; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.score-detail { font-size: 12px; color: #6b82a0; margin-top: 2px; }
 .btn-take {
   background: none; border: 2px solid; border-radius: 10px;
   padding: 10px 20px; font-size: 14px; font-weight: 700;
@@ -92,7 +92,7 @@ body {
 
 /* ── MY GRADES PANEL ── */
 .grades-panel {
-  background: #0e0e1a; border: 1px solid #1a1a2e;
+  background: #ffffff; border: 1px solid #bfdbfe;
   border-radius: 14px; padding: 28px;
 }
 .grades-panel-header {
@@ -109,32 +109,32 @@ body {
   flex-shrink: 0;
 }
 .avg-info .avg-pct { font-size: 28px; font-weight: 700; }
-.avg-info .avg-lbl { font-size: 12px; color: #5b5b7b; text-transform: uppercase; letter-spacing: 1px; }
+.avg-info .avg-lbl { font-size: 12px; color: #6b82a0; text-transform: uppercase; letter-spacing: 1px; }
 
 .cat-row {
   display: flex; align-items: center; gap: 16px;
-  padding: 14px 0; border-bottom: 1px solid #1a1a2e;
+  padding: 14px 0; border-bottom: 1px solid #dbeafe;
   flex-wrap: wrap;
 }
 .cat-row:last-child { border-bottom: none; }
 .cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.cat-name { flex: 1; font-size: 14px; color: #c8c4bc; min-width: 120px; }
-.cat-weight { font-size: 12px; color: #3a3a5e; }
+.cat-name { flex: 1; font-size: 14px; color: #334d6e; min-width: 120px; }
+.cat-weight { font-size: 12px; color: #93adc8; }
 .cat-bar-wrap { flex: 2; min-width: 120px; display: flex; align-items: center; gap: 12px; }
-.cat-bar-bg { flex: 1; height: 6px; background: #1a1a2e; border-radius: 3px; overflow: hidden; }
+.cat-bar-bg { flex: 1; height: 6px; background: #bfdbfe; border-radius: 3px; overflow: hidden; }
 .cat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
 .cat-pct { font-size: 15px; font-weight: 700; min-width: 44px; text-align: right; }
-.cat-entries { font-size: 12px; color: #5b5b7b; min-width: 80px; text-align: right; }
+.cat-entries { font-size: 12px; color: #6b82a0; min-width: 80px; text-align: right; }
 
 /* Loading / empty states */
-.loading-msg { text-align: center; color: #5b5b7b; font-size: 14px; padding: 32px 0; }
-.spinner-sm { display: inline-block; width: 20px; height: 20px; border: 2px solid #1a1a2e; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+.loading-msg { text-align: center; color: #4a6080; font-size: 14px; padding: 32px 0; }
+.spinner-sm { display: inline-block; width: 20px; height: 20px; border: 2px solid #dbeafe; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.empty-msg { color: #3a3a5e; font-size: 13px; padding: 20px 0; font-style: italic; }
-.notice { background: #12121f; border: 1px solid #2a2a3e; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #5b5b7b; margin-bottom: 20px; }
+.empty-msg { color: #6b82a0; font-size: 13px; padding: 20px 0; font-style: italic; }
+.notice { background: #f0f6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #6b82a0; margin-bottom: 20px; }
 
 /* Scrollbar */
-::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#0a0a0f} ::-webkit-scrollbar-thumb{background:#2a2a3e;border-radius:3px}
+::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#f8fbff} ::-webkit-scrollbar-thumb{background:#bfdbfe;border-radius:3px}
 </style>
 </head>
 <body>
@@ -162,8 +162,8 @@ body {
     <div class="grades-panel">
       <div class="grades-panel-header">
         <div>
-          <div style="font-size:16px;color:#e8e4dc;margin-bottom:4px" id="gradeStudentName"></div>
-          <div style="font-size:12px;color:#5b5b7b">Weighted average across all graded categories</div>
+          <div style="font-size:16px;color:#1e3a5f;margin-bottom:4px" id="gradeStudentName"></div>
+          <div style="font-size:12px;color:#6b82a0">Weighted average across all graded categories</div>
         </div>
         <div class="overall-avg">
           <div class="avg-circle" id="avgCircle">—</div>
@@ -217,7 +217,7 @@ const EXAMS = [
 ];
 
 const CATEGORIES = [
-  { id:"quiz",  label:"Quizzes", color:"#818cf8", weight:0.10 },
+  { id:"quiz",  label:"Quizzes", color:"#6366f1", weight:0.10 },
   { id:"test",  label:"Tests",   color:"#fbbf24", weight:0.40 },
   { id:"exam",  label:"Exams",   color:"#f87171", weight:0.50 },
 ];
@@ -244,7 +244,7 @@ function renderExams() {
            <div class="score-label">${sc.pct>=70?'Passed':'Not Passed'}</div>
            <div class="score-detail">${sc.score}/${sc.total} pts</div>
          </div>`
-      : `<div class="score-display"><div style="color:#3a3a5e;font-size:13px;">Not taken</div></div>`;
+      : `<div class="score-display"><div style="color:#93adc8;font-size:13px;">Not taken</div></div>`;
 
     return `
       <div class="exam-card" style="border-left-color:${ex.color}">
@@ -259,7 +259,7 @@ function renderExams() {
           <div class="exam-badge" style="color:${ex.color};border-color:${ex.color}40;background:${ex.color}11">
             Counts as ${ex.weight} of grade
           </div>
-          <div style="font-size:12px;color:#3a3a5e;margin-top:6px">${ex.topics}</div>
+          <div style="font-size:12px;color:#93adc8;margin-top:6px">${ex.topics}</div>
         </div>
         <div class="exam-actions">
           ${scoreHtml}
@@ -461,7 +461,7 @@ function renderGrades(name) {
   rows.innerHTML = CATEGORIES.map(cat => {
     const d = catData[cat.id];
     const pct = d ? d.pct : null;
-    const pc = pct !== null ? (pct >= 80 ? "#4ade80" : pct >= 60 ? "#fbbf24" : "#f87171") : "#3a3a5e";
+    const pc = pct !== null ? (pct >= 80 ? "#4ade80" : pct >= 60 ? "#fbbf24" : "#f87171") : "#93adc8";
     const entryText = d ? `${d.entries || "?"}/${d.total || "?"} graded` : "No grades yet";
     return `
       <div class="cat-row">
@@ -488,7 +488,7 @@ function pctToLetter(pct) {
   return "F";
 }
 function letterColor(l) {
-  return {A:"#4ade80",B:"#86efac",C:"#fbbf24",D:"#f97316",F:"#f87171","—":"#5b5b7b"}[l] || "#5b5b7b";
+  return {A:"#4ade80",B:"#86efac",C:"#fbbf24",D:"#f97316",F:"#f87171","—":"#6b82a0"}[l] || "#6b82a0";
 }
 
 // Enter key on name input
