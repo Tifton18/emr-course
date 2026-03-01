@@ -336,9 +336,10 @@ const EXAMS = [
 ];
 
 const CATEGORIES = [
-  { id:"quiz",  label:"Quizzes", color:"#6366f1", weight:0.10 },
-  { id:"test",  label:"Tests",   color:"#fbbf24", weight:0.40 },
-  { id:"exam",  label:"Exams",   color:"#f87171", weight:0.50 },
+  { id:"quiz",    label:"Quizzes",      color:"#818cf8", weight:0.10 },
+  { id:"module",  label:"Module Exams", color:"#fbbf24", weight:0.20 },
+  { id:"midterm", label:"Midterm Exam", color:"#f97316", weight:0.30 },
+  { id:"final",   label:"Final Exam",   color:"#f87171", weight:0.40 },
 ];
 
 // ══════════════════════════════════════════════════════
@@ -347,8 +348,8 @@ const CATEGORIES = [
 // Leave name as "" for unassigned slots
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
-  { id: "TFD-001", name: "James G" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-001", name: "" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -619,20 +620,26 @@ function renderGrades(name) {
   section.style.display = "block";
   document.getElementById("gradeStudentName").textContent = name;
 
-  const catData = window._trackerCatData || {};
+  // Build catData from tracker quiz scores + exam results
+  const catData = {};
 
-  // Merge exam scores into catData
-  Object.entries(studentScores).forEach(([examId, sc]) => {
-    const ex = EXAMS.find(e => e.id === examId);
-    if (!ex) return;
-    const catId = ex.category;
-    if (!catData[catId]) catData[catId] = { pct: sc.pct, entries: 1, total: 1 };
-    else {
-      // Blend: if we already have tracker entries, weight equally
-      catData[catId].pct = Math.round((catData[catId].pct + sc.pct) / 2);
-      catData[catId].entries = (catData[catId].entries || 0) + 1;
-    }
-  });
+  // Quiz scores from tracker
+  const trackerData = window._trackerCatData || {};
+  if (trackerData.quiz) catData.quiz = trackerData.quiz;
+
+  // Exam scores — each exam maps to its own category
+  // module category: average of week1 + week4
+  const moduleExams = ['week1','week4'].map(id => studentScores[id]).filter(Boolean);
+  if (moduleExams.length > 0) {
+    const avg = Math.round(moduleExams.reduce((s,e) => s + e.pct, 0) / moduleExams.length);
+    catData.module = { pct: avg, entries: moduleExams.length, total: 2 };
+  }
+  if (studentScores.midterm) {
+    catData.midterm = { pct: studentScores.midterm.pct, entries: 1, total: 1 };
+  }
+  if (studentScores.final) {
+    catData.final = { pct: studentScores.final.pct, entries: 1, total: 1 };
+  }
 
   // Weighted overall
   let totalWeight = 0, weightedSum = 0;
@@ -654,19 +661,31 @@ function renderGrades(name) {
   document.getElementById("avgPct").textContent = overall !== null ? overall + "%" : "—";
   document.getElementById("avgPct").style.color = lc;
 
-  // Category rows
   const rows = document.getElementById("catRows");
+
   if (Object.keys(catData).length === 0) {
-    rows.innerHTML = `<div class="empty-msg">No grades found for "${name}". Make sure your name matches exactly what you used on your exams.</div>`;
+    rows.innerHTML = `<div class="empty-msg">No grades on file yet for "${name}".</div>`;
     return;
   }
 
-  rows.innerHTML = CATEGORIES.map(cat => {
+  // Build rows — show individual exam scores under module category
+  let html = '';
+  CATEGORIES.forEach(cat => {
     const d = catData[cat.id];
     const pct = d ? d.pct : null;
-    const pc = pct !== null ? (pct >= 80 ? "#4ade80" : pct >= 60 ? "#fbbf24" : "#f87171") : "#93adc8";
-    const entryText = d ? `${d.entries || "?"}/${d.total || "?"} graded` : "No grades yet";
-    return `
+    const pc = pct !== null ? (pct >= 80 ? "#16a34a" : pct >= 70 ? "#4ade80" : pct >= 60 ? "#fbbf24" : "#f87171") : "#93adc8";
+    let entryText = "No grades yet";
+    if (cat.id === 'module' && moduleExams.length > 0) {
+      entryText = moduleExams.map((e,i) => {
+        const examId = ['week1','week4'][i];
+        const ex = EXAMS.find(x => x.id === examId);
+        return `${ex ? ex.name : examId}: ${e.pct}%`;
+      }).join(' · ');
+    } else if (d) {
+      entryText = `${d.entries || 1}/${d.total || 1} graded`;
+    }
+
+    html += `
       <div class="cat-row">
         <div class="cat-dot" style="background:${cat.color}"></div>
         <div class="cat-name" style="color:${cat.color}">${cat.label}</div>
@@ -677,9 +696,10 @@ function renderGrades(name) {
           </div>
           <div class="cat-pct" style="color:${pc}">${pct !== null ? pct + "%" : "—"}</div>
         </div>
-        <div class="cat-entries">${entryText}</div>
+        <div class="cat-entries" style="font-size:11px;color:#6b82a0;">${entryText}</div>
       </div>`;
-  }).join("");
+  });
+  rows.innerHTML = html;
 }
 
 function pctToLetter(pct) {
