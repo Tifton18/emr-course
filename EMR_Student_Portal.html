@@ -349,7 +349,7 @@ const CATEGORIES = [
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
   { id: "TFD-001", name: "" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -509,8 +509,7 @@ async function fetchStudentScores(name) {
             op: "EQUAL",
             value: { stringValue: name }
           }
-        },
-        orderBy: [{ field: { fieldPath: "submittedAt" }, direction: "DESCENDING" }]
+        }
       }
     };
     const resp = await fetch(url, {
@@ -522,26 +521,34 @@ async function fetchStudentScores(name) {
     const results = await resp.json();
     console.log("Portal: examResults query returned", results.length, "rows for name:", name);
     // Each result is a document; keep the latest per exam
-    const seen = new Set();
+    // Sort by submittedAt descending in JS (newest first), keep best score per exam
+    const parsed = [];
     for (const item of results) {
       if (!item.document) continue;
       const f = item.document.fields;
       const examLabel = f.examLabel?.stringValue || "";
       const storedName = f.name?.stringValue || "";
-      // pct may be integerValue or stringValue
-      const pct = parseInt(f.pct?.integerValue || f.pct?.doubleValue || f.pct?.stringValue || 0);
+      const pct   = parseInt(f.pct?.integerValue   || f.pct?.doubleValue   || f.pct?.stringValue   || 0);
       const score = parseInt(f.score?.integerValue || f.score?.doubleValue || f.score?.stringValue || 0);
       const total = parseInt(f.total?.integerValue || f.total?.doubleValue || f.total?.stringValue || 0);
+      const submittedAt = f.submittedAt?.stringValue || "";
+      const category    = f.category?.stringValue || "";
       console.log("Portal: exam row:", { storedName, examLabel, pct, score, total });
-      // Map examLabel → examId
-      const ex = EXAMS.find(e => e.name === examLabel);
-      if (!ex || seen.has(ex.id)) { console.log("Portal: no matching exam for label:", examLabel); continue; }
-      seen.add(ex.id);
-      studentScores[ex.id] = {
-        pct, score, total,
-        submittedAt: f.submittedAt?.stringValue || "",
-        category: f.category?.stringValue || ex.category,
-      };
+      parsed.push({ examLabel, pct, score, total, submittedAt, category });
+    }
+    // Sort newest first then keep best score per exam
+    parsed.sort((a,b) => b.submittedAt.localeCompare(a.submittedAt));
+    for (const row of parsed) {
+      const ex = EXAMS.find(e => e.name === row.examLabel);
+      if (!ex) { console.log("Portal: no matching exam for label:", row.examLabel); continue; }
+      const existing = studentScores[ex.id];
+      if (!existing || row.pct > existing.pct) {
+        studentScores[ex.id] = {
+          pct: row.pct, score: row.score, total: row.total,
+          submittedAt: row.submittedAt,
+          category: row.category || ex.category,
+        };
+      }
     }
     console.log("Portal: studentScores after fetch:", JSON.stringify(studentScores));
   } catch(e) {
@@ -721,10 +728,7 @@ function letterColor(l) {
   return {A:"#4ade80",B:"#86efac",C:"#fbbf24",D:"#f97316",F:"#f87171","—":"#6b82a0"}[l] || "#6b82a0";
 }
 
-// Enter key on name input
-document.getElementById("nameInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") lookupStudent();
-});
+// Sign-in handled by modal — see attemptSignIn()
 
 // Show sign-in on load
 // Main content hidden until signed in
