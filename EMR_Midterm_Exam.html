@@ -221,7 +221,7 @@
 // Google Apps Script Web App (see SETUP_INSTRUCTIONS.txt)
 // ══════════════════════════════════════════════════════
 const EXAM_LABEL      = "Midterm Exam";
-const EXAM_CATEGORY   = "exam";   // maps to Exams (50%) in grade tracker
+const EXAM_CATEGORY   = "midterm"; // maps to Midterm Exam (30%) in grade tracker
 const TOTAL_TIME      = 50 * 60; // 50 minutes
 
 // Firebase config — shared with attendance tracker
@@ -230,6 +230,7 @@ const FB_CONFIG = {
   authDomain:"class-attendance-72cd9.firebaseapp.com",
   projectId:"class-attendance-72cd9",
 };
+const EXAM_PASSWORD   = "tfd-mid"; // ← change this to control access
 const LETTERS         = ["A","B","C","D","E"];
 
 // ── QUESTION DATA ────────────────────────────────────
@@ -434,6 +435,9 @@ function renderIntro() {
         <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
         <label class="name-label">Student Name</label>
         <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to begin..." autocomplete="off">
+        <label class="name-label" style="margin-top:4px;">Exam Password</label>
+        <input class="name-input" id="passwordInput" type="password" placeholder="Enter the exam password..." autocomplete="off">
+        <div id="passwordError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">Incorrect password. Please try again.</div>
         <br>
         <button class="btn-begin" id="beginBtn" disabled>Begin Exam</button>
       </div>
@@ -606,17 +610,35 @@ function attachEvents() {
   const beginBtn  = document.getElementById("beginBtn");
   if (nameInput) {
     nameInput.value = studentName;
+    const passwordInput = document.getElementById("passwordInput");
+    const passwordError = document.getElementById("passwordError");
+    function updateBeginBtn(){
+      const ready = !!studentName && !!passwordInput.value.trim();
+      beginBtn.disabled = !ready;
+      beginBtn.classList.toggle("active", ready);
+    }
     nameInput.addEventListener("input", e=>{
       studentName = e.target.value.trim();
       nameInput.classList.toggle("has-value", !!studentName);
-      beginBtn.disabled = !studentName;
-      beginBtn.classList.toggle("active", !!studentName);
+      updateBeginBtn();
     });
-    nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName) beginExam(); });
+    nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") passwordInput.focus(); });
+    passwordInput.addEventListener("input", ()=>{ passwordError.style.display="none"; updateBeginBtn(); });
+    passwordInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName&&passwordInput.value.trim()) beginExam(); });
   }
   if (beginBtn) {
-    beginBtn.classList.toggle("active", !!studentName);
-    beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
+    beginBtn.classList.toggle("active", false);
+    beginBtn.addEventListener("click", ()=>{
+      if(!studentName) return;
+      const pwInput = document.getElementById("passwordInput");
+      const pwError = document.getElementById("passwordError");
+      if(pwInput && pwInput.value.trim() !== EXAM_PASSWORD){
+        if(pwError){ pwError.style.display="block"; }
+        if(pwInput){ pwInput.value=""; pwInput.focus(); }
+        return;
+      }
+      beginExam();
+    });
   }
 
   // EXAM — MC / Best2
