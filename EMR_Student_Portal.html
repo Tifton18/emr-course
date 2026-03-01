@@ -186,6 +186,15 @@ const FB = {
   projectId: "class-attendance-72cd9",
 };
 
+
+// Maps portal exam id → tracker assignId (must match EXAM_DEFS in tracker)
+const EXAM_ID_TO_ASSIGN = {
+  week1:   '__exam_week1__',
+  midterm: '__exam_midterm__',
+  week4:   '__exam_week4__',
+  final:   '__exam_final__',
+};
+
 // ── EXAM DEFINITIONS ─────────────────────────────────
 const EXAMS = [
   {
@@ -195,10 +204,10 @@ const EXAMS = [
     questions: 25,
     time: "25 min",
     passing: "70%",
-    category: "test",
+    category: "module",
     color: "#fbbf24",
     icon: "📋",
-    weight: "40%",
+    weight: "20% (Module Exams)",
     topics: "EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management",
   },
   {
@@ -208,11 +217,37 @@ const EXAMS = [
     questions: 50,
     time: "50 min",
     passing: "70%",
-    category: "exam",
-    color: "#f87171",
+    category: "midterm",
+    color: "#f97316",
     icon: "📝",
-    weight: "50%",
+    weight: "30% (Midterm)",
     topics: "All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED",
+  },
+  {
+    id: "week4",
+    name: "Week 4 Exam",
+    file: "EMR_Week4_Exam.html",
+    questions: 25,
+    time: "25 min",
+    passing: "70%",
+    category: "module",
+    color: "#fbbf24",
+    icon: "📋",
+    weight: "20% (Module Exams)",
+    topics: "Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies",
+  },
+  {
+    id: "final",
+    name: "Final Exam",
+    file: "EMR_Final_Exam.html",
+    questions: 50,
+    time: "50 min",
+    passing: "70%",
+    category: "final",
+    color: "#f87171",
+    icon: "🎓",
+    weight: "40% (Final)",
+    topics: "Comprehensive — all course topics",
   },
 ];
 
@@ -225,13 +260,36 @@ const CATEGORIES = [
 // Map category id → exams that feed it
 const CAT_EXAM_MAP = {
   quiz: [],
-  test: ["week1"],
-  exam: ["midterm"],
+  module:  ["week1","week4"],
+  midterm: ["midterm"],
+  final:   ["final"],
 };
+
+// Which exams are currently open (fetched from Firebase tracker/main)
+let examStatus = {};
 
 // Student scores fetched from Firebase: { [examId]: {pct, score, total, submittedAt} }
 let studentScores = {};
 let currentStudent = "";
+
+
+// ── FETCH EXAM STATUS FROM TRACKER ───────────────────
+async function fetchExamStatus() {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/main?key=${FB.apiKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const doc = await resp.json();
+    const fields = doc.fields || {};
+    const statusMap = fields.examStatus?.mapValue?.fields || {};
+    examStatus = {};
+    Object.entries(statusMap).forEach(([k,v]) => {
+      examStatus[k] = v.booleanValue === true;
+    });
+  } catch(e) {
+    console.error('fetchExamStatus error:', e);
+  }
+}
 
 // ── RENDER EXAMS GRID ─────────────────────────────────
 function renderExams() {
@@ -263,10 +321,14 @@ function renderExams() {
         </div>
         <div class="exam-actions">
           ${scoreHtml}
-          <a class="btn-take" href="${ex.file}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
-            onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
-            ${sc ? 'Retake' : 'Take Exam'} →
-          </a>
+          ${ex.comingSoon
+            ? `<span style="font-size:12px;color:#93adc8;border:1px solid #bfdbfe;border-radius:8px;padding:8px 16px;">Coming Soon</span>`
+            : examStatus[EXAMS.find(e=>e.id===ex.id) ? EXAM_ID_TO_ASSIGN[ex.id] : '']
+              ? `<a class="btn-take" href="${ex.file}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
+                  onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
+                  ${sc ? 'Retake' : 'Take Exam'} →
+                </a>`
+              : `<span style="font-size:12px;color:#93adc8;border:1px solid #bfdbfe;border-radius:8px;padding:8px 16px;white-space:nowrap;">Not Yet Assigned</span>`}
         </div>
       </div>`;
   }).join("");
@@ -283,7 +345,7 @@ async function lookupStudent() {
   btn.textContent = "Loading…";
 
   studentScores = {};
-  await fetchStudentScores(name);
+  await Promise.all([fetchStudentScores(name), fetchExamStatus()]);
 
   btn.disabled = false;
   btn.textContent = "View My Grades";
@@ -496,8 +558,11 @@ document.getElementById("nameInput").addEventListener("keydown", e => {
   if (e.key === "Enter") lookupStudent();
 });
 
-// Initial render with no scores
-renderExams();
+// Fetch exam status then render
+fetchExamStatus().then(() => renderExams());
+
+// Refresh status every 60 seconds in case teacher opens/closes exams
+setInterval(() => fetchExamStatus().then(() => renderExams()), 60000);
 </script>
 </body>
 </html>
