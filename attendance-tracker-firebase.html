@@ -387,16 +387,19 @@ async function loadExamResults(){
     const rows=await resp.json();
     examResults={};
     // Keep only the BEST score per student per exam
+    console.log('examResults raw rows:', rows.length);
     rows.forEach(row=>{
       if(!row.document)return;
       const f=row.document.fields||{};
       const name=(f.name?.stringValue||'').toLowerCase().trim();
       const label=f.examLabel?.stringValue||'';
-      const pct=parseInt(f.pct?.integerValue||0);
-      const score=parseInt(f.score?.integerValue||0);
-      const total=parseInt(f.total?.integerValue||0);
+      // pct/score/total may come as integerValue or stringValue depending on how stored
+      const pct=parseInt(f.pct?.integerValue||f.pct?.doubleValue||f.pct?.stringValue||0);
+      const score=parseInt(f.score?.integerValue||f.score?.doubleValue||f.score?.stringValue||0);
+      const total=parseInt(f.total?.integerValue||f.total?.doubleValue||f.total?.stringValue||0);
       const submittedAt=f.submittedAt?.stringValue||'';
       const def=EXAM_DEFS.find(d=>d.label===label);
+      console.log('Row:', {name, label, pct, score, total, defFound:!!def});
       if(!name||!def)return;
       if(!examResults[name])examResults[name]={};
       const existing=examResults[name][def.assignId];
@@ -404,6 +407,7 @@ async function loadExamResults(){
         examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category};
       }
     });
+    console.log('examResults loaded:', JSON.stringify(examResults));
   }catch(e){console.error('loadExamResults error:',e);}
 }
 
@@ -663,7 +667,8 @@ function renderSummary(){
     const apc=att.pct===null?'#6b82a0':att.pct>=80?'#4ade80':att.pct>=60?'#fbbf24':'#f87171';
     const attStats=att.total>0?`<div class="summary-stats">${[['present','Present'],['absent','Absent'],['late','Late'],['excused','Excused']].map(([k,l])=>{const cfg=STATUS_CONFIG[k];return`<div class="stat-pill" style="background:${cfg.bg};border:1px solid ${cfg.color}30;color:${cfg.color}">${att[k]} ${l}</div>`;}).join('')}<div class="att-bar-wrap"><div class="att-bar-bg"><div class="att-bar-fill" style="width:${att.pct||0}%;background:${apc}"></div></div></div></div>`:`<div class="no-data">No attendance recorded yet</div>`;
     const catPills=CATEGORIES.map(cat=>{const avg=getCatAverage(student.id,cat.id);if(avg===null)return'';return`<div class="summary-cat-pill" style="color:${cat.color};border-color:${cat.color}40;background:${cat.color}11">${cat.label}: ${avg}%</div>`;}).join('');
-    const gradesRow=data.assignments.length>0?`<div class="summary-grades-row">${catPills||`<span style="color:#93adc8;font-size:12px">No scores entered yet</span>`}</div>`:'';
+    const hasAnyGrades=data.assignments.length>0||Object.keys(examResults).length>0;
+    const gradesRow=hasAnyGrades?`<div class="summary-grades-row">${catPills||`<span style="color:#93adc8;font-size:12px">No scores entered yet</span>`}</div>`:'';
     const div=document.createElement('div');div.className='summary-row';
     div.innerHTML=`<div class="summary-top">
       <div class="student-num">${String(idx+1).padStart(2,'0')}</div>
