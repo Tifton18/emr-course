@@ -142,6 +142,35 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .stat-pill{border:1px solid #ccc;color:#000!important;background:#f5f5f5!important}
   .att-bar-bg{background:#1e3a5f}
 }
+
+  /* Exam toggles */
+  .exam-toggle-row {
+    display:flex;align-items:center;gap:16px;
+    background:#ffffff;border:1px solid #bfdbfe;border-radius:12px;
+    padding:18px 22px;margin-bottom:12px;
+    border-left:4px solid;
+  }
+  .exam-toggle-info { flex:1; }
+  .exam-toggle-name { font-size:16px;color:#1e3a5f;margin-bottom:3px; }
+  .exam-toggle-meta { font-size:12px;color:#6b82a0; }
+  .exam-toggle-status { font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-right:12px; }
+  /* Toggle switch */
+  .toggle-wrap { display:flex;align-items:center;gap:10px;flex-shrink:0; }
+  .toggle-switch {
+    position:relative;width:52px;height:28px;cursor:pointer;
+  }
+  .toggle-switch input { opacity:0;width:0;height:0; }
+  .toggle-slider {
+    position:absolute;inset:0;background:#bfdbfe;border-radius:28px;
+    transition:background 0.25s;
+  }
+  .toggle-slider:before {
+    content:'';position:absolute;width:20px;height:20px;
+    left:4px;bottom:4px;background:#fff;border-radius:50%;
+    transition:transform 0.25s;box-shadow:0 1px 4px rgba(0,0,0,0.15);
+  }
+  .toggle-switch input:checked + .toggle-slider { background:#16a34a; }
+  .toggle-switch input:checked + .toggle-slider:before { transform:translateX(24px); }
 </style>
 </head>
 <body>
@@ -164,6 +193,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('attendance',this)">Attendance</button>
     <button class="tab-btn" onclick="switchTab('grades',this)">Grades</button>
+    <button class="tab-btn" onclick="switchTab('exams',this)">Exams</button>
     <button class="tab-btn" onclick="switchTab('summary',this)">Summary</button>
   </div>
 </div>
@@ -215,6 +245,17 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     </div>
   </div>
 
+
+  <!-- EXAMS -->
+  <div class="tab-panel" id="panel-exams">
+    <div style="max-width:640px;">
+      <div style="font-size:13px;color:#4a6080;margin-bottom:24px;line-height:1.7;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;">
+        Toggle each exam open or closed. Students can only access an exam on the portal when it is <strong style="color:#16a34a">Open</strong>. Changes take effect instantly.
+      </div>
+      <div id="examToggles"></div>
+    </div>
+  </div>
+
   <!-- SUMMARY -->
   <div class="tab-panel" id="panel-summary">
     <div class="summary-meta" id="summaryMeta"></div>
@@ -262,12 +303,14 @@ const DEFAULT_STUDENTS=['Alex Johnson','Brianna Smith','Carlos Rivera','Diana Ch
 
 let data={className:'My Class',students:[],attendance:{},assignments:[],scores:{}};
 let saveTimer=null, selectedDate=todayStr(), activeTab='attendance';
-let addFormOpen={quiz:false,test:false,exam:false};
+let addFormOpen={quiz:false,module:false,midterm:false,final:false};
 
 // Exam definitions — labels must match what the exam files submit to Firebase
 const EXAM_DEFS=[
-  {label:'Week 1 Exam',  category:'test', assignId:'__exam_week1__'},
-  {label:'Midterm Exam', category:'exam', assignId:'__exam_midterm__'},
+  {label:'Week 1 Exam',  category:'module',  assignId:'__exam_week1__'},
+  {label:'Midterm Exam', category:'midterm', assignId:'__exam_midterm__'},
+  {label:'Week 4 Exam',  category:'module',  assignId:'__exam_week4__'},
+  {label:'Final Exam',   category:'final',   assignId:'__exam_final__'},
 ];
 // examResults: studentName (lowercase) -> { assignId -> {pct,score,total,submittedAt} }
 let examResults={};
@@ -321,9 +364,11 @@ async function loadFromFirebase(){
       if(!data.students)data.students=[];
       if(!data.assignments)data.assignments=[];
       if(!data.scores)data.scores={};
+      if(!data.examStatus)data.examStatus={};
+      if(!data.examStatus)data.examStatus={};
     }else{
       data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));
-      data.className='My Class';data.attendance={};data.assignments=[];data.scores={};
+      data.className='My Class';data.attendance={};data.assignments=[];data.scores={};data.examStatus={};
       await DOC_REF.set(data);
     }
   }catch(e){setSyncStatus('error','✗ Connection failed');data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));}
@@ -338,6 +383,8 @@ async function loadFromFirebase(){
       if(!data.attendance)data.attendance={};
       if(!data.assignments)data.assignments=[];
       if(!data.scores)data.scores={};
+      if(!data.examStatus)data.examStatus={};
+      if(!data.examStatus)data.examStatus={};
       document.getElementById('classNameDisplay').textContent=data.className;
       renderCurrent();updateTodayCount();
     }
@@ -355,6 +402,7 @@ function switchTab(name,btn){
 function renderCurrent(){
   if(activeTab==='attendance')renderAttendance();
   else if(activeTab==='grades')renderGradesTab();
+  else if(activeTab==='exams')renderExamToggles();
   else if(activeTab==='summary')renderSummary();
 }
 
@@ -568,6 +616,40 @@ function addStudent(){const name=document.getElementById('newStudentInput').valu
 document.getElementById('newStudentInput').addEventListener('keydown',e=>{if(e.key==='Enter')addStudent();if(e.key==='Escape')cancelAdd();});
 
 function exportReport(){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-summary').classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));renderSummary();setTimeout(()=>window.print(),100);}
+
+
+// ── EXAM TOGGLES ───────────────────────────────────────
+function renderExamToggles(){
+  const container=document.getElementById('examToggles');
+  container.innerHTML='';
+  EXAM_DEFS.forEach(ex=>{
+    const isOpen=!!(data.examStatus&&data.examStatus[ex.assignId]);
+    const cat=CATEGORIES.find(c=>c.id===ex.category)||{color:'#6b82a0',label:'',weight:0};
+    const row=document.createElement('div');
+    row.className='exam-toggle-row';
+    row.style.borderLeftColor=isOpen?'#16a34a':'#bfdbfe';
+    row.innerHTML=`
+      <div class="exam-toggle-info">
+        <div class="exam-toggle-name">${ex.label}</div>
+        <div class="exam-toggle-meta" style="color:${cat.color}">${cat.label} · ${Math.round(cat.weight*100)}% of grade</div>
+      </div>
+      <div class="toggle-wrap">
+        <span class="exam-toggle-status" style="color:${isOpen?'#16a34a':'#93adc8'}">${isOpen?'Open':'Closed'}</span>
+        <label class="toggle-switch">
+          <input type="checkbox" ${isOpen?'checked':''} onchange="toggleExam('${ex.assignId}',this.checked)"/>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>`;
+    container.appendChild(row);
+  });
+}
+
+function toggleExam(assignId,open){
+  if(!data.examStatus)data.examStatus={};
+  data.examStatus[assignId]=open;
+  scheduleSave();
+  renderExamToggles();
+}
 
 async function refreshExamResults(){
   setSyncStatus('syncing','Refreshing exams…');
