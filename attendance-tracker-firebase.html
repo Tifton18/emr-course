@@ -162,6 +162,18 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .btn-reset-confirm:hover { background:#b91c1c; }
   .btn-reset-cancel { flex:1;background:#f0f6ff;color:#4a6080;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:15px;cursor:pointer;font-family:Georgia,serif;transition:all 0.2s; }
   .btn-reset-cancel:hover { border-color:#2563eb;color:#2563eb; }
+
+  /* Item Analysis */
+  .analysis-stat-bar { height:10px;border-radius:5px;overflow:hidden;background:#e6f0fb;flex:1;min-width:80px; }
+  .analysis-stat-fill-correct { height:100%;background:#4ade80;border-radius:5px;transition:width 0.4s; }
+  .analysis-stat-fill-incorrect { height:100%;background:#f87171;border-radius:5px;transition:width 0.4s; }
+  .analysis-q-row { background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 18px;margin-bottom:10px; }
+  .analysis-q-row.flagged { border-color:#fca5a5;background:#fff8f8; }
+  .analysis-section-header { font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b82a0;margin:20px 0 8px;padding-bottom:6px;border-bottom:1px solid #e6f0fb; }
+  .analysis-overview { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px; }
+  .analysis-overview-card { background:#fff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 18px;text-align:center; }
+  .analysis-overview-num { font-size:28px;font-weight:700;color:#1e3a5f; }
+  .analysis-overview-label { font-size:12px;color:#6b82a0;margin-top:4px; }
 </style>
 </head>
 <body>
@@ -184,6 +196,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('attendance',this)">Attendance</button>
     <button class="tab-btn" onclick="switchTab('grades',this)">Grades</button>
+    <button class="tab-btn" onclick="switchTab('analysis',this)">Item Analysis</button>
     <button class="tab-btn" onclick="switchTab('summary',this)">Summary</button>
   </div>
 </div>
@@ -242,6 +255,24 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     </div>
   </div>
 
+
+
+  <!-- ITEM ANALYSIS -->
+  <div class="tab-panel" id="panel-analysis">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="panel-title" style="margin-bottom:4px;">Item Analysis</div>
+        <div style="font-size:13px;color:#6b82a0;">Per-question correct/incorrect breakdown across all submissions</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <select id="analysisExamSelect" onchange="renderAnalysis()" style="background:#fff;border:1px solid #bfdbfe;border-radius:8px;padding:7px 12px;color:#1e3a5f;font-size:13px;font-family:Georgia,serif;cursor:pointer;">
+          <option value="">Select an exam…</option>
+        </select>
+        <button onclick="refreshAnalysis()" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;color:#4a6080;padding:7px 14px;cursor:pointer;font-size:12px;font-family:Georgia,serif;transition:all 0.2s;" onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe';this.style.color='#4a6080'">⟳ Refresh</button>
+      </div>
+    </div>
+    <div id="analysisContent"></div>
+  </div>
 
   <!-- SUMMARY -->
   <div class="tab-panel" id="panel-summary">
@@ -462,6 +493,7 @@ function switchTab(name,btn){
 function renderCurrent(){
   if(activeTab==='attendance')renderAttendance();
   else if(activeTab==='grades')renderGradesTab();
+  else if(activeTab==='analysis')renderAnalysis();
   else if(activeTab==='summary')renderSummary();
 }
 
@@ -780,6 +812,192 @@ async function confirmReset(){
 
   examResults={};
   renderCurrent();
+}
+
+
+// ── ITEM ANALYSIS ─────────────────────────────────────
+
+// Question data embedded from each exam (stem + correct answers)
+// We fetch this by reading the exam files' question arrays via a fetch
+const EXAM_QUESTION_CACHE = {}; // examLabel -> [{stem, type, options, correct, section, points}]
+
+async function fetchExamQuestions(examLabel) {
+  if (EXAM_QUESTION_CACHE[examLabel]) return EXAM_QUESTION_CACHE[examLabel];
+  const def = EXAM_DEFS.find(d => d.label === examLabel);
+  if (!def) return null;
+  // Map exam label to file name
+  const fileMap = {
+    'Week 1 Exam':  'EMR_Week1_Exam.html',
+    'Week 4 Exam':  'EMR_Week4_Exam.html',
+    'Midterm Exam': 'EMR_Midterm_Exam.html',
+    'Final Exam':   'EMR_Final_Exam.html',
+  };
+  const file = fileMap[examLabel];
+  if (!file) return null;
+  try {
+    const resp = await fetch(file);
+    const html = await resp.text();
+    // Extract questions array from the file
+    const match = html.match(/const questions = (\[[\s\S]*?\]);\s*
+\s*const SECTION_COLORS/);
+    if (!match) return null;
+    const questions = eval(match[1]); // safe — our own file
+    EXAM_QUESTION_CACHE[examLabel] = questions;
+    return questions;
+  } catch(e) {
+    console.error('fetchExamQuestions error:', e);
+    return null;
+  }
+}
+
+async function refreshAnalysis() {
+  await loadExamResults();
+  // Populate exam select
+  const sel = document.getElementById('analysisExamSelect');
+  if (!sel) return;
+  const current = sel.value;
+  // Get unique exam labels from submissions
+  const labels = new Set();
+  Object.values(examResults).forEach(studentExams => {
+    Object.values(studentExams).forEach(r => { if(r.examLabel) labels.add(r.examLabel); });
+  });
+  // Also add from EXAM_DEFS that have submissions
+  EXAM_DEFS.forEach(d => {
+    const hasAny = Object.values(examResults).some(se => se[d.assignId]);
+    if (hasAny) labels.add(d.label);
+  });
+  sel.innerHTML = '<option value="">Select an exam…</option>';
+  [...labels].forEach(label => {
+    const opt = document.createElement('option');
+    opt.value = label;
+    opt.textContent = label;
+    if (label === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  renderAnalysis();
+}
+
+async function renderAnalysis() {
+  const container = document.getElementById('analysisContent');
+  if (!container) return;
+  const examLabel = document.getElementById('analysisExamSelect')?.value;
+  if (!examLabel) {
+    container.innerHTML = '<div style="color:#93adc8;font-size:14px;padding:20px 0;">Select an exam above to view item analysis.</div>';
+    return;
+  }
+  container.innerHTML = '<div style="color:#6b82a0;font-size:14px;padding:20px 0;">Loading question data…</div>';
+
+  const def = EXAM_DEFS.find(d => d.label === examLabel);
+  if (!def) { container.innerHTML = '<div style="color:#f87171">Exam definition not found.</div>'; return; }
+
+  // Gather all submissions for this exam that have answersData
+  const submissions = []; // [{studentName, answers: [...], questionResults: [...]}]
+  Object.entries(examResults).forEach(([name, exams]) => {
+    const r = exams[def.assignId];
+    if (!r) return;
+    submissions.push({ name, answersData: r.answersData || null, pct: r.pct, score: r.score, total: r.total });
+  });
+
+  if (submissions.length === 0) {
+    container.innerHTML = '<div style="color:#93adc8;font-size:14px;padding:20px 0;">No submissions found for this exam yet.</div>';
+    return;
+  }
+
+  // Fetch questions
+  const questions = await fetchExamQuestions(examLabel);
+  if (!questions) {
+    container.innerHTML = '<div style="color:#f87171;font-size:14px;padding:20px 0;">Could not load question data. Make sure the exam file is in the same folder.</div>';
+    return;
+  }
+
+  const totalSubs = submissions.length;
+  const avgScore = Math.round(submissions.reduce((s,r) => s + r.pct, 0) / totalSubs);
+  const passing = submissions.filter(r => r.pct >= 70).length;
+
+  // Per-question analysis
+  const qStats = questions.map((q, qi) => {
+    let correct = 0, answered = 0;
+    submissions.forEach(sub => {
+      if (!sub.answersData || !sub.answersData[qi]) return;
+      answered++;
+      const given = sub.answersData[qi].given;
+      // Score the question
+      let isCorrect = false;
+      if (q.type === 'mc') {
+        const correctIdx = q.correct ? q.correct[0] : q.answer;
+        isCorrect = Array.isArray(given) ? given[0] === correctIdx : given === correctIdx;
+      } else if (q.type === 'best2') {
+        const correctSet = new Set(q.correct || q.answers || []);
+        const givenSet = new Set(Array.isArray(given) ? given : []);
+        isCorrect = correctSet.size === givenSet.size && [...correctSet].every(x => givenSet.has(x));
+      } else if (q.type === 'matching') {
+        isCorrect = Array.isArray(given) && q.pairs.every((p, pi) => given[pi] === p.def);
+      }
+      if (isCorrect) correct++;
+    });
+    const pct = answered > 0 ? Math.round((correct / answered) * 100) : null;
+    return { qi, stem: q.stem, section: q.section, type: q.type, correct, answered, pct, flagged: pct !== null && pct < 70 };
+  });
+
+  // Build HTML
+  let html = '';
+
+  // Overview cards
+  const flagged = qStats.filter(q => q.flagged).length;
+  html += `<div class="analysis-overview">
+    <div class="analysis-overview-card">
+      <div class="analysis-overview-num">${totalSubs}</div>
+      <div class="analysis-overview-label">Submissions</div>
+    </div>
+    <div class="analysis-overview-card">
+      <div class="analysis-overview-num" style="color:${avgScore>=70?'#16a34a':'#dc2626'}">${avgScore}%</div>
+      <div class="analysis-overview-label">Class Average</div>
+    </div>
+    <div class="analysis-overview-card">
+      <div class="analysis-overview-num" style="color:#16a34a">${passing}</div>
+      <div class="analysis-overview-label">Passing (≥70%)</div>
+    </div>
+    <div class="analysis-overview-card">
+      <div class="analysis-overview-num" style="color:${flagged>0?'#dc2626':'#16a34a'}">${flagged}</div>
+      <div class="analysis-overview-label">Flagged Questions <span style="font-size:10px;color:#6b82a0">(&lt;70% correct)</span></div>
+    </div>
+  </div>`;
+
+  // Questions grouped by section
+  let lastSection = null;
+  qStats.forEach(q => {
+    if (q.section !== lastSection) {
+      lastSection = q.section;
+      html += `<div class="analysis-section-header">${q.section}</div>`;
+    }
+    const pc = q.pct !== null ? q.pct : 0;
+    const barColor = pc >= 80 ? '#4ade80' : pc >= 70 ? '#86efac' : pc >= 60 ? '#fbbf24' : '#f87171';
+    const textColor = pc >= 70 ? '#16a34a' : '#dc2626';
+    html += `
+      <div class="analysis-q-row${q.flagged ? ' flagged' : ''}">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${q.flagged?'#fee2e2':'#e6f0fb'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${q.flagged?'#dc2626':'#1e3a5f'};">${q.qi+1}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;color:#1e3a5f;line-height:1.5;margin-bottom:10px;">${q.stem}</div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px;">
+                <div class="analysis-stat-bar">
+                  <div class="analysis-stat-fill-correct" style="width:${pc}%;background:${barColor}"></div>
+                </div>
+                <span style="font-size:13px;font-weight:700;color:${textColor};white-space:nowrap;">${q.pct !== null ? q.pct+'%' : '—'} correct</span>
+              </div>
+              <div style="display:flex;gap:16px;font-size:12px;color:#6b82a0;white-space:nowrap;">
+                <span>✓ ${q.correct} / ${q.answered}</span>
+                <span style="text-transform:uppercase;letter-spacing:1px;">${q.type}</span>
+                ${q.flagged ? '<span style="color:#dc2626;font-weight:700;">⚠ Review</span>' : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
 }
 
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
