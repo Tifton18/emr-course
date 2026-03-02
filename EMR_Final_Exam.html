@@ -879,34 +879,35 @@ let reviewData = null; // loaded from Firebase
 
 async function loadReviewData(name) {
   try {
+    // Filter by name only (no composite index needed), then match examLabel client-side
     const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents:runQuery?key=${FB_CONFIG.apiKey}`;
     const body = {
       structuredQuery: {
         from: [{ collectionId: "examResults" }],
         where: {
-          compositeFilter: {
-            op: "AND",
-            filters: [
-              { fieldFilter: { field: { fieldPath: "name" }, op: "EQUAL", value: { stringValue: name } } },
-              { fieldFilter: { field: { fieldPath: "examLabel" }, op: "EQUAL", value: { stringValue: EXAM_LABEL } } }
-            ]
+          fieldFilter: {
+            field: { fieldPath: "name" },
+            op: "EQUAL",
+            value: { stringValue: name }
           }
         }
       }
     };
     const resp = await fetch(url, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
     const results = await resp.json();
-    // Find the best score submission
+    // Filter client-side by examLabel, keep best score
     let best = null;
     for (const item of results) {
       if (!item.document) continue;
       const f = item.document.fields;
-      const pct = parseInt(f.pct?.integerValue || 0);
+      const label = f.examLabel?.stringValue || "";
+      if (label !== EXAM_LABEL) continue; // match this exam only
+      const pct = parseInt(f.pct?.integerValue || f.pct?.stringValue || 0);
       if (!best || pct > best.pct) {
         best = {
           pct,
-          score: parseInt(f.score?.integerValue || 0),
-          total: parseInt(f.total?.integerValue || 0),
+          score: parseInt(f.score?.integerValue || f.score?.stringValue || 0),
+          total: parseInt(f.total?.integerValue || f.total?.stringValue || 0),
           answersData: f.answersData?.stringValue ? JSON.parse(f.answersData.stringValue) : null,
           submittedAt: f.submittedAt?.stringValue || "",
         };
