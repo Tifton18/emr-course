@@ -227,6 +227,29 @@ body {
   .content-card-desc { font-size:13px;color:#6b82a0;margin-top:2px; }
   .content-card-btn { background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;color:#2563eb;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all 0.2s;flex-shrink:0; }
   .content-card-btn:hover { background:#dbeafe;border-color:#2563eb; }
+
+  /* Certificates */
+  .cert-upload-card { background:#fff;border:2px dashed #bfdbfe;border-radius:14px;padding:28px 24px;text-align:center; }
+  .cert-upload-icon { font-size:40px;margin-bottom:8px; }
+  .cert-upload-title { font-size:16px;font-weight:700;color:#1e3a5f;margin-bottom:20px; }
+  .cert-field-label { display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#6b82a0;margin-bottom:6px;text-align:left; }
+  .cert-input { width:100%;background:#f0f6ff;border:2px solid #bfdbfe;border-radius:10px;padding:12px 14px;font-size:14px;color:#1e3a5f;font-family:Georgia,serif;outline:none;box-sizing:border-box;transition:border-color 0.2s; }
+  .cert-input:focus { border-color:#2563eb;background:#fff; }
+  .cert-file-btn { background:#f0f6ff;border:2px solid #bfdbfe;border-radius:10px;padding:12px 14px;font-size:14px;color:#2563eb;cursor:pointer;transition:all 0.2s;text-align:left; }
+  .cert-file-btn:hover { background:#dbeafe;border-color:#2563eb; }
+  .cert-upload-btn { width:100%;background:#1a2744;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:Georgia,serif;transition:background 0.2s;margin-top:4px; }
+  .cert-upload-btn:hover { background:#1e40af; }
+  .cert-upload-btn:disabled { background:#93adc8;cursor:not-allowed; }
+  .cert-card { background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px; }
+  .cert-card-icon { font-size:28px;flex-shrink:0; }
+  .cert-card-body { flex:1;min-width:0; }
+  .cert-card-title { font-size:15px;font-weight:700;color:#1e3a5f; }
+  .cert-card-meta { font-size:12px;color:#6b82a0;margin-top:2px; }
+  .cert-card-actions { display:flex;gap:8px;flex-shrink:0; }
+  .cert-view-btn { background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;color:#2563eb;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all 0.2s; }
+  .cert-view-btn:hover { background:#dbeafe;border-color:#2563eb; }
+  .cert-del-btn { background:none;border:1px solid #fca5a5;border-radius:8px;color:#f87171;padding:7px 10px;font-size:13px;cursor:pointer;transition:all 0.2s; }
+  .cert-del-btn:hover { background:#fee2e2;border-color:#dc2626;color:#dc2626; }
 </style>
 </head>
 <body>
@@ -281,6 +304,7 @@ body {
     <button class="portal-tab" onclick="switchPortalTab('resources',this)">📄 Resources</button>
     <button class="portal-tab" onclick="switchPortalTab('slides',this)">📊 Slides</button>
     <button class="portal-tab" onclick="switchPortalTab('links',this)">🔗 Links</button>
+    <button class="portal-tab" onclick="switchPortalTab('certificates',this)">🏅 Certificates</button>
   </div>
 
   <!-- EXAMS TAB -->
@@ -337,6 +361,44 @@ body {
     <div id="portalLinks"><div class="portal-loading">Loading…</div></div>
   </div>
 
+  <!-- CERTIFICATES TAB -->
+  <div class="portal-panel" id="ptab-certificates">
+    <div class="section-title">My Certificates</div>
+    <div style="font-size:13px;color:#6b82a0;margin-bottom:20px;">Upload certificates for completed courses. Accepted formats: PDF, JPG, PNG.</div>
+
+    <!-- Upload form -->
+    <div class="cert-upload-card" id="certUploadArea">
+      <div class="cert-upload-icon">🏅</div>
+      <div class="cert-upload-title">Upload a Certificate</div>
+      <div style="margin-bottom:16px;">
+        <label class="cert-field-label">Certificate / Course Name</label>
+        <input class="cert-input" id="certName" type="text" placeholder="e.g. CPR/AED Certification" autocomplete="off">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label class="cert-field-label">Select File (PDF, JPG, or PNG)</label>
+        <input type="file" id="certFile" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="certFileSelected(this)">
+        <div class="cert-file-btn" onclick="document.getElementById('certFile').click()" id="certFileBtn">
+          📎 Choose File
+        </div>
+        <div id="certFileName" style="font-size:12px;color:#6b82a0;margin-top:6px;"></div>
+      </div>
+      <div id="certUploadError" style="color:#dc2626;font-size:13px;margin-bottom:12px;display:none;"></div>
+      <div id="certUploadProgress" style="display:none;margin-bottom:12px;">
+        <div style="background:#e6f0fb;border-radius:6px;height:8px;overflow:hidden;">
+          <div id="certProgressBar" style="height:100%;background:#2563eb;border-radius:6px;width:0%;transition:width 0.3s;"></div>
+        </div>
+        <div id="certProgressText" style="font-size:12px;color:#6b82a0;margin-top:4px;">Uploading…</div>
+      </div>
+      <button class="cert-upload-btn" id="certUploadBtn" onclick="uploadCertificate()">Upload Certificate</button>
+    </div>
+
+    <!-- Certificate list -->
+    <div style="margin-top:24px;">
+      <div class="section-title" style="font-size:14px;margin-bottom:12px;">Uploaded Certificates</div>
+      <div id="certList"><div class="portal-loading">Loading certificates…</div></div>
+    </div>
+  </div>
+
 </div><!-- end main -->
 
 <!-- Firebase REST API (no SDK needed for simple reads) -->
@@ -344,6 +406,7 @@ body {
 const FB = {
   apiKey: "AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
   projectId: "class-attendance-72cd9",
+  storageBucket: "class-attendance-72cd9.firebasestorage.app",
 };
 
 
@@ -457,6 +520,7 @@ function switchPortalTab(name, btn) {
   if (name === 'resources') renderPortalResources();
   if (name === 'slides') renderPortalSlides();
   if (name === 'links') renderPortalLinks();
+  if (name === 'certificates') { renderPortalCertificates(); }
 }
 
 async function fetchPortalContent() {
@@ -518,6 +582,172 @@ async function renderPortalLinks() {
   el.innerHTML = items.map(l => `<div class="content-card"><div class="content-card-icon">🔗</div><div class="content-card-body"><div class="content-card-title">${l.title||'Link'}</div>${l.description?`<div class="content-card-desc">${l.description}</div>`:''}</div><a href="${l.url||'#'}" target="_blank" class="content-card-btn">Visit →</a></div>`).join('');
 }
 
+
+// ── CERTIFICATES ──────────────────────────────────────
+let certSelectedFile = null;
+
+function certFileSelected(input) {
+  certSelectedFile = input.files[0];
+  const btn = document.getElementById('certFileBtn');
+  const nameEl = document.getElementById('certFileName');
+  if (certSelectedFile) {
+    btn.textContent = '📎 ' + certSelectedFile.name;
+    nameEl.textContent = (certSelectedFile.size / 1024).toFixed(1) + ' KB';
+  }
+}
+
+async function uploadCertificate() {
+  const name = document.getElementById('certName').value.trim();
+  const errEl = document.getElementById('certUploadError');
+  errEl.style.display = 'none';
+
+  if (!name) { errEl.textContent = 'Please enter a certificate name.'; errEl.style.display = 'block'; return; }
+  if (!certSelectedFile) { errEl.textContent = 'Please select a file to upload.'; errEl.style.display = 'block'; return; }
+  if (!currentSession) { errEl.textContent = 'You must be signed in to upload.'; errEl.style.display = 'block'; return; }
+
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  if (certSelectedFile.size > maxSize) { errEl.textContent = 'File too large. Maximum size is 10MB.'; errEl.style.display = 'block'; return; }
+
+  const btn = document.getElementById('certUploadBtn');
+  const progressWrap = document.getElementById('certUploadProgress');
+  const progressBar = document.getElementById('certProgressBar');
+  const progressText = document.getElementById('certProgressText');
+
+  btn.disabled = true;
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '10%';
+  progressText.textContent = 'Uploading…';
+
+  try {
+    // Upload to Firebase Storage via REST API
+    const studentId = currentSession.id.replace(/[^a-zA-Z0-9]/g, '_');
+    const timestamp = Date.now();
+    const ext = certSelectedFile.name.split('.').pop();
+    const filename = `certificates/${studentId}/${timestamp}_${name.replace(/[^a-zA-Z0-9]/g,'_')}.${ext}`;
+    const uploadUrl = `https://firebasestorage.googleapis.com/v0/b/${FB.storageBucket}/o?uploadType=media&name=${encodeURIComponent(filename)}&key=${FB.apiKey}`;
+
+    progressBar.style.width = '40%';
+    const uploadResp = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': certSelectedFile.type || 'application/octet-stream' },
+      body: certSelectedFile,
+    });
+    if (!uploadResp.ok) throw new Error(await uploadResp.text());
+    const uploadData = await uploadResp.json();
+    progressBar.style.width = '70%';
+    progressText.textContent = 'Saving record…';
+
+    // Save metadata to Firestore
+    const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${FB.storageBucket}/o/${encodeURIComponent(filename)}?alt=media&token=${uploadData.downloadTokens}`;
+    const meta = {
+      fields: {
+        studentId:   { stringValue: currentSession.id },
+        studentName: { stringValue: currentSession.name },
+        certName:    { stringValue: name },
+        filename:    { stringValue: filename },
+        downloadUrl: { stringValue: downloadUrl },
+        fileType:    { stringValue: ext.toLowerCase() },
+        uploadedAt:  { stringValue: new Date().toISOString() },
+      }
+    };
+    const fsUrl = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/certificates?key=${FB.apiKey}`;
+    const fsResp = await fetch(fsUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(meta) });
+    if (!fsResp.ok) throw new Error(await fsResp.text());
+
+    progressBar.style.width = '100%';
+    progressText.textContent = '✓ Uploaded successfully!';
+    progressBar.style.background = '#16a34a';
+
+    // Reset form
+    setTimeout(() => {
+      document.getElementById('certName').value = '';
+      document.getElementById('certFile').value = '';
+      document.getElementById('certFileBtn').textContent = '📎 Choose File';
+      document.getElementById('certFileName').textContent = '';
+      progressWrap.style.display = 'none';
+      progressBar.style.width = '0%';
+      progressBar.style.background = '#2563eb';
+      certSelectedFile = null;
+      btn.disabled = false;
+      loadCertificates(); // refresh list
+    }, 1500);
+  } catch(e) {
+    console.error('uploadCertificate error:', e);
+    errEl.textContent = 'Upload failed: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    progressWrap.style.display = 'none';
+  }
+}
+
+async function loadCertificates() {
+  const el = document.getElementById('certList');
+  if (!el || !currentSession) return;
+  el.innerHTML = '<div class="portal-loading">Loading certificates…</div>';
+  try {
+    // Query Firestore certificates collection for this student
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents:runQuery?key=${FB.apiKey}`;
+    const body = {
+      structuredQuery: {
+        from: [{ collectionId: 'certificates' }],
+        where: { fieldFilter: { field: { fieldPath: 'studentId' }, op: 'EQUAL', value: { stringValue: currentSession.id } } }
+      }
+    };
+    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const rows = await resp.json();
+    const certs = [];
+    for (const row of rows) {
+      if (!row.document) continue;
+      const f = row.document.fields || {};
+      certs.push({
+        docName: row.document.name,
+        certName: f.certName?.stringValue || 'Certificate',
+        downloadUrl: f.downloadUrl?.stringValue || '',
+        fileType: f.fileType?.stringValue || '',
+        uploadedAt: f.uploadedAt?.stringValue || '',
+      });
+    }
+    // Sort newest first
+    certs.sort((a,b) => b.uploadedAt.localeCompare(a.uploadedAt));
+    if (certs.length === 0) {
+      el.innerHTML = '<div class="portal-empty">No certificates uploaded yet.</div>';
+      return;
+    }
+    el.innerHTML = certs.map((c,i) => {
+      const icon = c.fileType === 'pdf' ? '📄' : '🖼️';
+      const date = c.uploadedAt ? new Date(c.uploadedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '';
+      return `<div class="cert-card">
+        <div class="cert-card-icon">${icon}</div>
+        <div class="cert-card-body">
+          <div class="cert-card-title">${c.certName}</div>
+          <div class="cert-card-meta">${date} · ${c.fileType.toUpperCase()}</div>
+        </div>
+        <div class="cert-card-actions">
+          <a href="${c.downloadUrl}" target="_blank" class="cert-view-btn">View</a>
+          <button class="cert-del-btn" onclick="deleteCertificate('${c.docName}', '${c.certName}')">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    console.error('loadCertificates error:', e);
+    el.innerHTML = '<div class="portal-empty" style="color:#f87171;">Failed to load certificates.</div>';
+  }
+}
+
+async function deleteCertificate(docName, certName) {
+  if (!confirm(`Delete "${certName}"? This cannot be undone.`)) return;
+  try {
+    await fetch(`https://firestore.googleapis.com/v1/${docName}?key=${FB.apiKey}`, { method:'DELETE' });
+    loadCertificates();
+  } catch(e) {
+    console.error('deleteCertificate error:', e);
+    alert('Delete failed. Please try again.');
+  }
+}
+
+async function renderPortalCertificates() {
+  await loadCertificates();
+}
 function renderExams() {
   const grid = document.getElementById("examsGrid");
   grid.innerHTML = EXAMS.map(ex => {
