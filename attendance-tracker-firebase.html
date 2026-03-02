@@ -783,36 +783,105 @@ function renderSummary(){
       <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
         ${wavg!==null?`<span style="font-size:18px;font-weight:bold;color:${lc}">${wavg}%</span>`:''}
         <span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span>
-        <button onclick="deleteStudentExams('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑 Reset Exams</button>
+        <button onclick="showResetModal('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑 Reset Exams</button>
       </div></div>${attStats}${gradesRow}`;
     list.appendChild(div);
   });
 }
 
-async function deleteStudentExams(studentName) {
-  if (!confirm(`Delete all exam submissions for "${studentName}"?\nThis cannot be undone.`)) return;
+// ── EXAM RESET MODAL ─────────────────────────────────
+let _resetModalDocs = []; // [{docName, examLabel, pct, submittedAt}]
+
+async function showResetModal(studentName) {
+  setSyncStatus('syncing', 'Loading submissions…');
   try {
-    // Query all examResults docs for this student
     const url = `https://firestore.googleapis.com/v1/projects/class-attendance-72cd9/databases/(default)/documents:runQuery?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`;
-    const body = { structuredQuery: { from:[{collectionId:'examResults'}], where:{ fieldFilter:{ field:{fieldPath:'name'}, op:'EQUAL', value:{stringValue:studentName} } } } };
+    const body = { structuredQuery: { from:[{collectionId:'examResults'}] } };
     const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
     const rows = await resp.json();
-    // Delete each matching document
-    let deleted = 0;
+    const nameLower = studentName.toLowerCase().trim();
+    _resetModalDocs = [];
     for (const row of rows) {
       if (!row.document) continue;
-      const docName = row.document.name; // full resource path
-      const delResp = await fetch(`https://firestore.googleapis.com/v1/${docName}?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`, {method:'DELETE'});
-      if (delResp.ok) deleted++;
+      const f = row.document.fields || {};
+      const rowName = (f.name?.stringValue || '').toLowerCase().trim();
+      if (rowName !== nameLower) continue;
+      _resetModalDocs.push({
+        docName: row.document.name,
+        examLabel: f.examLabel?.stringValue || 'Unknown Exam',
+        pct: parseInt(f.pct?.integerValue || f.pct?.stringValue || 0),
+        score: parseInt(f.score?.integerValue || f.score?.stringValue || 0),
+        total: parseInt(f.total?.integerValue || f.total?.stringValue || 0),
+        submittedAt: f.submittedAt?.stringValue || '',
+      });
     }
-    await loadExamResults();
-    renderSummary();
-    setSyncStatus('saved', `✓ Deleted ${deleted} submission${deleted!==1?'s':''} for ${studentName}`);
-    setTimeout(()=>setSyncStatus('',''), 3000);
+    setSyncStatus('', '');
+    renderResetModal(studentName);
   } catch(e) {
-    console.error('deleteStudentExams error:', e);
-    setSyncStatus('error', '✗ Delete failed');
+    console.error('showResetModal error:', e);
+    setSyncStatus('error', '✗ Failed to load submissions');
   }
+}
+
+function renderResetModal(studentName) {
+  const existing = document.getElementById('examResetModal');
+  if (existing) existing.remove();
+
+  const rows = _resetModalDocs.length === 0
+    ? `<div style="color:#93adc8;font-size:14px;padding:16px 0;">No exam submissions found for ${studentName}.</div>`
+    : _resetModalDocs.map((doc, i) => {
+        const date = doc.submittedAt ? new Date(doc.submittedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+        const pc = doc.pct >= 70 ? '#16a34a' : '#dc2626';
+        return `<label style="display:flex;align-items:center;gap:14px;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#f0f6ff'">
+          <input type="checkbox" data-idx="${i}" style="width:18px;height:18px;accent-color:#dc2626;flex-shrink:0;">
+          <div style="flex:1;">
+            <div style="font-size:14px;font-weight:600;color:#1e3a5f;">${doc.examLabel}</div>
+            <div style="font-size:12px;color:#6b82a0;margin-top:2px;">${date}</div>
+          </div>
+          <div style="font-size:18px;font-weight:700;color:${pc}">${doc.pct}%</div>
+          <div style="font-size:12px;color:#6b82a0;">${doc.score}/${doc.total}</div>
+        </label>`;
+      }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'examResetModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,25,50,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;backdrop-filter:blur(4px);';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px 28px 24px;max-width:480px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.4);border-top:4px solid #dc2626;">
+      <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#6b82a0;margin-bottom:6px;">Reset Exam Submissions</div>
+      <div style="font-size:20px;font-weight:700;color:#1e3a5f;margin-bottom:4px;">${studentName}</div>
+      <div style="font-size:13px;color:#6b82a0;margin-bottom:20px;">Select which exams to delete. The student will be able to retake selected exams.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;" id="resetCheckList">${rows}</div>
+      ${_resetModalDocs.length > 0 ? `
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button onclick="document.querySelectorAll('#resetCheckList input').forEach(c=>c.checked=true)" style="flex:1;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px;font-size:12px;color:#4a6080;cursor:pointer;">Select All</button>
+        <button onclick="document.querySelectorAll('#resetCheckList input').forEach(c=>c.checked=false)" style="flex:1;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px;font-size:12px;color:#4a6080;cursor:pointer;">Clear All</button>
+      </div>
+      <button onclick="confirmResetSelected('${studentName}')" style="width:100%;background:#dc2626;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:Georgia,serif;margin-bottom:10px;" onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">Delete Selected</button>` : ''}
+      <button onclick="document.getElementById('examResetModal').remove()" style="width:100%;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:11px;font-size:14px;color:#4a6080;cursor:pointer;font-family:Georgia,serif;">Cancel</button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function confirmResetSelected(studentName) {
+  const checkboxes = document.querySelectorAll('#resetCheckList input[type=checkbox]:checked');
+  if (checkboxes.length === 0) { alert('No exams selected.'); return; }
+  const toDelete = [...checkboxes].map(cb => _resetModalDocs[parseInt(cb.dataset.idx)]);
+  const labels = toDelete.map(d => d.examLabel).join(', ');
+  if (!confirm(`Delete "${labels}" for ${studentName}?\nThis cannot be undone.`)) return;
+  document.getElementById('examResetModal').remove();
+  setSyncStatus('syncing', 'Deleting…');
+  let deleted = 0;
+  for (const doc of toDelete) {
+    try {
+      const delResp = await fetch(`https://firestore.googleapis.com/v1/${doc.docName}?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`, {method:'DELETE'});
+      if (delResp.ok) deleted++;
+    } catch(e) { console.error('Delete error:', e); }
+  }
+  await loadExamResults();
+  renderSummary();
+  setSyncStatus('saved', `✓ Deleted ${deleted} submission${deleted!==1?'s':''} for ${studentName}`);
+  setTimeout(()=>setSyncStatus('',''), 3000);
 }
 
 function removeStudent(id){if(!confirm('Remove this student?'))return;data.students=data.students.filter(s=>s.id!==id);delete data.scores[String(id)];scheduleSave();renderAttendance();}
