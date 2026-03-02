@@ -344,6 +344,49 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <div class="summary-meta" id="summaryMeta"></div>
     <div id="summaryList"></div>
   </div>
+
+  <!-- CONTENT MANAGER -->
+  <div class="tab-panel" id="panel-content">
+    <div class="panel-title" style="margin-bottom:4px;">Content Manager</div>
+    <div style="font-size:13px;color:#6b82a0;margin-bottom:24px;">Manage what students see in the portal — announcements, links, resources, and slides.</div>
+
+    <div class="cm-section">
+      <div class="cm-section-header">
+        <div><div class="cm-section-title">📋 Announcements</div><div class="cm-section-sub">Messages shown at the top of the student portal</div></div>
+        <button class="cm-add-btn" onclick="cmAddItem('announcements')">+ Add</button>
+      </div>
+      <div id="cm-announcements"></div>
+    </div>
+
+    <div class="cm-section">
+      <div class="cm-section-header">
+        <div><div class="cm-section-title">🔗 Links</div><div class="cm-section-sub">External reference links for students</div></div>
+        <button class="cm-add-btn" onclick="cmAddItem('links')">+ Add</button>
+      </div>
+      <div id="cm-links"></div>
+    </div>
+
+    <div class="cm-section">
+      <div class="cm-section-header">
+        <div><div class="cm-section-title">📄 Resources</div><div class="cm-section-sub">PDFs and study materials (paste a URL or Google Drive share link)</div></div>
+        <button class="cm-add-btn" onclick="cmAddItem('resources')">+ Add</button>
+      </div>
+      <div id="cm-resources"></div>
+    </div>
+
+    <div class="cm-section">
+      <div class="cm-section-header">
+        <div><div class="cm-section-title">📊 Slides</div><div class="cm-section-sub">PowerPoint files — enter filename as uploaded to GitHub (e.g. Week1_Slides.pptx)</div></div>
+        <button class="cm-add-btn" onclick="cmAddItem('slides')">+ Add</button>
+      </div>
+      <div id="cm-slides"></div>
+    </div>
+
+    <div class="cm-save-bar">
+      <button class="cm-save-btn" onclick="savePortalContent()">💾 Save &amp; Publish to Portal</button>
+    </div>
+  </div>
+
 </div>
 
 <!-- RESET MODAL -->
@@ -1317,15 +1360,7 @@ function renderContentManager() {
 
   ['announcements','links','resources','slides'].forEach(renderSection);
 
-  // Add save button if not already there
-  const panel = document.getElementById('panel-content');
-  let saveBar = panel.querySelector('.cm-save-bar');
-  if (!saveBar) {
-    saveBar = document.createElement('div');
-    saveBar.className = 'cm-save-bar';
-    saveBar.innerHTML = `<button class="cm-save-btn" onclick="savePortalContent()">💾 Save & Publish to Portal</button>`;
-    panel.appendChild(saveBar);
-  }
+  // Save bar is in static HTML
 }
 
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
