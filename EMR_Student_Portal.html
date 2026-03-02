@@ -348,8 +348,8 @@ const CATEGORIES = [
 // Leave name as "" for unassigned slots
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
-  { id: "TFD-001", name: "test" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-001", name: "" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -415,7 +415,7 @@ function renderExams() {
                      📋 Review Answers
                   </a>
                 </div>`
-              : `<a class="btn-take" href="${ex.file}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
+              : `<a class="btn-take" href="${ex.file}?student=${encodeURIComponent(currentSession?.name||'')}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
                   onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
                   Take Exam →
                 </a>`}
