@@ -851,8 +851,53 @@ function renderSummary(){
         <span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span>
         <button onclick="showResetModal('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑 Reset Exams</button>
       </div></div>${attStats}${gradesRow}`;
+    // Load certs for this student asynchronously and append
     list.appendChild(div);
+    loadStudentCertsForSummary(student.name, div);
   });
+}
+
+async function loadStudentCertsForSummary(studentName, cardEl) {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/class-attendance-72cd9/databases/(default)/documents:runQuery?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`;
+    const body = {
+      structuredQuery: {
+        from: [{ collectionId: 'certificates' }],
+        where: { fieldFilter: { field: { fieldPath: 'studentName' }, op: 'EQUAL', value: { stringValue: studentName } } }
+      }
+    };
+    const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const rows = await resp.json();
+    const certs = [];
+    for (const row of rows) {
+      if (!row.document) continue;
+      const f = row.document.fields || {};
+      certs.push({
+        certName: f.certName?.stringValue || 'Certificate',
+        downloadUrl: f.downloadUrl?.stringValue || '',
+        fileType: f.fileType?.stringValue || '',
+        uploadedAt: f.uploadedAt?.stringValue || '',
+        docName: row.document.name,
+      });
+    }
+    if (certs.length === 0) return;
+    certs.sort((a,b) => b.uploadedAt.localeCompare(a.uploadedAt));
+    const certsHtml = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e6f0fb;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">🏅 Certificates (${certs.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${certs.map(c => {
+          const icon = c.fileType === 'pdf' ? '📄' : '🖼️';
+          const date = c.uploadedAt ? new Date(c.uploadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+          return `<a href="${c.downloadUrl}" target="_blank" style="display:flex;align-items:center;gap:6px;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:6px 12px;text-decoration:none;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe'">
+            <span>${icon}</span>
+            <span style="font-size:13px;color:#1e3a5f;font-weight:600;">${c.certName}</span>
+            <span style="font-size:11px;color:#93adc8;">${date}</span>
+          </a>`;
+        }).join('')}
+      </div>
+    </div>`;
+    cardEl.insertAdjacentHTML('beforeend', certsHtml);
+  } catch(e) { console.error('loadStudentCertsForSummary error:', e); }
 }
 
 // ── EXAM RESET MODAL ─────────────────────────────────
