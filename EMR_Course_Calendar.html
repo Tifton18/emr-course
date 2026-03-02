@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Course Schedule — Spring 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --w1:        #1d4ed8;
+    --w1-lite:   #eff6ff;
+    --w1-mid:    #bfdbfe;
+    --w2:        #15803d;
+    --w2-lite:   #f0fdf4;
+    --w2-mid:    #bbf7d0;
+    --wfh:       #92400e;
+    --wfh-lite:  #fffbeb;
+    --wfh-mid:   #fde68a;
+    --w3:        #0e7490;
+    --w3-lite:   #ecfeff;
+    --w3-mid:    #a5f3fc;
+    --w4:        #7c3aed;
+    --w4-lite:   #faf5ff;
+    --w4-mid:    #ddd6fe;
+    --w5:        #be123c;
+    --w5-lite:   #fff1f2;
+    --w5-mid:    #fecdd3;
+    --exam:      #c2410c;
+    --exam-lite: #fff7ed;
+    --exam-mid:  #fed7aa;
+    --review:    #0f766e;
+    --review-lite:#f0fdfa;
+    --nremt:     #1e1b4b;
+    --nremt-lite:#eef2ff;
+    --nremt-mid: #c7d2fe;
+
+    --ink:       #0f172a;
+    --ink-mid:   #334155;
+    --ink-light: #64748b;
+    --ink-faint: #94a3b8;
+    --surface:   #ffffff;
+    --bg:        #f8fafc;
+    --border:    #e2e8f0;
+    --border-mid:#cbd5e1;
+
+    --radius:    10px;
+    --cell-min:  130px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────────────── */
+  .page-header {
+    background: var(--ink);
+    color: #fff;
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 18px,
+      rgba(255,255,255,.025) 18px,
+      rgba(255,255,255,.025) 19px
+    );
+    pointer-events: none;
+  }
+  .header-inner { max-width: 1200px; margin: 0 auto; position: relative; }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #93c5fd;
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    line-height: 1.05;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .header-sub {
+    font-size: 15px;
+    color: #94a3b8;
+    margin-bottom: 28px;
+  }
+  .header-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-pill {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #e2e8f0;
+  }
+  .header-pill strong { color: #fff; }
+
+  /* ── Legend ──────────────────────────────────────────────────────────────── */
+  .legend-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+  }
+  .legend-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-right: 4px;
+  }
+  .legend-items { display: flex; flex-wrap: wrap; gap: 8px; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-mid);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ── Main layout ─────────────────────────────────────────────────────────── */
+  .main { max-width: 1200px; margin: 0 auto; padding: 32px 40px 0; }
+
+  /* ── Week block ──────────────────────────────────────────────────────────── */
+  .week-block { margin-bottom: 28px; }
+  .week-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .week-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+  .week-dates {
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+
+  /* ── Day grid ────────────────────────────────────────────────────────────── */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 900px) { .day-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 500px) { .day-grid { grid-template-columns: 1fr; } }
+
+  /* ── Day card ────────────────────────────────────────────────────────────── */
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    min-height: var(--cell-min);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .15s, transform .15s;
+  }
+  .day-card:hover {
+    box-shadow: 0 6px 24px rgba(0,0,0,.09);
+    transform: translateY(-2px);
+  }
+  .day-card.off {
+    background: var(--bg);
+    border-style: dashed;
+    opacity: .55;
+  }
+  .day-card.wfh-card { border-style: dashed; }
+
+  .card-top {
+    height: 4px;
+    flex-shrink: 0;
+  }
+  .card-body {
+    padding: 12px 14px 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .04em;
+  }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+  .card-meta {
+    font-size: 11.5px;
+    color: var(--ink-light);
+    line-height: 1.4;
+    margin-top: auto;
+    padding-top: 6px;
+  }
+  .card-chapters {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-bottom: 2px;
+  }
+  .exam-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #c2410c;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-top: 6px;
+  }
+  .wfh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-top: 6px;
+  }
+
+  .nremt-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #1e1b4b;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-top: 6px;
+  }
+  .review-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0fdfa;
+    border: 1px solid #99f6e4;
+    color: #0f766e;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    margin-top: 6px;
+  }
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  /* ── Exam summary footer ─────────────────────────────────────────────────── */
+  .exam-summary {
+    max-width: 1200px;
+    margin: 32px auto 0;
+    padding: 0 40px;
+  }
+  .exam-summary-inner {
+    background: var(--ink);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .exam-item { display: flex; flex-direction: column; gap: 4px; }
+  .exam-item-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #64748b;
+  }
+  .exam-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .exam-item-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #fed7aa;
+  }
+
+  /* ── Animations ──────────────────────────────────────────────────────────── */
+  .week-block {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp .4s ease forwards;
+  }
+  .week-block:nth-child(1) { animation-delay: .05s; }
+  .week-block:nth-child(2) { animation-delay: .12s; }
+  .week-block:nth-child(3) { animation-delay: .19s; }
+  .week-block:nth-child(4) { animation-delay: .26s; }
+  .week-block:nth-child(5) { animation-delay: .33s; }
+  .week-block:nth-child(6) { animation-delay: .40s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Responsive tweaks ───────────────────────────────────────────────────── */
+  @media (max-width: 680px) {
+    .page-header { padding: 32px 20px 24px; }
+    .legend-bar  { padding: 12px 20px; }
+    .main        { padding: 20px 16px 0; }
+    .exam-summary { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ────────────────────────────────────────────────────────────── -->
+<header class="page-header">
+  <div class="header-inner">
+    <div class="header-eyebrow">Georgia OEMST &nbsp;·&nbsp; NHTSA 2021 National EMS Education Standards</div>
+    <h1 class="header-title">Emergency Medical<br>Responder</h1>
+    <p class="header-sub">Course Schedule &nbsp;·&nbsp; Spring 2026</p>
+    <div class="header-pills">
+      <span class="header-pill"><strong>20 class days</strong></span>
+      <span class="header-pill"><strong>128</strong> contact hours</span>
+      <span class="header-pill">Apr 13 – May 21, 2026</span>
+      <span class="header-pill">Mon – Thu &nbsp;·&nbsp; 8 AM – 5 PM</span>
+      <span class="header-pill">4 exams</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Sticky legend ──────────────────────────────────────────────────────── -->
+<div class="legend-bar">
+  <span class="legend-label">Legend</span>
+  <div class="legend-items">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--w1)"></span>Week 1</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--w2)"></span>Week 2 In-Person</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--wfh)"></span>Work From Home</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--w3)"></span>Week 3</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--w4)"></span>Week 4</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--w5)"></span>Week 5</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--exam);border-radius:50%"></span>Exam Day</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--review)"></span>Final Review</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--nremt)"></span>NREMT Testing</span>
+  </div>
+</div>
+
+<!-- ── Main calendar ──────────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- WEEK 1 -->
+  <div class="week-block">
+    <div class="week-heading">
+      <span class="week-tag" style="background:var(--w1)">Week 1</span>
+      <span class="week-dates">April 13 – 16, 2026</span>
+    </div>
+    <div class="day-grid">
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w1)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w1)">Mon · Apr 13</div>
+          <div class="card-title">EMS Systems, EMR Role &amp; Medical/Legal</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 1–3</div>
+            9 hrs &nbsp;·&nbsp; EMS overview, scope of practice, medical/legal &amp; ethics, well-being
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w1)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w1)">Tue · Apr 14</div>
+          <div class="card-title">Anatomy, Physiology &amp; Medical Terminology</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 4</div>
+            9 hrs &nbsp;·&nbsp; Body systems, directional terms, prefixes &amp; suffixes
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w1)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w1)">Wed · Apr 15</div>
+          <div class="card-title">Lifting, Moving &amp; Patient Positioning</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 5</div>
+            9 hrs &nbsp;·&nbsp; Body mechanics, emergency moves, patient positioning
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w1)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w1)">Thu · Apr 16</div>
+          <div class="card-title">Airway Management</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 6</div>
+            9 hrs &nbsp;·&nbsp; OPA/NPA, suctioning, BVM ventilation, oxygen delivery
+          </div>
+          <div class="exam-badge">✏️ Week 1 Exam</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WEEK 2 -->
+  <div class="week-block">
+    <div class="week-heading">
+      <span class="week-tag" style="background:var(--w2)">Week 2</span>
+      <span class="week-dates">April 20 – 23, 2026</span>
+    </div>
+    <div class="day-grid">
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w2)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w2)">Mon · Apr 20</div>
+          <div class="card-title">CPR / AED Certification — AHA BLS Provider</div>
+          <div class="card-meta">
+            <div class="card-chapters">AHA BLS</div>
+            9 hrs &nbsp;·&nbsp; Adult, child &amp; infant CPR · AED · 2-rescuer techniques
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card wfh-card">
+        <div class="card-top" style="background:var(--wfh)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--wfh)">Tue · Apr 21</div>
+          <div class="card-title">NIMS 100, 200, 700 &amp; 800</div>
+          <div class="card-meta">
+            <div class="card-chapters">FEMA / NIMS</div>
+            Online self-study &nbsp;·&nbsp; Incident Command System fundamentals
+          </div>
+          <div class="wfh-badge">🏠 Work From Home</div>
+        </div>
+      </div>
+
+      <div class="day-card wfh-card">
+        <div class="card-top" style="background:var(--wfh)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--wfh)">Wed · Apr 22</div>
+          <div class="card-title">Traffic Incident Management (TIMS)</div>
+          <div class="card-meta">
+            <div class="card-chapters">TIMS</div>
+            Online &nbsp;·&nbsp; Responder safety, traffic control zones
+          </div>
+          <div class="wfh-badge">🏠 Work From Home</div>
+        </div>
+      </div>
+
+      <div class="day-card wfh-card">
+        <div class="card-top" style="background:var(--wfh)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--wfh)">Thu · Apr 23</div>
+          <div class="card-title">Congenital Adrenal Hyperplasia (CAH)</div>
+          <div class="card-meta">
+            <div class="card-chapters">TRAIN Georgia</div>
+            Online &nbsp;·&nbsp; CAH recognition &amp; emergency response
+          </div>
+          <div class="wfh-badge">🏠 Work From Home</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WEEK 3 -->
+  <div class="week-block">
+    <div class="week-heading">
+      <span class="week-tag" style="background:var(--w3)">Week 3</span>
+      <span class="week-dates">April 27 – 30, 2026</span>
+    </div>
+    <div class="day-grid">
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w3)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w3)">Mon · Apr 27</div>
+          <div class="card-title">Ventilation &amp; Breathing Assessment</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 6–7</div>
+            9 hrs &nbsp;·&nbsp; Respiratory assessment, SpO₂, assisted ventilation, CPAP
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w3)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w3)">Tue · Apr 28</div>
+          <div class="card-title">Patient Assessment — Scene Size-Up, Primary Survey &amp; Vitals</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 7–8</div>
+            9 hrs &nbsp;·&nbsp; SAMPLE history, vital signs, AVPU, secondary assessment
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w3)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w3)">Wed · Apr 29</div>
+          <div class="card-title">Circulation, Bleeding Control &amp; Shock</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 9</div>
+            9 hrs &nbsp;·&nbsp; Hemorrhage control, tourniquets, wound packing, shock management
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--exam)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--exam)">Thu · Apr 30</div>
+          <div class="card-title">Cardiac Emergencies, CPR &amp; AED</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 10</div>
+            9 hrs &nbsp;·&nbsp; AMI recognition, high-quality CPR, AED protocols, post-resuscitation care
+          </div>
+          <div class="exam-badge">✏️ Midterm Exam — Weeks 1 &amp; 3</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WEEK 4 -->
+  <div class="week-block">
+    <div class="week-heading">
+      <span class="week-tag" style="background:var(--w4)">Week 4</span>
+      <span class="week-dates">May 4 – 7, 2026</span>
+    </div>
+    <div class="day-grid">
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w4)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w4)">Mon · May 4</div>
+          <div class="card-title">Medical Emergencies I — AMS, Diabetes, Seizures &amp; Stroke</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 11</div>
+            9 hrs &nbsp;·&nbsp; AEIOU-TIPS, oral glucose, Cincinnati Stroke Scale, postictal care
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w4)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w4)">Tue · May 5</div>
+          <div class="card-title">Medical Emergencies II — Respiratory, Allergic, Abdominal, Toxicology &amp; Behavioral</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 11–12</div>
+            9 hrs &nbsp;·&nbsp; Anaphylaxis, epi auto-injector, toxidromes, behavioral crisis management
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w4)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w4)">Wed · May 6</div>
+          <div class="card-title">Trauma Assessment, Soft Tissue &amp; Burns</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 13–14</div>
+            9 hrs &nbsp;·&nbsp; Kinematics, Rule of Nines, wound management, evisceration
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--exam)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--exam)">Thu · May 7</div>
+          <div class="card-title">Musculoskeletal, Spinal, Head &amp; Chest Trauma</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 15–16</div>
+            9 hrs &nbsp;·&nbsp; Splinting, CSM, Cushing's triad, open pneumothorax, flail chest
+          </div>
+          <div class="exam-badge">✏️ Week 4 Exam</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WEEK 5 -->
+  <div class="week-block">
+    <div class="week-heading">
+      <span class="week-tag" style="background:var(--w5)">Week 5</span>
+      <span class="week-dates">May 11 – 14, 2026</span>
+    </div>
+    <div class="day-grid">
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w5)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w5)">Mon · May 11</div>
+          <div class="card-title">Obstetrics, Pediatrics &amp; Geriatrics</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 17</div>
+            9 hrs &nbsp;·&nbsp; Field delivery, newborn resuscitation, JumpSTART, geriatric considerations
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w5)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w5)">Tue · May 12</div>
+          <div class="card-title">Environmental Emergencies &amp; Special Situations</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 18</div>
+            9 hrs &nbsp;·&nbsp; Heat stroke, hypothermia, drowning, bites &amp; stings, lightning
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--w5)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--w5)">Wed · May 13</div>
+          <div class="card-title">MCI Triage, ICS, Hazmat, Terrorism &amp; EMS Operations</div>
+          <div class="card-meta">
+            <div class="card-chapters">Ch. 19–20</div>
+            9 hrs &nbsp;·&nbsp; START/JumpSTART triage, ICS roles, hazmat zones, secondary devices
+          </div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--exam)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--exam)">Thu · May 14</div>
+          <div class="card-title">Comprehensive Review &amp; Final Examination</div>
+          <div class="card-meta">
+            <div class="card-chapters">All Chapters</div>
+            9 hrs &nbsp;·&nbsp; Course review, 120-question written final, SMC skills evaluation
+          </div>
+          <div class="exam-badge">🎓 Final Exam &amp; Skills Eval</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- WEEK 6 — REVIEW & NREMT -->
+  <div class="week-block">
+    <div class="week-heading">
+      <span class="week-tag" style="background:var(--nremt)">Week 6</span>
+      <span class="week-dates">May 18 – 21, 2026</span>
+    </div>
+    <div class="day-grid">
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--review)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--review)">Mon · May 18</div>
+          <div class="card-title">Final Course Review Day</div>
+          <div class="card-meta">
+            <div class="card-chapters">All Chapters</div>
+            Comprehensive review of all course content in preparation for NREMT cognitive exam
+          </div>
+          <div class="review-badge">📚 Final Review</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--nremt)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--nremt)">Tue · May 19</div>
+          <div class="card-title">NREMT Cognitive Exam</div>
+          <div class="card-meta">
+            <div class="card-chapters">NREMT</div>
+            Computer-adaptive testing &nbsp;·&nbsp; 70–110 questions &nbsp;·&nbsp; EMR certification exam
+          </div>
+          <div class="nremt-badge">🏅 NREMT Testing</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--nremt)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--nremt)">Wed · May 20</div>
+          <div class="card-title">NREMT Cognitive Exam</div>
+          <div class="card-meta">
+            <div class="card-chapters">NREMT</div>
+            Computer-adaptive testing &nbsp;·&nbsp; 70–110 questions &nbsp;·&nbsp; EMR certification exam
+          </div>
+          <div class="nremt-badge">🏅 NREMT Testing</div>
+        </div>
+      </div>
+
+      <div class="day-card">
+        <div class="card-top" style="background:var(--nremt)"></div>
+        <div class="card-body">
+          <div class="card-date" style="color:var(--nremt)">Thu · May 21</div>
+          <div class="card-title">NREMT Cognitive Exam</div>
+          <div class="card-meta">
+            <div class="card-chapters">NREMT</div>
+            Computer-adaptive testing &nbsp;·&nbsp; 70–110 questions &nbsp;·&nbsp; EMR certification exam
+          </div>
+          <div class="nremt-badge">🏅 NREMT Testing</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Exam summary ───────────────────────────────────────────────────────── -->
+<div class="exam-summary">
+  <div class="exam-summary-inner">
+    <div class="exam-item">
+      <span class="exam-item-label">Exam 1</span>
+      <span class="exam-item-name">Week 1 Exam</span>
+      <span class="exam-item-date">Thu · Apr 16</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">Exam 2</span>
+      <span class="exam-item-name">Midterm Exam</span>
+      <span class="exam-item-date">Thu · Apr 30 &nbsp;·&nbsp; Weeks 1 &amp; 3</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">Exam 3</span>
+      <span class="exam-item-name">Week 4 Exam</span>
+      <span class="exam-item-date">Thu · May 7</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">Exam 4</span>
+      <span class="exam-item-name">Final Exam</span>
+      <span class="exam-item-date">Thu · May 14 &nbsp;·&nbsp; All Chapters · 120 Qs · 70% to pass</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">Final Review</span>
+      <span class="exam-item-name">Course Review Day</span>
+      <span class="exam-item-date">Mon · May 18</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">NREMT Testing</span>
+      <span class="exam-item-name">Cognitive Exam Window</span>
+      <span class="exam-item-date">Tue – Thu · May 19–21</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">Class Hours</span>
+      <span class="exam-item-name">8:00 AM – 5:00 PM</span>
+      <span class="exam-item-date">Mon – Thu each week</span>
+    </div>
+    <div class="exam-item">
+      <span class="exam-item-label">Total Hours</span>
+      <span class="exam-item-name">128 Contact Hours</span>
+      <span class="exam-item-date">20 class days over 5 weeks</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
