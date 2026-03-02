@@ -198,6 +198,35 @@ body {
     cursor: pointer; font-family: Georgia, serif; transition: all 0.2s;
   }
   .btn-signout:hover { border-color: #dc2626; color: #dc2626; }
+
+  /* Portal tabs */
+  .portal-tabs { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;background:#e6f0fb;border-radius:12px;padding:6px; }
+  .portal-tab { flex:1;min-width:80px;background:none;border:none;border-radius:8px;padding:9px 12px;font-size:13px;color:#4a6080;cursor:pointer;font-family:Georgia,serif;transition:all 0.2s;white-space:nowrap; }
+  .portal-tab.active { background:#fff;color:#1e3a5f;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .portal-tab:hover:not(.active) { background:#fff8;color:#1e3a5f; }
+  .portal-panel { display:none; }
+  .portal-panel.active { display:block; }
+  .portal-loading { color:#93adc8;font-size:14px;padding:20px 0;font-style:italic; }
+  .portal-empty { color:#93adc8;font-size:14px;padding:20px 0;text-align:center; }
+
+  /* Announcement cards */
+  .ann-card { border-radius:10px;padding:14px 18px;margin-bottom:10px;border-left:4px solid; }
+  .ann-card.info    { background:#eff6ff;border-color:#2563eb;color:#1e40af; }
+  .ann-card.warning { background:#fffbeb;border-color:#f59e0b;color:#92400e; }
+  .ann-card.success { background:#f0fdf4;border-color:#16a34a;color:#166534; }
+  .ann-card.urgent  { background:#fef2f2;border-color:#dc2626;color:#991b1b; }
+  .ann-text { font-size:15px;line-height:1.6; }
+  .ann-date { font-size:11px;opacity:0.6;margin-top:6px; }
+
+  /* Resource / link cards */
+  .content-card { background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;transition:border-color 0.2s; }
+  .content-card:hover { border-color:#2563eb; }
+  .content-card-icon { font-size:24px;flex-shrink:0; }
+  .content-card-body { flex:1;min-width:0; }
+  .content-card-title { font-size:15px;font-weight:700;color:#1e3a5f; }
+  .content-card-desc { font-size:13px;color:#6b82a0;margin-top:2px; }
+  .content-card-btn { background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;color:#2563eb;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all 0.2s;flex-shrink:0; }
+  .content-card-btn:hover { background:#dbeafe;border-color:#2563eb; }
 </style>
 </head>
 <body>
@@ -244,12 +273,25 @@ body {
 
 <div class="main" style="display:none;">
 
-  <!-- EXAMS -->
-  <div class="section-title">Available Exams</div>
-  <div class="exams-grid" id="examsGrid"></div>
+  <!-- PORTAL NAV TABS -->
+  <div class="portal-tabs">
+    <button class="portal-tab active" onclick="switchPortalTab('exams',this)">🎓 Exams</button>
+    <button class="portal-tab" onclick="switchPortalTab('grades',this)">📊 Grades</button>
+    <button class="portal-tab" onclick="switchPortalTab('announcements',this)">📋 Announcements</button>
+    <button class="portal-tab" onclick="switchPortalTab('resources',this)">📄 Resources</button>
+    <button class="portal-tab" onclick="switchPortalTab('slides',this)">📊 Slides</button>
+    <button class="portal-tab" onclick="switchPortalTab('links',this)">🔗 Links</button>
+  </div>
 
-  <!-- GRADES -->
-  <div id="gradesSection" style="display:none;">
+  <!-- EXAMS TAB -->
+  <div class="portal-panel active" id="ptab-exams">
+    <div class="section-title">Available Exams</div>
+    <div class="exams-grid" id="examsGrid"></div>
+  </div>
+
+  <!-- GRADES TAB -->
+  <div class="portal-panel" id="ptab-grades">
+  <div id="gradesSection" style="display:block;">
     <div class="section-title">My Grade Summary</div>
     <div class="grades-panel">
       <div class="grades-panel-header">
@@ -269,7 +311,33 @@ body {
     </div>
   </div>
 
-</div>
+  </div><!-- end ptab-grades -->
+
+  <!-- ANNOUNCEMENTS TAB -->
+  <div class="portal-panel" id="ptab-announcements">
+    <div class="section-title">Announcements</div>
+    <div id="portalAnnouncements"><div class="portal-loading">Loading…</div></div>
+  </div>
+
+  <!-- RESOURCES TAB -->
+  <div class="portal-panel" id="ptab-resources">
+    <div class="section-title">Study Resources</div>
+    <div id="portalResources"><div class="portal-loading">Loading…</div></div>
+  </div>
+
+  <!-- SLIDES TAB -->
+  <div class="portal-panel" id="ptab-slides">
+    <div class="section-title">Course Slides</div>
+    <div id="portalSlides"><div class="portal-loading">Loading…</div></div>
+  </div>
+
+  <!-- LINKS TAB -->
+  <div class="portal-panel" id="ptab-links">
+    <div class="section-title">Reference Links</div>
+    <div id="portalLinks"><div class="portal-loading">Loading…</div></div>
+  </div>
+
+</div><!-- end main -->
 
 <!-- Firebase REST API (no SDK needed for simple reads) -->
 <script>
@@ -349,7 +417,7 @@ const CATEGORIES = [
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
   { id: "TFD-001", name: "" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -375,6 +443,81 @@ let currentStudent = "";
 
 
 // ── RENDER EXAMS GRID ─────────────────────────────────
+
+// ── PORTAL CONTENT ────────────────────────────────────
+let portalActiveTab = 'exams';
+
+function switchPortalTab(name, btn) {
+  portalActiveTab = name;
+  document.querySelectorAll('.portal-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.portal-panel').forEach(panel => panel.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ptab-' + name)?.classList.add('active');
+  if (name === 'announcements') renderPortalAnnouncements();
+  if (name === 'resources') renderPortalResources();
+  if (name === 'slides') renderPortalSlides();
+  if (name === 'links') renderPortalLinks();
+}
+
+async function fetchPortalContent() {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/portalContent?key=${FB.apiKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const doc = await resp.json();
+    const f = doc.fields || {};
+    const parse = (key) => {
+      const arr = f[key]?.arrayValue?.values || [];
+      return arr.map(v => {
+        const fields = v.mapValue?.fields || {};
+        const out = {};
+        Object.entries(fields).forEach(([k,val]) => { out[k] = val.stringValue || val.integerValue || ''; });
+        return out;
+      });
+    };
+    return { announcements: parse('announcements'), links: parse('links'), resources: parse('resources'), slides: parse('slides') };
+  } catch(e) { console.error('fetchPortalContent error:', e); return null; }
+}
+
+let _portalContentCache = null;
+async function getPortalContent() {
+  if (!_portalContentCache) _portalContentCache = await fetchPortalContent();
+  return _portalContentCache || { announcements:[], links:[], resources:[], slides:[] };
+}
+
+async function renderPortalAnnouncements() {
+  const el = document.getElementById('portalAnnouncements');
+  const content = await getPortalContent();
+  const items = content.announcements || [];
+  if (items.length === 0) { el.innerHTML = '<div class="portal-empty">No announcements at this time.</div>'; return; }
+  el.innerHTML = items.map(a => `<div class="ann-card ${a.type||'info'}"><div class="ann-text">${a.text||''}</div></div>`).join('');
+}
+
+async function renderPortalResources() {
+  const el = document.getElementById('portalResources');
+  const content = await getPortalContent();
+  const items = content.resources || [];
+  if (items.length === 0) { el.innerHTML = '<div class="portal-empty">No resources posted yet.</div>'; return; }
+  el.innerHTML = items.map(r => `<div class="content-card"><div class="content-card-icon">📄</div><div class="content-card-body"><div class="content-card-title">${r.title||'Resource'}</div>${r.description?`<div class="content-card-desc">${r.description}</div>`:''}</div><a href="${r.url||'#'}" target="_blank" class="content-card-btn">Open →</a></div>`).join('');
+}
+
+async function renderPortalSlides() {
+  const el = document.getElementById('portalSlides');
+  const content = await getPortalContent();
+  const items = content.slides || [];
+  if (items.length === 0) { el.innerHTML = '<div class="portal-empty">No slides posted yet.</div>'; return; }
+  const base = window.location.href.replace(/\/[^\/]*$/, '/');
+  el.innerHTML = items.map(s => `<div class="content-card"><div class="content-card-icon">📊</div><div class="content-card-body"><div class="content-card-title">${s.title||'Slides'}</div>${s.description?`<div class="content-card-desc">${s.description}</div>`:''}<div class="content-card-desc" style="font-size:11px;color:#93adc8;margin-top:4px;">${s.filename||''}</div></div><a href="${base}${s.filename||''}" download class="content-card-btn">⬇ Download</a></div>`).join('');
+}
+
+async function renderPortalLinks() {
+  const el = document.getElementById('portalLinks');
+  const content = await getPortalContent();
+  const items = content.links || [];
+  if (items.length === 0) { el.innerHTML = '<div class="portal-empty">No links posted yet.</div>'; return; }
+  el.innerHTML = items.map(l => `<div class="content-card"><div class="content-card-icon">🔗</div><div class="content-card-body"><div class="content-card-title">${l.title||'Link'}</div>${l.description?`<div class="content-card-desc">${l.description}</div>`:''}</div><a href="${l.url||'#'}" target="_blank" class="content-card-btn">Visit →</a></div>`).join('');
+}
+
 function renderExams() {
   const grid = document.getElementById("examsGrid");
   grid.innerHTML = EXAMS.map(ex => {
@@ -492,7 +635,7 @@ function signOut() {
   document.getElementById("portalHeader").classList.remove("visible");
   document.getElementById("signInHeroBtn").style.display = "";
   document.querySelector(".main").style.display = "none";
-  document.getElementById("gradesSection").style.display = "none";
+  // gradesSection display handled by portal tabs
   document.getElementById("siName").value = "";
   document.getElementById("siId").value = "";
   renderExams();
