@@ -270,8 +270,12 @@ const SECTION_COLORS = {
 };
 
 // ── STATE ────────────────────────────────────────────
+// Pre-fill student name from portal URL param
+const _urlParams = new URLSearchParams(window.location.search);
+const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
+
 let phase        = "intro";
-let studentName  = "";
+let studentName  = _portalStudent || "";
 let current      = 0;
 let answers      = Array(questions.length).fill(null);
 let matchSels    = {};      // "qIdx-termIdx" -> def string
@@ -330,19 +334,44 @@ function updateTimerUI() {
 // ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
 // Uses GET with ?payload= because Apps Script cross-origin POST is blocked
 // by CORS preflight. GET requests follow the redirect and reach doGet().
-async function submitToSheets(subData) {
-  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_URL_HERE") {
-    console.warn("No Apps Script URL configured — skipping submission.");
-    return { success: false, noUrl: true };
-  }
+async function submitToFirebase(subData) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
   try {
-    const payload = encodeURIComponent(JSON.stringify(subData));
-    const url = APPS_SCRIPT_URL + "?payload=" + payload;
-    const resp = await fetch(url, { method: "GET", mode: "no-cors" });
-    // no-cors GET to Apps Script follows redirect; we can't read response body
-    // but the data arrives. Treat as success.
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults`;
+    // Trim answersData to avoid exceeding Firestore field size limits
+    const answersStr = JSON.stringify(subData.answersData);
+    const body = {
+      fields: {
+        examLabel:  {stringValue: subData.examLabel},
+        category:   {stringValue: EXAM_CATEGORY},
+        name:       {stringValue: subData.name},
+        score:      {integerValue: subData.score},
+        total:      {integerValue: subData.total},
+        pct:        {integerValue: subData.pct},
+        timeUsed:   {integerValue: subData.timeUsed},
+        submittedAt:{stringValue: subData.submittedAt},
+        answersData:{stringValue: answersStr},
+      }
+    };
+    console.log('Submitting to Firebase, answersData size:', answersStr.length, 'bytes');
+    const resp = await fetch(url + `?key=${FB_CONFIG.apiKey}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.error('Firebase error response:', errText);
+      throw new Error(errText);
+    }
+    console.log('Firebase submit success');
     return { success: true };
   } catch(e) {
+    clearTimeout(timeout);
+    console.error("Firebase submit error:", e);
     return { success: false, error: e.toString() };
   }
 }
@@ -375,12 +404,15 @@ async function finishExam() {
   phase = "submitting";
   render();
 
-  const result = await submitToFirebase(subData);
-  console.log('Submit result:', result);
-  if (!result.success) {
-    console.error('SUBMIT FAILED:', result.error);
-  } else {
-    console.log('Submit SUCCESS - score saved to Firebase');
+  let result = { success: false, error: 'Not attempted' };
+  try {
+    result = await submitToFirebase(subData);
+    console.log('Submit result:', result);
+    if (!result.success) console.error('SUBMIT FAILED:', result.error);
+    else console.log('Submit SUCCESS');
+  } catch(e) {
+    console.error('finishExam caught error:', e);
+    result = { success: false, error: e.toString() };
   }
   phase = "results";
   window._submitResult = result;
@@ -414,7 +446,7 @@ function renderIntro() {
         </div>
         <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
         <label class="name-label">Student Name</label>
-        <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to begin..." autocomplete="off">
+        <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to begin..." autocomplete="off" ${_portalStudent ? `value="${_portalStudent}" readonly style="background:#e6f0fb;color:#1e3a5f;cursor:default;border-color:#93c5fd;"` : ""}>
         <label class="name-label" style="margin-top:4px;">Exam Password</label>
         <input class="name-input" id="passwordInput" type="password" placeholder="Enter the exam password..." autocomplete="off">
         <div id="passwordError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">Incorrect password. Please try again.</div>
@@ -596,8 +628,12 @@ function attachEvents() {
       const ready = !!nameInput.value.trim() && !!passwordInput.value.trim();
       if(beginBtn){ beginBtn.disabled = !ready; beginBtn.classList.toggle("active", ready); }
     }
+    if (_portalStudent) {
+      studentName = _portalStudent;
+      nameInput.value = _portalStudent;
+    }
     nameInput.addEventListener("input", e=>{
-      if(!REVIEW_MODE){ studentName = e.target.value.trim(); nameInput.classList.toggle("has-value", !!studentName); }
+      if(!REVIEW_MODE && !_portalStudent){ studentName = e.target.value.trim(); nameInput.classList.toggle("has-value", !!studentName); }
       updateBeginBtn();
     });
     nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") passwordInput.focus(); });
@@ -790,7 +826,7 @@ function renderReviewIntro() {
         <div class="intro-title" style="font-size:32px">${EXAM_LABEL}</div>
         <div class="intro-sub">Enter your name and password to review your submitted answers</div>
         <label class="name-label">Student Name</label>
-        <input class="name-input" id="nameInput" type="text" value="${REVIEW_NAME}" placeholder="Enter your full name..." autocomplete="off">
+        <input class="name-input" id="nameInput" type="text" value="${REVIEW_NAME || _portalStudent}" placeholder="Enter your full name..." autocomplete="off" ${(REVIEW_NAME || _portalStudent) ? 'readonly style="background:#e6f0fb;color:#1e3a5f;cursor:default;border-color:#93c5fd;"' : ""}>
         <label class="name-label" style="margin-top:4px;">Exam Password</label>
         <input class="name-input" id="passwordInput" type="password" placeholder="Enter the exam password..." autocomplete="off">
         <div id="passwordError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">Incorrect password. Please try again.</div>
