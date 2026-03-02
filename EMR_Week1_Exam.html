@@ -270,8 +270,12 @@ const SECTION_COLORS = {
 };
 
 // ── STATE ────────────────────────────────────────────
+// Pre-fill student name from portal URL param
+const _urlParams = new URLSearchParams(window.location.search);
+const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
+
 let phase        = "intro";
-let studentName  = "";
+let studentName  = _portalStudent || "";
 let current      = 0;
 let answers      = Array(questions.length).fill(null);
 let matchSels    = {};      // "qIdx-termIdx" -> def string
@@ -424,7 +428,7 @@ function renderIntro() {
         </div>
         <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
         <label class="name-label">Student Name</label>
-        <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to begin..." autocomplete="off">
+        <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to begin..." autocomplete="off" ${_portalStudent ? `value="${_portalStudent}" readonly style="background:#e6f0fb;color:#1e3a5f;cursor:default;border-color:#93c5fd;"` : ""}>
         <label class="name-label" style="margin-top:4px;">Exam Password</label>
         <input class="name-input" id="passwordInput" type="password" placeholder="Enter the exam password..." autocomplete="off">
         <div id="passwordError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">Incorrect password. Please try again.</div>
@@ -606,8 +610,12 @@ function attachEvents() {
       const ready = !!nameInput.value.trim() && !!passwordInput.value.trim();
       if(beginBtn){ beginBtn.disabled = !ready; beginBtn.classList.toggle("active", ready); }
     }
+    if (_portalStudent) {
+      studentName = _portalStudent;
+      nameInput.value = _portalStudent;
+    }
     nameInput.addEventListener("input", e=>{
-      if(!REVIEW_MODE){ studentName = e.target.value.trim(); nameInput.classList.toggle("has-value", !!studentName); }
+      if(!REVIEW_MODE && !_portalStudent){ studentName = e.target.value.trim(); nameInput.classList.toggle("has-value", !!studentName); }
       updateBeginBtn();
     });
     nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter") passwordInput.focus(); });
@@ -800,7 +808,7 @@ function renderReviewIntro() {
         <div class="intro-title" style="font-size:32px">${EXAM_LABEL}</div>
         <div class="intro-sub">Enter your name and password to review your submitted answers</div>
         <label class="name-label">Student Name</label>
-        <input class="name-input" id="nameInput" type="text" value="${REVIEW_NAME}" placeholder="Enter your full name..." autocomplete="off">
+        <input class="name-input" id="nameInput" type="text" value="${REVIEW_NAME || _portalStudent}" placeholder="Enter your full name..." autocomplete="off" ${(REVIEW_NAME || _portalStudent) ? 'readonly style="background:#e6f0fb;color:#1e3a5f;cursor:default;border-color:#93c5fd;"' : ""}>
         <label class="name-label" style="margin-top:4px;">Exam Password</label>
         <input class="name-input" id="passwordInput" type="password" placeholder="Enter the exam password..." autocomplete="off">
         <div id="passwordError" style="color:#ef4444;font-size:13px;margin:-16px 0 16px;display:none;">Incorrect password. Please try again.</div>
