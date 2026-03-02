@@ -411,60 +411,43 @@ const FB = {
 
 
 // ── EXAM DEFINITIONS ─────────────────────────────────
-const EXAMS = [
-  {
-    id: "week1",
-    name: "Week 1 Exam",
-    file: "EMR_Week1_Exam.html",
-    questions: 25,
-    time: "25 min",
-    passing: "70%",
-    category: "module",
-    color: "#fbbf24",
-    icon: "📋",
-    weight: "20% (Module Exams)",
-    topics: "EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management",
-  },
-  {
-    id: "midterm",
-    name: "Midterm Exam",
-    file: "EMR_Midterm_Exam.html",
-    questions: 50,
-    time: "50 min",
-    passing: "70%",
-    category: "midterm",
-    color: "#f97316",
-    icon: "📝",
-    weight: "30% (Midterm)",
-    topics: "All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED",
-  },
-  {
-    id: "week4",
-    name: "Week 4 Exam",
-    file: "EMR_Week4_Exam.html",
-    questions: 25,
-    time: "25 min",
-    passing: "70%",
-    category: "module",
-    color: "#fbbf24",
-    icon: "📋",
-    weight: "20% (Module Exams)",
-    topics: "Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies",
-  },
-  {
-    id: "final",
-    name: "Final Exam",
-    file: "EMR_Final_Exam.html",
-    questions: 120,
-    time: "120 min",
-    passing: "70%",
-    category: "final",
-    color: "#f87171",
-    icon: "🎓",
-    weight: "40% (Final)",
-    topics: "Comprehensive — all course topics",
-  },
+// Exams are loaded dynamically from Firebase (managed via Content Manager in tracker)
+// Fallback defaults used if Firebase has no exam data yet
+const DEFAULT_EXAMS = [
+  { id:"week1",   name:"Week 1 Exam",   file:"EMR_Week1_Exam.html",   questions:25,  time:"25 min",  passing:"70%", category:"module",  color:"#fbbf24", icon:"📋", weight:"20% (Module Exams)", topics:"EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management", active:true },
+  { id:"midterm", name:"Midterm Exam",  file:"EMR_Midterm_Exam.html", questions:50,  time:"50 min",  passing:"70%", category:"midterm", color:"#f97316", icon:"📝", weight:"30% (Midterm)",      topics:"All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED", active:true },
+  { id:"week4",   name:"Week 4 Exam",   file:"EMR_Week4_Exam.html",   questions:25,  time:"25 min",  passing:"70%", category:"module",  color:"#fbbf24", icon:"📋", weight:"20% (Module Exams)", topics:"Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies", active:true },
+  { id:"final",   name:"Final Exam",    file:"EMR_Final_Exam.html",   questions:120, time:"120 min", passing:"70%", category:"final",   color:"#f87171", icon:"🎓", weight:"40% (Final)",        topics:"Comprehensive — all course topics", active:true },
 ];
+let EXAMS = [...DEFAULT_EXAMS];
+
+async function loadExamsFromFirebase() {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/portalContent?key=${FB.apiKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const doc = await resp.json();
+    const arr = doc.fields?.exams?.arrayValue?.values || [];
+    if (arr.length === 0) return; // no exams saved yet — use defaults
+    EXAMS = arr.map(v => {
+      const f = v.mapValue?.fields || {};
+      return {
+        id:        f.id?.stringValue        || '',
+        name:      f.name?.stringValue      || '',
+        file:      f.file?.stringValue      || '',
+        questions: f.questions?.stringValue || '',
+        time:      f.time?.stringValue      || '',
+        passing:   f.passing?.stringValue   || '70%',
+        category:  f.category?.stringValue  || 'module',
+        color:     f.color?.stringValue     || '#fbbf24',
+        icon:      f.icon?.stringValue      || '📋',
+        weight:    f.weight?.stringValue    || '',
+        topics:    f.topics?.stringValue    || '',
+        active:    f.active?.booleanValue !== false,
+      };
+    }).filter(e => e.active && e.name && e.file);
+  } catch(e) { console.error('loadExamsFromFirebase error:', e); }
+}
 
 const CATEGORIES = [
   { id:"quiz",    label:"Quizzes",      color:"#818cf8", weight:0.10 },
@@ -479,8 +462,8 @@ const CATEGORIES = [
 // Leave name as "" for unassigned slots
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
-  { id: "TFD-61", name: "Dustin Howell" },
-  { id: "TFD-002", name: "Anthony Golden" },
+  { id: "TFD-001", name: "" },
+  { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
   { id: "TFD-005", name: "" },
@@ -748,7 +731,8 @@ async function deleteCertificate(docName, certName) {
 async function renderPortalCertificates() {
   await loadCertificates();
 }
-function renderExams() {
+async function renderExams() {
+  await loadExamsFromFirebase();
   const grid = document.getElementById("examsGrid");
   grid.innerHTML = EXAMS.map(ex => {
     const sc = studentScores[ex.id];
@@ -839,6 +823,7 @@ function attemptSignIn() {
   currentSession = { id: match.id, name: match.name };
   currentStudent = match.name;
   try { localStorage.setItem('tfd_session', JSON.stringify(currentSession)); } catch(e) {}
+  await loadExamsFromFirebase();
   document.getElementById("signInModal").classList.add("hidden");
 
   // Show portal header
