@@ -734,7 +734,7 @@ async function renderPortalCertificates() {
 function renderExams() {
   const grid = document.getElementById("examsGrid");
   grid.innerHTML = EXAMS.map(ex => {
-    const sc = studentScores[ex.id];
+    const sc = studentScores[ex.id] || studentScores[ex.name];
     const scoreHtml = sc
       ? `<div class="score-display">
            <div class="score-pct" style="color:${sc.pct>=70?'#4ade80':'#f87171'}">${sc.pct}%</div>
@@ -765,7 +765,7 @@ function renderExams() {
             : sc
               ? `<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
                   <span style="font-size:12px;font-weight:700;color:#16a34a;border:2px solid #16a34a;border-radius:8px;padding:8px 16px;background:#f0fdf4;white-space:nowrap;">✓ Submitted ${sc.pct}%</span>
-                  <a href="${ex.file}?review=1&name=${encodeURIComponent(currentSession?.name||'')}"
+                  <a href="${(sc.file||ex.file)}?review=1&name=${encodeURIComponent(currentSession?.name||'')}"
                      style="font-size:12px;color:#2563eb;border:1px solid #bfdbfe;border-radius:8px;padding:6px 14px;background:#f0f6ff;text-decoration:none;white-space:nowrap;transition:all 0.2s;"
                      onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe'">
                      📋 Review Answers
@@ -907,13 +907,16 @@ async function fetchStudentScores(name) {
     parsed.sort((a,b) => b.submittedAt.localeCompare(a.submittedAt));
     for (const row of parsed) {
       const ex = EXAMS.find(e => e.name === row.examLabel);
-      if (!ex) { console.log("Portal: no matching exam for label:", row.examLabel); continue; }
-      const existing = studentScores[ex.id];
+      // Use ex.id if found in EXAMS, otherwise use the label itself as the key
+      const key = ex ? ex.id : row.examLabel;
+      const existing = studentScores[key];
       if (!existing || row.pct > existing.pct) {
-        studentScores[ex.id] = {
+        studentScores[key] = {
           pct: row.pct, score: row.score, total: row.total,
           submittedAt: row.submittedAt,
-          category: row.category || ex.category,
+          category: row.category || (ex ? ex.category : 'practice'),
+          examLabel: row.examLabel,
+          file: ex ? ex.file : null,
         };
       }
     }
