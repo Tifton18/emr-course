@@ -958,7 +958,14 @@
     .exam-header { flex-wrap: wrap; }
     .progress-wrap { max-width: 200px; }
   }
-</style>
+
+  input[readonly] {
+    background: #f0f6ff !important;
+    border-color: #93c5fd !important;
+    color: #1e3a5f !important;
+    cursor: default !important;
+  }
+  </style>
 </head>
 <body>
 
@@ -1132,7 +1139,7 @@ const EXAM_ID       = "practice2";
   if (portalName) {
     window.addEventListener('DOMContentLoaded', () => {
       const inp = document.getElementById('studentName');
-      if (inp) { inp.value = portalName; inp.readOnly = true; inp.style.background = '#f0f6ff'; }
+      if (inp) { inp.value = portalName; inp.readOnly = true; inp.style.cssText += ';background:#f0f6ff!important;border-color:#93c5fd!important;color:#1e3a5f;cursor:default;'; }
     });
   }
   // Review mode check
