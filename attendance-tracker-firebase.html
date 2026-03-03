@@ -606,11 +606,11 @@ async function loadFromFirebase(){
       if(!data.assignments)data.assignments=[];
       if(!data.scores)data.scores={};
     }else{
-      data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));
+      data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n,tfdId:'TFD-'+String(i+1).padStart(3,'0')}));
       data.className='My Class';data.attendance={};data.assignments=[];data.scores={};
       await DOC_REF.set(JSON.parse(JSON.stringify(data)));
     }
-  }catch(e){setSyncStatus('error','✗ Connection failed');data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n}));}
+  }catch(e){setSyncStatus('error','✗ Connection failed');data.students=DEFAULT_STUDENTS.map((n,i)=>({id:i+1,name:n,tfdId:'TFD-'+String(i+1).padStart(3,'0')}));}
   await loadExamResults();
   await loadPortalContent();
   document.getElementById('loadingOverlay').style.display='none';
@@ -667,7 +667,17 @@ function renderAttendance(){
   data.students.forEach((student,idx)=>{
     const status=rec[student.id]||null;
     const row=document.createElement('div');row.className='student-row';row.style.borderLeftColor=status?STATUS_CONFIG[status].color:'#dbeafe';
-    row.innerHTML=`<div class="student-num">${String(idx+1).padStart(2,'0')}</div><div class="student-name">${escHtml(student.name)}</div>
+    row.innerHTML=`<div class="student-num">${String(idx+1).padStart(2,'0')}</div>
+      <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
+        <div class="student-name">${escHtml(student.name)}</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:#93adc8;letter-spacing:1px;">ID:</span>
+          <input value="${escHtml(student.tfdId||'')}" placeholder="TFD-001"
+            style="font-size:11px;color:#4a6080;background:transparent;border:none;border-bottom:1px dashed #bfdbfe;width:70px;padding:1px 2px;font-family:monospace;"
+            onchange="updateStudentId(${student.id}, this.value.trim())"
+            onclick="event.stopPropagation()" title="Click to edit student ID"/>
+        </div>
+      </div>
       <div class="status-btns">${STATUSES.map(s=>{const a=status===s,cfg=STATUS_CONFIG[s];return`<button class="status-btn" style="border-color:${a?cfg.color:'#bfdbfe'};background:${a?cfg.bg:'transparent'};color:${a?cfg.color:'#93adc8'}" onclick="setStatus(${student.id},'${s}')">${cfg.label}</button>`;}).join('')}</div>
       <button class="remove-btn" onclick="removeStudent(${student.id})">×</button>`;
     list.appendChild(row);
@@ -1032,7 +1042,27 @@ async function confirmResetSelected(studentName) {
 function removeStudent(id){if(!confirm('Remove this student?'))return;data.students=data.students.filter(s=>s.id!==id);delete data.scores[String(id)];scheduleSave();renderAttendance();}
 function showAddForm(){document.getElementById('addForm').style.display='flex';document.getElementById('addStudentTrigger').style.display='none';document.getElementById('newStudentInput').focus();}
 function cancelAdd(){document.getElementById('addForm').style.display='none';document.getElementById('addStudentTrigger').style.display='block';document.getElementById('newStudentInput').value='';}
-function addStudent(){const name=document.getElementById('newStudentInput').value.trim();if(!name)return;data.students.push({id:Date.now(),name});scheduleSave();cancelAdd();renderAttendance();}
+
+function updateStudentId(sid, newId) {
+  const student = data.students.find(s => s.id === sid);
+  if (!student) return;
+  student.tfdId = newId;
+  scheduleSave();
+}
+
+function addStudent(){
+  const name=document.getElementById('newStudentInput').value.trim();
+  if(!name)return;
+  // Auto-assign next TFD ID
+  const usedNums = data.students.map(s => {
+    const m = (s.tfdId||'').match(/TFD-(\d+)/);
+    return m ? parseInt(m[1]) : 0;
+  });
+  const nextNum = Math.max(0, ...usedNums) + 1;
+  const tfdId = 'TFD-' + String(nextNum).padStart(3,'0');
+  data.students.push({id:Date.now(), name, tfdId});
+  scheduleSave();cancelAdd();renderAttendance();
+}
 document.getElementById('newStudentInput').addEventListener('keydown',e=>{if(e.key==='Enter')addStudent();if(e.key==='Escape')cancelAdd();});
 
 function exportReport(){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-summary').classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));renderSummary();setTimeout(()=>window.print(),100);}
