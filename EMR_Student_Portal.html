@@ -731,8 +731,7 @@ async function deleteCertificate(docName, certName) {
 async function renderPortalCertificates() {
   await loadCertificates();
 }
-async function renderExams() {
-  await loadExamsFromFirebase();
+function renderExams() {
   const grid = document.getElementById("examsGrid");
   grid.innerHTML = EXAMS.map(ex => {
     const sc = studentScores[ex.id];
@@ -823,7 +822,6 @@ function attemptSignIn() {
   currentSession = { id: match.id, name: match.name };
   currentStudent = match.name;
   try { localStorage.setItem('tfd_session', JSON.stringify(currentSession)); } catch(e) {}
-  await loadExamsFromFirebase();
   document.getElementById("signInModal").classList.add("hidden");
 
   // Show portal header
@@ -1100,12 +1098,13 @@ function letterColor(l) {
 // Sign-in handled by modal — see attemptSignIn()
 
 // Check for saved session on load
-(function() {
+(async function() {
+  // Load exams from Firebase first (needed for both signed-in and guest views)
+  await loadExamsFromFirebase();
   try {
     const saved = localStorage.getItem('tfd_session');
     if (saved) {
       const session = JSON.parse(saved);
-      // Verify the saved session still exists in the roster
       const match = STUDENT_ROSTER.find(s =>
         s.id === session.id &&
         s.name.trim().toLowerCase() === session.name.trim().toLowerCase() &&
@@ -1114,7 +1113,6 @@ function letterColor(l) {
       if (match) {
         currentSession = { id: match.id, name: match.name };
         currentStudent = match.name;
-        // Show portal header
         const header = document.getElementById("portalHeader");
         header.classList.add("visible");
         document.getElementById("portalAvatar").textContent = match.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
