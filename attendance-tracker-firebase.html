@@ -1464,10 +1464,7 @@ function renderContentManager() {
             <textarea oninput="cmUpdateField('announcements',${i},'text',this.value)" placeholder="Enter announcement text…">${item.text||''}</textarea>
             <div style="display:flex;align-items:center;gap:10px;margin-top:2px;">
               <div class="cm-item-label" style="margin:0;">Type:</div>
-              ${['info','warning','success','urgent'].map(type=>`
-                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:${{'info':'#2563eb','warning':'#f59e0b','success':'#16a34a','urgent':'#dc2626'}[type]};">
-                  <input type="radio" name="ann-type-${i}" value="${type}" ${item.type===type?'checked':''} onchange="cmUpdateField('announcements',${i},'type','${type}')"> ${type}
-                </label>`).join('')}
+              ${['info','warning','success','urgent'].map(type=>{const typeColors={info:'#2563eb',warning:'#f59e0b',success:'#16a34a',urgent:'#dc2626'};return `<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:${typeColors[type]};"><input type="radio" name="ann-type-${i}" value="${type}" ${item.type===type?'checked':''} onchange="cmUpdateField('announcements',${i},'type','${type}')">${type}</label>`;}).join('')}
             </div>
           </div>
           <button class="cm-del-btn" onclick="cmRemoveItem('announcements',${i})">✕</button>
