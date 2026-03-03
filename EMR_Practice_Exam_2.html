@@ -1143,8 +1143,9 @@ const EXAM_ID       = "practice2";
     });
   }
   // Review mode check
-  const reviewName = decodeURIComponent(params.get('review') || '').trim();
-  if (reviewName) {
+  const isReview = params.get('review') === '1';
+  const reviewName = decodeURIComponent(params.get('name') || '').trim();
+  if (isReview && reviewName) {
     window.addEventListener('DOMContentLoaded', () => { startReviewMode(reviewName); });
   }
 })();
@@ -1701,7 +1702,7 @@ async function saveToFirebase() {
     console.log('Saved to Firebase ✓');
 
     // Show review link
-    const portalUrl = `https://tifton18.github.io/emr-course/EMR_Student_Portal.html?review=${encodeURIComponent(currentStudentName)}&exam=${encodeURIComponent(EXAM_LABEL)}`;
+    const portalUrl = `${window.location.pathname.split('/').pop()}?review=1&name=${encodeURIComponent(currentStudentName)}`;
     const reviewDiv = document.getElementById('reviewLink');
     if (reviewDiv) {
       reviewDiv.innerHTML = `<a href="${portalUrl}" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1a2744;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">📋 Review My Answers in Portal</a>`;
