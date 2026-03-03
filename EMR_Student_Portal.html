@@ -432,7 +432,7 @@ async function loadExamsFromFirebase() {
     const doc = await resp.json();
     const arr = doc.fields?.exams?.arrayValue?.values || [];
     if (arr.length === 0) return; // no exams saved yet — use defaults
-    const fromFirebase = arr.map(v => {
+    const allFromFirebase = arr.map(v => {
       const f = v.mapValue?.fields || {};
       return {
         id:        f.id?.stringValue        || '',
@@ -448,11 +448,12 @@ async function loadExamsFromFirebase() {
         topics:    f.topics?.stringValue    || '',
         active:    f.active?.booleanValue !== false,
       };
-    }).filter(e => e.active && e.name && e.file);
-    // Merge: keep Firebase exams but fill in any DEFAULT_EXAMS not already present
-    const fbNames = new Set(fromFirebase.map(e => e.name));
+    }).filter(e => e.name); // keep ALL (including inactive) to track names
+    const activeFromFirebase = allFromFirebase.filter(e => e.active && e.file);
+    // Only add DEFAULT_EXAMS that are NOT managed in Firebase at all (by name)
+    const fbNames = new Set(allFromFirebase.map(e => e.name));
     const missing = DEFAULT_EXAMS.filter(e => !fbNames.has(e.name) && e.active !== false);
-    EXAMS = [...fromFirebase, ...missing];
+    EXAMS = [...activeFromFirebase, ...missing];
   } catch(e) { console.error('loadExamsFromFirebase error:', e); }
 }
 
