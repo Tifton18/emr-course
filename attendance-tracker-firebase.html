@@ -489,10 +489,13 @@ let addFormOpen={quiz:false,module:false,midterm:false,final:false};
 
 // Exam definitions — labels must match what the exam files submit to Firebase
 const EXAM_DEFS=[
-  {label:'Week 1 Exam',  category:'module',  assignId:'__exam_week1__'},
-  {label:'Midterm Exam', category:'midterm', assignId:'__exam_midterm__'},
-  {label:'Week 4 Exam',  category:'module',  assignId:'__exam_week4__'},
-  {label:'Final Exam',   category:'final',   assignId:'__exam_final__'},
+  {label:'Week 1 Exam',     category:'module',   assignId:'__exam_week1__'},
+  {label:'Midterm Exam',    category:'midterm',  assignId:'__exam_midterm__'},
+  {label:'Week 4 Exam',     category:'module',   assignId:'__exam_week4__'},
+  {label:'Final Exam',      category:'final',    assignId:'__exam_final__'},
+  {label:'Practice Exam 1', category:'practice', assignId:'__exam_practice1__'},
+  {label:'Practice Exam 2', category:'practice', assignId:'__exam_practice2__'},
+  {label:'Practice Exam 3', category:'practice', assignId:'__exam_practice3__'},
 ];
 // examResults: studentName (lowercase) -> { assignId -> {pct,score,total,submittedAt} }
 let examResults={};
