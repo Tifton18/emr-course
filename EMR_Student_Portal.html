@@ -264,8 +264,8 @@ body {
     <div class="modal-sub">Tifton Fire Department · EMR Program</div>
     <label class="modal-label" for="siName">Full Name</label>
     <input class="modal-input" id="siName" type="text" placeholder="Enter your full name…" autocomplete="off" />
-    <label class="modal-label" for="siId" style="display:none;">Student ID</label>
-    <input class="modal-input" id="siId" type="text" placeholder="e.g. TFD-001" style="display:none;" autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;" />
+    <label class="modal-label" for="siId">Student ID</label>
+    <input class="modal-input" id="siId" type="text" placeholder="e.g. TFD-001" autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;" />
     <div class="modal-error" id="siError">Name or Student ID not recognized. Please check and try again.</div>
     <button class="modal-btn" id="siBtn" onclick="attemptSignIn()">Sign In</button>
     <div class="modal-footer">Contact your instructor if you have trouble signing in.</div>
@@ -451,7 +451,7 @@ async function loadExamsFromFirebase() {
     }).filter(e => e.active && e.name && e.file);
     // Merge: keep Firebase exams but fill in any DEFAULT_EXAMS not already present
     const fbNames = new Set(fromFirebase.map(e => e.name));
-    const missing = DEFAULT_EXAMS.filter(e => !fbNames.has(e.name));
+    const missing = DEFAULT_EXAMS.filter(e => !fbNames.has(e.name) && e.active !== false);
     EXAMS = [...fromFirebase, ...missing];
   } catch(e) { console.error('loadExamsFromFirebase error:', e); }
 }
@@ -469,7 +469,7 @@ const CATEGORIES = [
 // Leave name as "" for unassigned slots
 // ══════════════════════════════════════════════════════
 const STUDENT_ROSTER = [
-  { id: "TFD-61", name: "Dustin Howell" },
+  { id: "TFD-001", name: "" },
   { id: "TFD-002", name: "" },
   { id: "TFD-003", name: "" },
   { id: "TFD-004", name: "" },
@@ -740,7 +740,7 @@ async function renderPortalCertificates() {
 }
 function renderExams() {
   const grid = document.getElementById("examsGrid");
-  grid.innerHTML = EXAMS.map(ex => {
+  grid.innerHTML = EXAMS.filter(ex => ex.active !== false).map(ex => {
     const sc = studentScores[ex.id] || studentScores[ex.name];
     const scoreHtml = sc
       ? `<div class="score-display">
@@ -808,7 +808,6 @@ function attemptSignIn() {
   const idNorm = normalizeId(idVal);
   const nameNorm = normalizeName(nameVal);
 
-  // Match by name only (ID field is optional/informational)
   const match = STUDENT_ROSTER.find(s =>
     normalizeName(s.name) === nameNorm &&
     s.name.trim() !== ""
@@ -1119,10 +1118,13 @@ async function loadRosterFromFirebase() {
     if (studentsArr.length === 0) return;
     // Replace STUDENT_ROSTER with live data from tracker
     STUDENT_ROSTER.length = 0;
-    studentsArr.forEach(sv => {
+    studentsArr.forEach((sv, idx) => {
       const sf = sv.mapValue?.fields || {};
       const name = sf.name?.stringValue || '';
-      const id   = String(sf.id?.integerValue || sf.id?.stringValue || '');
+      // Use tfdId if set, otherwise fall back to TFD-XXX from position
+      const tfdId = sf.tfdId?.stringValue || '';
+      const num   = String(sf.id?.integerValue || sf.id?.stringValue || idx+1).padStart(3,'0');
+      const id    = tfdId || `TFD-${num}`;
       if (name.trim()) STUDENT_ROSTER.push({ id, name });
     });
     console.log('Portal: roster loaded from Firebase:', STUDENT_ROSTER.length, 'students');
