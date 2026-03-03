@@ -1369,23 +1369,22 @@ function renderContentManager() {
     const items = portalContent[section] || [];
     const el = document.getElementById(`cm-${section}`);
     if (!el) return;
-    if (items.length === 0) {
-      el.innerHTML = `<div class="cm-empty">No items yet — click + Add to create one.</div>`;
-      return;
-    }
 
-    el.innerHTML = items.map((item, i) => {
-      if (section === 'exams') {
+    // Exams section uses DOM building (handled separately to avoid quote issues)
+    if (section === 'exams') {
       const cats = ['module','midterm','final','quiz'];
-      const rows = items.map(function(item, i) {
-        const div = document.createElement('div');
-        div.className = 'cm-item';
-        div.style.borderLeft = '3px solid ' + (item.color || '#fbbf24');
-
+      el.innerHTML = '';
+      if (items.length === 0) {
+        el.innerHTML = '<div class="cm-empty">No exams yet — click + Add Exam.</div>';
+        return;
+      }
+      items.forEach(function(item, i) {
         const catOpts = cats.map(function(c) {
           return '<option value="' + c + '"' + (item.category === c ? ' selected' : '') + '>' + c + '</option>';
         }).join('');
-
+        const div = document.createElement('div');
+        div.className = 'cm-item';
+        div.style.borderLeft = '3px solid ' + (item.color || '#fbbf24');
         div.innerHTML = [
           '<div class="cm-item-body">',
             '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">',
@@ -1410,14 +1409,14 @@ function renderContentManager() {
                 '</div></div>',
             '</div>',
             '<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:6px;">',
-              '<div><div class="cm-item-label">Topics / Description</div>',
-                '<input data-sec="exams" data-idx="' + i + '" data-fld="topics" value="' + escHtml(item.topics||'') + '" placeholder="e.g. Airway Management · CPR · Trauma"></div>',
+              '<div><div class="cm-item-label">Topics</div>',
+                '<input data-sec="exams" data-idx="' + i + '" data-fld="topics" value="' + escHtml(item.topics||'') + '" placeholder="e.g. Airway Management · CPR"></div>',
               '<div><div class="cm-item-label">Weight Label</div>',
                 '<input data-sec="exams" data-idx="' + i + '" data-fld="weight" value="' + escHtml(item.weight||'') + '" placeholder="e.g. 20% (Module Exams)"></div>',
             '</div>',
             '<div style="display:flex;align-items:center;gap:16px;margin-top:8px;">',
               '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#4a6080;">',
-                '<input type="checkbox" data-sec="exams" data-idx="' + i + '" data-fld="active" ' + (item.active !== false ? 'checked' : '') + ' style="accent-color:#2563eb;width:16px;height:16px;"> Active (visible to students)</label>',
+                '<input type="checkbox" data-sec="exams" data-idx="' + i + '" data-fld="active" ' + (item.active !== false ? 'checked' : '') + ' style="accent-color:#2563eb;width:16px;height:16px;"> Active</label>',
               '<div style="display:flex;gap:6px;margin-left:auto;">',
                 '<button data-move-sec="exams" data-move-idx="' + i + '" data-move-dir="-1" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;cursor:pointer;color:#4a6080;font-size:13px;">↑</button>',
                 '<button data-move-sec="exams" data-move-idx="' + i + '" data-move-dir="1" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;cursor:pointer;color:#4a6080;font-size:13px;">↓</button>',
@@ -1426,39 +1425,39 @@ function renderContentManager() {
           '</div>',
           '<button data-del-sec="exams" data-del-idx="' + i + '" class="cm-del-btn">✕</button>',
         ].join('');
-        return div;
-      });
-
-      el.innerHTML = '';
-      if (rows.length === 0) {
-        el.innerHTML = '<div class="cm-empty">No exams yet — click + Add Exam.</div>';
-      } else {
-        rows.forEach(function(row) { el.appendChild(row); });
-        // Attach events via data attributes to avoid inline handler quoting issues
-        el.querySelectorAll('input[data-sec], select[data-sec]').forEach(function(inp) {
-          inp.addEventListener('change', function() {
-            const s = this.dataset.sec, idx = parseInt(this.dataset.idx), fld = this.dataset.fld;
-            portalContent[s][idx][fld] = this.type === 'checkbox' ? this.checked : this.value;
-            if (fld === 'color') { this.closest('.cm-item').style.borderLeftColor = this.value; }
+        // Attach events
+        div.querySelectorAll('[data-sec]').forEach(function(inp) {
+          var ev = inp.type === 'color' ? 'input' : 'change';
+          inp.addEventListener(ev, function() {
+            var s = this.dataset.sec, ix = parseInt(this.dataset.idx), fld = this.dataset.fld;
+            portalContent[s][ix][fld] = this.type === 'checkbox' ? this.checked : this.value;
+            if (fld === 'color') this.closest('.cm-item').style.borderLeftColor = this.value;
           });
           inp.addEventListener('input', function() {
-            const s = this.dataset.sec, idx = parseInt(this.dataset.idx), fld = this.dataset.fld;
-            if (this.type !== 'checkbox') {
-              portalContent[s][idx][fld] = this.value;
-              if (fld === 'color') { this.closest('.cm-item').style.borderLeftColor = this.value; }
+            if (this.type === 'text') {
+              portalContent[this.dataset.sec][parseInt(this.dataset.idx)][this.dataset.fld] = this.value;
             }
           });
         });
-        el.querySelectorAll('button[data-del-sec]').forEach(function(btn) {
+        div.querySelectorAll('[data-del-sec]').forEach(function(btn) {
           btn.addEventListener('click', function() { cmRemoveItem(this.dataset.delSec, parseInt(this.dataset.delIdx)); });
         });
-        el.querySelectorAll('button[data-move-sec]').forEach(function(btn) {
+        div.querySelectorAll('[data-move-sec]').forEach(function(btn) {
           btn.addEventListener('click', function() { cmMoveItem(this.dataset.moveSec, parseInt(this.dataset.moveIdx), parseInt(this.dataset.moveDir)); });
         });
-      }
+        el.appendChild(div);
+      });
       return;
     }
-        if (section === 'announcements') {
+
+    // All other sections use innerHTML map
+    if (items.length === 0) {
+      el.innerHTML = `<div class="cm-empty">No items yet — click + Add to create one.</div>`;
+      return;
+    }
+
+    el.innerHTML = items.map((item, i) => {
+      if (section === 'announcements') {
         return `<div class="cm-item">
           <div class="cm-item-body">
             <div class="cm-item-label">Message</div>
@@ -1466,7 +1465,7 @@ function renderContentManager() {
             <div style="display:flex;align-items:center;gap:10px;margin-top:2px;">
               <div class="cm-item-label" style="margin:0;">Type:</div>
               ${['info','warning','success','urgent'].map(type=>`
-                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:${TYPE_COLORS[type]};">
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;color:${{'info':'#2563eb','warning':'#f59e0b','success':'#16a34a','urgent':'#dc2626'}[type]};">
                   <input type="radio" name="ann-type-${i}" value="${type}" ${item.type===type?'checked':''} onchange="cmUpdateField('announcements',${i},'type','${type}')"> ${type}
                 </label>`).join('')}
             </div>
@@ -1511,7 +1510,6 @@ function renderContentManager() {
         </div>`;
       }
     }).join('');
-  };
 
   ['exams','announcements','links','resources','slides'].forEach(renderSection);
 
