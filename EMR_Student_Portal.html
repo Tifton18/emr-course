@@ -264,8 +264,8 @@ body {
     <div class="modal-sub">Tifton Fire Department · EMR Program</div>
     <label class="modal-label" for="siName">Full Name</label>
     <input class="modal-input" id="siName" type="text" placeholder="Enter your full name…" autocomplete="off" />
-    <label class="modal-label" for="siId">Student ID</label>
-    <input class="modal-input" id="siId" type="text" placeholder="e.g. TFD-001" autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;" />
+    <label class="modal-label" for="siId" style="display:none;">Student ID</label>
+    <input class="modal-input" id="siId" type="text" placeholder="e.g. TFD-001" style="display:none;" autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;" />
     <div class="modal-error" id="siError">Name or Student ID not recognized. Please check and try again.</div>
     <button class="modal-btn" id="siBtn" onclick="attemptSignIn()">Sign In</button>
     <div class="modal-footer">Contact your instructor if you have trouble signing in.</div>
@@ -417,7 +417,10 @@ const DEFAULT_EXAMS = [
   { id:"week1",   name:"Week 1 Exam",   file:"EMR_Week1_Exam.html",   questions:25,  time:"25 min",  passing:"70%", category:"module",  color:"#fbbf24", icon:"📋", weight:"20% (Module Exams)", topics:"EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management", active:true },
   { id:"midterm", name:"Midterm Exam",  file:"EMR_Midterm_Exam.html", questions:50,  time:"50 min",  passing:"70%", category:"midterm", color:"#f97316", icon:"📝", weight:"30% (Midterm)",      topics:"All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED", active:true },
   { id:"week4",   name:"Week 4 Exam",   file:"EMR_Week4_Exam.html",   questions:25,  time:"25 min",  passing:"70%", category:"module",  color:"#fbbf24", icon:"📋", weight:"20% (Module Exams)", topics:"Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies", active:true },
-  { id:"final",   name:"Final Exam",    file:"EMR_Final_Exam.html",   questions:120, time:"120 min", passing:"70%", category:"final",   color:"#f87171", icon:"🎓", weight:"40% (Final)",        topics:"Comprehensive — all course topics", active:true },
+  { id:"final",     name:"Final Exam",       file:"EMR_Final_Exam.html",       questions:120, time:"120 min", passing:"70%", category:"final",    color:"#f87171", icon:"🎓",  weight:"40% (Final)",        topics:"Comprehensive — all course topics", active:true },
+  { id:"practice1", name:"Practice Exam 1",  file:"EMR_Practice_Exam_1.html",  questions:30,  time:"60 min",  passing:"70%", category:"practice", color:"#06b6d4", icon:"📝",  weight:"Ungraded Practice",  topics:"Patient Assessment · Airway · Shock · Trauma · Medical Emergencies", active:true },
+  { id:"practice2", name:"Practice Exam 2",  file:"EMR_Practice_Exam_2.html",  questions:30,  time:"60 min",  passing:"70%", category:"practice", color:"#06b6d4", icon:"📝",  weight:"Ungraded Practice",  topics:"Patient Assessment · Airway · Shock · Trauma · Medical Emergencies", active:true },
+  { id:"practice3", name:"Practice Exam 3",  file:"EMR_Practice_Exam_3.html",  questions:30,  time:"60 min",  passing:"70%", category:"practice", color:"#06b6d4", icon:"📝",  weight:"Ungraded Practice",  topics:"Patient Assessment · Airway · Shock · Trauma · Medical Emergencies", active:true },
 ];
 let EXAMS = [...DEFAULT_EXAMS];
 
@@ -429,7 +432,7 @@ async function loadExamsFromFirebase() {
     const doc = await resp.json();
     const arr = doc.fields?.exams?.arrayValue?.values || [];
     if (arr.length === 0) return; // no exams saved yet — use defaults
-    EXAMS = arr.map(v => {
+    const fromFirebase = arr.map(v => {
       const f = v.mapValue?.fields || {};
       return {
         id:        f.id?.stringValue        || '',
@@ -446,6 +449,10 @@ async function loadExamsFromFirebase() {
         active:    f.active?.booleanValue !== false,
       };
     }).filter(e => e.active && e.name && e.file);
+    // Merge: keep Firebase exams but fill in any DEFAULT_EXAMS not already present
+    const fbNames = new Set(fromFirebase.map(e => e.name));
+    const missing = DEFAULT_EXAMS.filter(e => !fbNames.has(e.name));
+    EXAMS = [...fromFirebase, ...missing];
   } catch(e) { console.error('loadExamsFromFirebase error:', e); }
 }
 
@@ -801,8 +808,8 @@ function attemptSignIn() {
   const idNorm = normalizeId(idVal);
   const nameNorm = normalizeName(nameVal);
 
+  // Match by name only (ID field is optional/informational)
   const match = STUDENT_ROSTER.find(s =>
-    normalizeId(s.id) === idNorm &&
     normalizeName(s.name) === nameNorm &&
     s.name.trim() !== ""
   );
@@ -1101,15 +1108,38 @@ function letterColor(l) {
 // Sign-in handled by modal — see attemptSignIn()
 
 // Check for saved session on load
+
+async function loadRosterFromFirebase() {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB.projectId}/databases/(default)/documents/tracker/main?key=${FB.apiKey}`;
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const doc = await resp.json();
+    const studentsArr = doc.fields?.students?.arrayValue?.values || [];
+    if (studentsArr.length === 0) return;
+    // Replace STUDENT_ROSTER with live data from tracker
+    STUDENT_ROSTER.length = 0;
+    studentsArr.forEach(sv => {
+      const sf = sv.mapValue?.fields || {};
+      const name = sf.name?.stringValue || '';
+      const id   = String(sf.id?.integerValue || sf.id?.stringValue || '');
+      if (name.trim()) STUDENT_ROSTER.push({ id, name });
+    });
+    console.log('Portal: roster loaded from Firebase:', STUDENT_ROSTER.length, 'students');
+  } catch(e) {
+    console.error('loadRosterFromFirebase error:', e);
+  }
+}
+
 (async function() {
-  // Load exams from Firebase first (needed for both signed-in and guest views)
+  // Load exams and roster from Firebase first
   await loadExamsFromFirebase();
+  await loadRosterFromFirebase();
   try {
     const saved = localStorage.getItem('tfd_session');
     if (saved) {
       const session = JSON.parse(saved);
       const match = STUDENT_ROSTER.find(s =>
-        s.id === session.id &&
         s.name.trim().toLowerCase() === session.name.trim().toLowerCase() &&
         s.name.trim() !== ""
       );
