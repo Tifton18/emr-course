@@ -1376,49 +1376,49 @@ function renderContentManager() {
 
     el.innerHTML = items.map((item, i) => {
       if (section === 'exams') {
-      el.innerHTML = items.map((item, i) => `
-        <div class="cm-item" style="border-left:3px solid ${item.color||'#fbbf24'};">
-          <div class="cm-item-body">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-              <div><div class="cm-item-label">Exam Name</div><input value="${item.name||''}" placeholder="e.g. Week 2 Exam" oninput="cmUpdateField('exams',${i},'name',this.value)"></div>
-              <div><div class="cm-item-label">HTML Filename</div><input value="${item.file||''}" placeholder="e.g. EMR_Week2_Exam.html" oninput="cmUpdateField('exams',${i},'file',this.value)"></div>
-              <div><div class="cm-item-label">Unique ID</div><input value="${item.id||''}" placeholder="e.g. week2" oninput="cmUpdateField('exams',${i},'id',this.value)"></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:6px;">
-              <div><div class="cm-item-label">Questions</div><input value="${item.questions||''}" placeholder="25" oninput="cmUpdateField('exams',${i},'questions',this.value)"></div>
-              <div><div class="cm-item-label">Time</div><input value="${item.time||''}" placeholder="25 min" oninput="cmUpdateField('exams',${i},'time',this.value)"></div>
-              <div><div class="cm-item-label">Category</div>
-                <select style="width:100%;background:#fff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 10px;font-size:13px;color:#1e3a5f;font-family:Georgia,serif;" onchange="cmUpdateField('exams',${i},'category',this.value)">
-                  ${['module','midterm','final','quiz'].map(c=>`<option value="${c}" ${item.category===c?'selected':''}>${c}</option>`).join('')}
-                </select>
-              </div>
-              <div><div class="cm-item-label">Color</div>
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <input type="color" value="${item.color||'#fbbf24'}" style="width:38px;height:34px;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;padding:2px;" onchange="cmUpdateField('exams',${i},'color',this.value);this.closest('.cm-item').style.borderLeftColor=this.value;">
-                  <input value="${item.color||'#fbbf24'}" style="flex:1;" placeholder="#fbbf24" oninput="cmUpdateField('exams',${i},'color',this.value);this.closest('.cm-item').style.borderLeftColor=this.value;">
-                </div>
-              </div>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:6px;">
-              <div><div class="cm-item-label">Topics / Description</div><input value="${item.topics||''}" placeholder="e.g. Airway Management · CPR · Trauma" oninput="cmUpdateField('exams',${i},'topics',this.value)"></div>
-              <div><div class="cm-item-label">Weight Label</div><input value="${item.weight||''}" placeholder="e.g. 20% (Module Exams)" oninput="cmUpdateField('exams',${i},'weight',this.value)"></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#4a6080;">
-                <input type="checkbox" ${item.active!==false?'checked':''} onchange="cmUpdateField('exams',${i},'active',this.checked)" style="accent-color:#2563eb;width:16px;height:16px;">
-                Active (visible to students)
-              </label>
-              <div style="display:flex;gap:6px;margin-left:auto;">
-                <button onclick="cmMoveItem('exams',${i},-1)" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;cursor:pointer;color:#4a6080;font-size:13px;" title="Move up">↑</button>
-                <button onclick="cmMoveItem('exams',${i},1)" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;cursor:pointer;color:#4a6080;font-size:13px;" title="Move down">↓</button>
-              </div>
-            </div>
-          </div>
-          <button class="cm-del-btn" onclick="cmRemoveItem('exams',${i})">✕</button>
-        </div>`).join('');
+      const cats = ['module','midterm','final','quiz'];
+      let html = '';
+      items.forEach((item, i) => {
+        const catOptions = cats.map(c =>
+          '<option value="' + c + '"' + (item.category === c ? ' selected' : '') + '>' + c + '</option>'
+        ).join('');
+        html += '<div class="cm-item" style="border-left:3px solid ' + (item.color||'#fbbf24') + ';">'
+          + '<div class="cm-item-body">'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">'
+          + '<div><div class="cm-item-label">Exam Name</div><input value="' + (item.name||'') + '" placeholder="e.g. Week 2 Exam" oninput="cmUpdateField('exams',' + i + ','name',this.value)"></div>'
+          + '<div><div class="cm-item-label">HTML Filename</div><input value="' + (item.file||'') + '" placeholder="e.g. EMR_Week2_Exam.html" oninput="cmUpdateField('exams',' + i + ','file',this.value)"></div>'
+          + '<div><div class="cm-item-label">Unique ID</div><input value="' + (item.id||'') + '" placeholder="e.g. week2" oninput="cmUpdateField('exams',' + i + ','id',this.value)"></div>'
+          + '</div>'
+          + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:6px;">'
+          + '<div><div class="cm-item-label">Questions</div><input value="' + (item.questions||'') + '" placeholder="25" oninput="cmUpdateField('exams',' + i + ','questions',this.value)"></div>'
+          + '<div><div class="cm-item-label">Time</div><input value="' + (item.time||'') + '" placeholder="25 min" oninput="cmUpdateField('exams',' + i + ','time',this.value)"></div>'
+          + '<div><div class="cm-item-label">Category</div>'
+          + '<select style="width:100%;background:#fff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 10px;font-size:13px;color:#1e3a5f;font-family:Georgia,serif;" onchange="cmUpdateField('exams',' + i + ','category',this.value)">'
+          + catOptions + '</select></div>'
+          + '<div><div class="cm-item-label">Color</div>'
+          + '<div style="display:flex;align-items:center;gap:6px;">'
+          + '<input type="color" value="' + (item.color||'#fbbf24') + '" style="width:38px;height:34px;border:1px solid #bfdbfe;border-radius:6px;cursor:pointer;padding:2px;" onchange="cmUpdateField('exams',' + i + ','color',this.value);this.parentElement.nextElementSibling&&(this.parentElement.closest('.cm-item').style.borderLeftColor=this.value);">'
+          + '<input value="' + (item.color||'#fbbf24') + '" style="flex:1;" placeholder="#fbbf24" oninput="cmUpdateField('exams',' + i + ','color',this.value);this.closest('.cm-item').style.borderLeftColor=this.value;">'
+          + '</div></div></div>'
+          + '<div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:6px;">'
+          + '<div><div class="cm-item-label">Topics / Description</div><input value="' + (item.topics||'') + '" placeholder="e.g. Airway Management · CPR · Trauma" oninput="cmUpdateField('exams',' + i + ','topics',this.value)"></div>'
+          + '<div><div class="cm-item-label">Weight Label</div><input value="' + (item.weight||'') + '" placeholder="e.g. 20% (Module Exams)" oninput="cmUpdateField('exams',' + i + ','weight',this.value)"></div>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:16px;margin-top:8px;">'
+          + '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#4a6080;">'
+          + '<input type="checkbox" ' + (item.active !== false ? 'checked' : '') + ' onchange="cmUpdateField('exams',' + i + ','active',this.checked)" style="accent-color:#2563eb;width:16px;height:16px;"> Active (visible to students)</label>'
+          + '<div style="display:flex;gap:6px;margin-left:auto;">'
+          + '<button onclick="cmMoveItem('exams',' + i + ',-1)" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;cursor:pointer;color:#4a6080;font-size:13px;" title="Move up">↑</button>'
+          + '<button onclick="cmMoveItem('exams',' + i + ',1)" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:6px;padding:4px 10px;cursor:pointer;color:#4a6080;font-size:13px;" title="Move down">↓</button>'
+          + '</div></div>'
+          + '</div>'
+          + '<button class="cm-del-btn" onclick="cmRemoveItem('exams',' + i + ')">✕</button>'
+          + '</div>';
+      });
+      el.innerHTML = html || '<div class="cm-empty">No exams yet — click + Add Exam to create one.</div>';
       return;
     }
-    if (section === 'announcements') {
+        if (section === 'announcements') {
         return `<div class="cm-item">
           <div class="cm-item-body">
             <div class="cm-item-label">Message</div>
