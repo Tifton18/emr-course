@@ -860,6 +860,27 @@ function renderSummary(){
         <span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span>
         <button onclick="showResetModal('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑 Reset Exams</button>
       </div></div>${attStats}${gradesRow}`;
+    // Add practice exam attempts to card
+    const practiceExams = EXAM_DEFS.filter(d => d.category === 'practice');
+    const studentKey = student.name.toLowerCase().trim();
+    const practiceAttempts = practiceExams
+      .map(d => ({ label: d.label, result: examResults[studentKey]?.[d.assignId] || null }))
+      .filter(p => p.result !== null);
+
+    if (practiceAttempts.length > 0) {
+      const practiceHtml = document.createElement('div');
+      practiceHtml.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid #e6f0fb;';
+      practiceHtml.innerHTML = '<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">📝 Practice Exams (ungraded)</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
+        + practiceAttempts.map(p => {
+            const pct = p.result.pct;
+            const col = pct >= 70 ? '#16a34a' : '#dc2626';
+            return `<span style="background:${col}11;border:1px solid ${col}40;color:${col};border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;">${p.label}: ${pct}%</span>`;
+          }).join('')
+        + '</div>';
+      div.appendChild(practiceHtml);
+    }
+
     // Load certs for this student asynchronously and append
     list.appendChild(div);
     loadStudentCertsForSummary(student.name, div);
