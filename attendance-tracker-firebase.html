@@ -1430,9 +1430,9 @@ async function loadPortalContent() {
       });
     });
   } catch(e) { console.error('loadPortalContent error:', e); }
-  // Seed default exams if none saved yet
-  if (portalContent.exams.length === 0) {
-    portalContent.exams = [
+  // Seed default EMR exams if none saved yet
+  if (portalContent.emr.exams.length === 0) {
+    portalContent.emr.exams = [
       { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'20% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management', active:true },
       { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'📝', weight:'30% (Midterm)',      topics:'All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED', active:true },
       { id:'week4',   name:'Week 4 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'20% (Module Exams)', topics:'Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies', active:true },
