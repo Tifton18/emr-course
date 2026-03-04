@@ -496,6 +496,9 @@ const DEFAULT_STUDENTS=['Alex Johnson','Brianna Smith','Carlos Rivera','Diana Ch
 
 let data={className:'My Class',students:[],attendance:{},assignments:[],scores:{}};
 let saveTimer=null, selectedDate=todayStr(), activeTab='attendance';
+let activeSummaryCourse='emr';
+let activeGradesCourse='emr';
+let activeAnalysisCourse='emr';
 let addFormOpen={quiz:false,module:false,midterm:false,final:false};
 
 // Exam definitions — labels must match what the exam files submit to Firebase
