@@ -948,26 +948,37 @@ function switchCourse(courseId) {
 }
 
 function getEnrolledCourses() {
-  if (!currentSession) return [];
+  if (!currentSession) return COURSES.map(c => c.id); // not signed in: show all
   const student = _rosterData?.find(s => s.name.toLowerCase() === currentSession.name.toLowerCase());
-  if (!student) return COURSES.map(c => c.id); // default: all courses
-  return student.courses || ['emr']; // default enrolled in EMR only
+  if (!student) return COURSES.map(c => c.id); // not in roster: show all
+  return student.courses && student.courses.length > 0 ? student.courses : COURSES.map(c => c.id);
 }
 
 function renderCourseTabs() {
   const bar = document.getElementById('courseTabs');
-  if (!bar) return;
-  const inner = document.getElementById('courseTabsInner') || bar.querySelector('div');
-  if (!inner) return;
+  if (!bar) { console.warn('courseTabs element not found'); return; }
+  const inner = document.getElementById('courseTabsInner');
+  if (!inner) { console.warn('courseTabsInner element not found'); return; }
+
   const enrolled = getEnrolledCourses();
-  // If current active course isn't enrolled, switch to first enrolled course
-  if (!enrolled.includes(activeCourse)) {
-    activeCourse = enrolled[0] || COURSES[0].id;
+  console.log('renderCourseTabs: session=', currentSession?.name, 'enrolled=', enrolled, 'activeCourse=', activeCourse);
+
+  // If active course isn't enrolled, switch to first enrolled
+  if (enrolled.length > 0 && !enrolled.includes(activeCourse)) {
+    activeCourse = enrolled[0];
+    console.log('Switched activeCourse to', activeCourse);
   }
+
+  // Only show tabs if more than one course exists
+  if (COURSES.length <= 1) {
+    bar.style.display = 'none';
+    return;
+  }
+
   inner.innerHTML = COURSES.map(c => {
     const isEnrolled = enrolled.includes(c.id);
     const isActive = activeCourse === c.id;
-    return `<button onclick="${isEnrolled ? `switchCourse('${c.id}')` : ''}"
+    return `<button onclick="${isEnrolled ? `switchCourse('${c.id}')` : 'void(0)'}"
       title="${isEnrolled ? c.label : c.label + ' — not yet enrolled'}"
       style="padding:10px 18px;border:none;background:transparent;
              color:${isActive ? '#fff' : isEnrolled ? '#93adc8' : '#3a4a6b'};
@@ -975,17 +986,19 @@ function renderCourseTabs() {
              cursor:${isEnrolled ? 'pointer' : 'not-allowed'};
              border-bottom:3px solid ${isActive ? c.color : 'transparent'};
              transition:all 0.15s;white-space:nowrap;opacity:${isEnrolled ? '1' : '0.4'};">
-      ${c.icon} ${c.label}${isEnrolled ? '' : ' 🔒'}
+      ${c.icon || '📚'} ${c.label}${isEnrolled ? '' : ' 🔒'}
     </button>`;
   }).join('');
+
   bar.style.display = currentSession ? 'block' : 'none';
+  console.log('renderCourseTabs: set display=', bar.style.display, 'tabs=', COURSES.length);
 }
 
 async function loadStudentData(name) {
-  const btn = document.getElementById("signInHeroBtn");
   studentScores = {};
   window._trackerCatData = {};
   await fetchStudentScores(name);
+  renderCourseTabs(); // re-render after data loaded to enforce enrollment
   renderExams();
   renderGrades(name);
 }
@@ -1268,10 +1281,11 @@ async function loadRosterFromFirebase() {
 }
 
 (async function() {
-  // Load exams and roster from Firebase first
+  // Load everything from Firebase before showing anything
   await loadExamsFromFirebase();
   await loadRosterFromFirebase();
-  renderCourseTabs();
+  // Load portal content early so COURSES array is populated from Firebase
+  await getPortalContent();
   try {
     const saved = localStorage.getItem('tfd_session');
     if (saved) {
@@ -1290,6 +1304,7 @@ async function loadRosterFromFirebase() {
         document.getElementById("portalUserId").textContent = "Student ID: " + match.id;
         document.getElementById("signInHeroBtn").style.display = "none";
         document.querySelector(".main").style.display = "block";
+        renderCourseTabs();
         loadStudentData(match.name);
         return;
       } else {
