@@ -785,7 +785,7 @@ function renderGradesGrid(){
   }
 
   // Exam columns (auto-synced)
-  EXAM_DEFS.forEach(d=>{
+  Object.values(EXAM_DEFS).flat().forEach(d=>{
     const cat=CATEGORIES.find(c=>c.id===d.category);
     html+=`<th class="center" style="color:${cat?cat.color:'#6b82a0'}">${d.label}<br><span style="color:#93adc8;font-size:9px">auto-synced</span></th>`;
   });
@@ -807,7 +807,7 @@ function renderGradesGrid(){
     }
 
     // Exam score cells (read-only, auto-synced)
-    EXAM_DEFS.forEach(d=>{
+    Object.values(EXAM_DEFS).flat().forEach(d=>{
       const er=getExamScore(student.name,d.assignId);
       const lc=er?(er.pct>=80?'#16a34a':er.pct>=70?'#4ade80':er.pct>=60?'#fbbf24':'#f87171'):'#93adc8';
       html+=`<td class="center">
@@ -827,7 +827,7 @@ function renderGradesGrid(){
 
 function getScore(studentId,assignId){
   // Check if this is an exam assignment
-  const examDef=EXAM_DEFS.find(d=>d.assignId===assignId);
+  const examDef=Object.values(EXAM_DEFS).flat().find(d=>d.assignId===assignId);
   if(examDef){
     const student=data.students.find(s=>s.id===studentId);
     if(!student)return null;
@@ -1241,7 +1241,7 @@ const EXAM_QUESTION_CACHE = {}; // examLabel -> [{stem, type, options, correct, 
 
 async function fetchExamQuestions(examLabel) {
   if (EXAM_QUESTION_CACHE[examLabel]) return EXAM_QUESTION_CACHE[examLabel];
-  const def = EXAM_DEFS.find(d => d.label === examLabel);
+  const def = Object.values(EXAM_DEFS).flat().find(d => d.label === examLabel);
   if (!def) return null;
   // Map exam label to file name
   const fileMap = {
@@ -1280,7 +1280,7 @@ async function refreshAnalysis() {
     Object.values(studentExams).forEach(r => { if(r.examLabel) labels.add(r.examLabel); });
   });
   // Also add from EXAM_DEFS that have submissions
-  EXAM_DEFS.forEach(d => {
+  Object.values(EXAM_DEFS).flat().forEach(d => {
     const hasAny = Object.values(examResults).some(se => se[d.assignId]);
     if (hasAny) labels.add(d.label);
   });
@@ -1308,7 +1308,7 @@ async function renderAnalysis() {
   }
   container.innerHTML = '<div style="color:#6b82a0;font-size:14px;padding:20px 0;">Loading question data…</div>';
 
-  const def = EXAM_DEFS.find(d => d.label === examLabel);
+  const def = Object.values(EXAM_DEFS).flat().find(d => d.label === examLabel);
   if (!def) { container.innerHTML = '<div style="color:#f87171">Exam definition not found.</div>'; return; }
 
   // Gather all submissions for this exam that have answersData
