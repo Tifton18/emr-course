@@ -583,6 +583,20 @@ async function fetchPortalContent() {
         result[c.id] = { announcements:[], links:[], resources:[], slides:[] };
       }
     }
+    // Apply courses to the live COURSES array if present in Firebase
+    const coursesArr = root.courses?.arrayValue?.values || [];
+    if (coursesArr.length > 0) {
+      const parsed = coursesArr.map(v => {
+        const f = v.mapValue?.fields || {};
+        return { id: f.id?.stringValue||'', label: f.label?.stringValue||'', color: f.color?.stringValue||'#2563eb', icon: f.icon?.stringValue||'📚' };
+      }).filter(c => c.id && c.label);
+      if (parsed.length > 0) {
+        COURSES.length = 0;
+        parsed.forEach(c => COURSES.push(c));
+        // Ensure EXAMS has a bucket for each course
+        COURSES.forEach(c => { if (!EXAMS[c.id]) EXAMS[c.id] = [...(DEFAULT_EXAMS[c.id]||[])]; });
+      }
+    }
     return result;
   } catch(e) { console.error('fetchPortalContent error:', e); return null; }
 }
