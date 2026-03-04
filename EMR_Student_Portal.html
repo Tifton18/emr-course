@@ -296,6 +296,11 @@ body {
 
 <div class="main" style="display:none;">
 
+  <!-- COURSE TABS -->
+  <div id="courseTabs" style="display:none;background:#0f1e3a;border-bottom:2px solid #1e3a6e;padding:0 20px;">
+    <div style="display:flex;gap:0;max-width:960px;margin:0 auto;" id="courseTabsInner"></div>
+  </div>
+
   <!-- PORTAL NAV TABS -->
   <div class="portal-tabs">
     <button class="portal-tab active" onclick="switchPortalTab('exams',this)">🎓 Exams</button>
@@ -938,7 +943,7 @@ function getEnrolledCourses() {
 function renderCourseTabs() {
   const bar = document.getElementById('courseTabs');
   if (!bar) return;
-  const inner = bar.querySelector('div');
+  const inner = document.getElementById('courseTabsInner') || bar.querySelector('div');
   if (!inner) return;
   const enrolled = getEnrolledCourses();
   inner.innerHTML = COURSES.map(c => {
