@@ -960,6 +960,10 @@ function renderCourseTabs() {
   const inner = document.getElementById('courseTabsInner') || bar.querySelector('div');
   if (!inner) return;
   const enrolled = getEnrolledCourses();
+  // If current active course isn't enrolled, switch to first enrolled course
+  if (!enrolled.includes(activeCourse)) {
+    activeCourse = enrolled[0] || COURSES[0].id;
+  }
   inner.innerHTML = COURSES.map(c => {
     const isEnrolled = enrolled.includes(c.id);
     const isActive = activeCourse === c.id;
