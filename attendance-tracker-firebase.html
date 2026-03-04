@@ -929,7 +929,7 @@ function renderSummary(){
         <div class="student-name" style="font-size:15px">${escHtml(student.name)}</div>
         <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
           ${COURSES.map(c => {
-            const enrolled = (student.courses||['emr']).includes(c.id);
+            const enrolled = (student.courses||[]).includes(c.id);
             return `<label style="display:flex;align-items:center;gap:3px;cursor:pointer;font-size:11px;color:${enrolled?c.color:'#6b82a0'};">
               <input type="checkbox" ${enrolled?'checked':''} onchange="toggleStudentCourse(${student.id},'${c.id}',this.checked)"
                 style="width:12px;height:12px;accent-color:${c.color};cursor:pointer;"/>
@@ -1127,15 +1127,16 @@ function updateStudentId(sid, newId) {
 function toggleStudentCourse(sid, courseId, enrolled) {
   const student = data.students.find(s => s.id === sid);
   if (!student) return;
-  if (!student.courses) student.courses = ['emr'];
+  // Initialize courses from all COURSES if never set (not just emr default)
+  if (!student.courses) student.courses = [];
   if (enrolled) {
     if (!student.courses.includes(courseId)) student.courses.push(courseId);
   } else {
     student.courses = student.courses.filter(c => c !== courseId);
-    // Always keep at least emr
-    if (student.courses.length === 0) student.courses = ['emr'];
   }
   scheduleSave();
+  // Re-render to update checkbox states
+  renderSummary();
 }
 
 function addStudent(){
