@@ -948,10 +948,11 @@ function switchCourse(courseId) {
 }
 
 function getEnrolledCourses() {
-  if (!currentSession) return COURSES.map(c => c.id); // not signed in: show all
+  if (!currentSession) return COURSES.map(c => c.id); // not signed in: show all unlocked
   const student = _rosterData?.find(s => s.name.toLowerCase() === currentSession.name.toLowerCase());
   if (!student) return COURSES.map(c => c.id); // not in roster: show all
-  return student.courses && student.courses.length > 0 ? student.courses : COURSES.map(c => c.id);
+  // Return exactly what's saved - empty array means no enrollments yet
+  return student.courses || [];
 }
 
 function renderCourseTabs() {
@@ -1150,6 +1151,9 @@ function renderGrades(name) {
   section.style.display = "block";
   document.getElementById("gradeStudentName").textContent = name;
 
+  // Scores for the currently active course
+  const courseScores = studentScores[activeCourse] || {};
+
   // Build catData from tracker quiz scores + exam results
   const catData = {};
 
@@ -1268,7 +1272,7 @@ async function loadRosterFromFirebase() {
       const id    = tfdId || `TFD-${num}`;
       // Parse enrolled courses (stored as array of strings)
       const coursesArr = sf.courses?.arrayValue?.values || [];
-      const courses = coursesArr.length > 0 ? coursesArr.map(v => v.stringValue).filter(Boolean) : ['emr'];
+      const courses = coursesArr.map(v => v.stringValue).filter(Boolean); // empty = no enrollments
       if (name.trim()) {
         STUDENT_ROSTER.push({ id, name });
         _rosterData.push({ id, name, courses });
