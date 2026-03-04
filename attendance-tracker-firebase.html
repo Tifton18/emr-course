@@ -867,7 +867,7 @@ function letterToColor(letter){return{A:'#4ade80',B:'#86efac',C:'#fbbf24',D:'#f9
 function getCatAverage(studentId,catId){
   const ca=data.assignments.filter(a=>a.category===catId);
   const student=data.students.find(s=>s.id===studentId);
-  const examCat=EXAM_DEFS.filter(d=>d.category===catId);
+  const examCat=getExamDefs(activeSummaryCourse).filter(d=>d.category===catId);
   let earned=0,possible=0,hasAny=false;
   ca.forEach(a=>{const s=getScore(studentId,a.id);if(s!==null){earned+=s;possible+=a.points;hasAny=true;}});
   examCat.forEach(d=>{
