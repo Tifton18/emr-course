@@ -1721,12 +1721,12 @@ function renderContentManager() {
           var ev = inp.type === 'color' ? 'input' : 'change';
           inp.addEventListener(ev, function() {
             var s = this.dataset.sec, ix = parseInt(this.dataset.idx), fld = this.dataset.fld;
-            portalContent[s][ix][fld] = this.type === 'checkbox' ? this.checked : this.value;
+            portalContent[activeCourse][s][ix][fld] = this.type === 'checkbox' ? this.checked : this.value;
             if (fld === 'color') this.closest('.cm-item').style.borderLeftColor = this.value;
           });
           inp.addEventListener('input', function() {
             if (this.type === 'text') {
-              portalContent[this.dataset.sec][parseInt(this.dataset.idx)][this.dataset.fld] = this.value;
+              portalContent[activeCourse][this.dataset.sec][parseInt(this.dataset.idx)][this.dataset.fld] = this.value;
             }
           });
         });
