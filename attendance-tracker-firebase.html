@@ -890,13 +890,17 @@ function getAttStats(studentId){
 
 function switchSummaryCourse(c){activeSummaryCourse=c;renderSummary();}
 function renderSummary(){
+  try {
+  console.log('renderSummary called, students:', data.students?.length);
   const allDates=Object.keys(data.attendance);
   document.getElementById('summaryMeta').textContent=allDates.length+' session'+(allDates.length!==1?'s':'')+' recorded · '+data.assignments.length+' assignment'+(data.assignments.length!==1?'s':'');
   // Render course selector above the list
   const summarySelEl = document.getElementById('summaryCourseSelector');
   if (summarySelEl) summarySelEl.innerHTML = renderCourseSelectorHTML(activeSummaryCourse,'switchSummaryCourse');
   const list=document.getElementById('summaryList');list.innerHTML='';
+  console.log('summaryList el:', !!list, 'students:', data.students.length);
   data.students.forEach((student,idx)=>{
+    try {
     const att=getAttStats(student.id),wavg=calcWeightedAverage(student.id),letter=avgToLetter(wavg),lc=letterToColor(letter);
     const apc=att.pct===null?'#6b82a0':att.pct>=80?'#4ade80':att.pct>=60?'#fbbf24':'#f87171';
     const attStats=att.total>0?`<div class="summary-stats">${[['present','Present'],['absent','Absent'],['late','Late'],['excused','Excused']].map(([k,l])=>{const cfg=STATUS_CONFIG[k];return`<div class="stat-pill" style="background:${cfg.bg};border:1px solid ${cfg.color}30;color:${cfg.color}">${att[k]} ${l}</div>`;}).join('')}<div class="att-bar-wrap"><div class="att-bar-bg"><div class="att-bar-fill" style="width:${att.pct||0}%;background:${apc}"></div></div></div></div>`:`<div class="no-data">No attendance recorded yet</div>`;
@@ -950,7 +954,9 @@ function renderSummary(){
     // Load certs for this student asynchronously and append
     list.appendChild(div);
     loadStudentCertsForSummary(student.name, div);
+    } catch(studentErr) { console.error('renderSummary student error:', studentErr, student); }
   });
+  } catch(e) { console.error('renderSummary outer error:', e); }
 }
 
 async function loadStudentCertsForSummary(studentName, cardEl) {
