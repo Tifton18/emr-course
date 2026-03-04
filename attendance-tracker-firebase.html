@@ -352,6 +352,18 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   <div class="tab-panel" id="panel-content">
     <div class="panel-title" style="margin-bottom:4px;">Content Manager</div>
     <div style="font-size:13px;color:#6b82a0;margin-bottom:16px;">Manage what students see in the portal for each course.</div>
+
+    <!-- COURSES SECTION -->
+    <div class="cm-section" style="margin-bottom:28px;">
+      <div class="cm-section-header">
+        <div>
+          <div class="cm-section-title">📚 Courses</div>
+          <div class="cm-section-sub">Add, rename, reorder, or change the color of courses. Changes reflect immediately in the portal after saving.</div>
+        </div>
+      </div>
+      <div id="cm-courses-section" style="margin-top:12px;"></div>
+    </div>
+
     <div id="cm-course-tabs" style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;"></div>
 
     <!-- EXAMS SECTION -->
@@ -1444,6 +1456,13 @@ async function loadPortalContent() {
         portalContent = raw;
       }
     }
+    // Restore courses list from Firebase if saved
+    if (portalContent.courses && portalContent.courses.length > 0) {
+      COURSES.length = 0;
+      portalContent.courses.forEach(c => COURSES.push(c));
+    } else {
+      portalContent.courses = COURSES.map(c => ({...c}));
+    }
     // Ensure all courses and keys exist
     COURSES.forEach(c => {
       if (!portalContent[c.id]) portalContent[c.id] = emptyCourseContent();
@@ -1521,12 +1540,106 @@ function renderCourseSelectorHTML(activeId, onchangeFn) {
   </div>`;
 }
 
+
+// ── COURSE MANAGER ────────────────────────────────────────────────────────
+
+function renderCourseManager() {
+  const el = document.getElementById('cm-courses-section');
+  if (!el) return;
+
+  el.innerHTML = (portalContent.courses || COURSES).map((c, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0f1e3a;border-radius:10px;margin-bottom:8px;border:1px solid #1e3a6e;">
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <button onclick="cmMoveCourse(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:${i===0?'#2d3f6b':'#93adc8'};cursor:${i===0?'default':'pointer'};font-size:12px;line-height:1;">▲</button>
+        <button onclick="cmMoveCourse(${i},1)" ${i===portalContent.courses.length-1?'disabled':''} style="background:none;border:none;color:${i===portalContent.courses.length-1?'#2d3f6b':'#93adc8'};cursor:${i===portalContent.courses.length-1?'default':'pointer'};font-size:12px;line-height:1;">▼</button>
+      </div>
+      <input type="text" value="${escHtml(c.icon||'📚')}" maxlength="2"
+        onchange="cmUpdateCourse(${i},'icon',this.value)"
+        style="width:40px;text-align:center;font-size:18px;background:#162236;border:1px solid #2d4a7a;border-radius:6px;color:#e2e8f0;padding:4px;" />
+      <input type="text" value="${escHtml(c.label)}"
+        onchange="cmUpdateCourse(${i},'label',this.value)"
+        style="flex:1;background:#162236;border:1px solid #2d4a7a;border-radius:6px;color:#e2e8f0;padding:6px 10px;font-size:14px;" />
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="color" value="${c.color||'#2563eb'}"
+          oninput="cmUpdateCourse(${i},'color',this.value);this.nextElementSibling.style.background=this.value+'22';this.nextElementSibling.style.borderColor=this.value"
+          style="width:32px;height:32px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0;" />
+        <span style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:${c.color};background:${c.color}22;border:1px solid ${c.color};">${c.label}</span>
+      </div>
+      <button onclick="cmDeleteCourse(${i})" title="Remove course"
+        style="background:none;border:1px solid #f87171;border-radius:6px;color:#f87171;padding:4px 8px;font-size:12px;cursor:pointer;">🗑</button>
+    </div>
+  `).join('') + `
+    <button onclick="cmAddCourse()"
+      style="width:100%;padding:10px;border:2px dashed #2d4a7a;border-radius:10px;background:none;color:#60a5fa;font-size:13px;cursor:pointer;margin-top:4px;">
+      + Add Course
+    </button>`;
+}
+
+function cmUpdateCourse(i, field, value) {
+  if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
+  portalContent.courses[i][field] = value;
+  // Sync COURSES array live
+  COURSES.length = 0;
+  portalContent.courses.forEach(c => COURSES.push(c));
+  renderCourseManager();
+  renderContentManager(); // refresh course tabs
+}
+
+function cmMoveCourse(i, dir) {
+  if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
+  const arr = portalContent.courses;
+  const j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  COURSES.length = 0;
+  arr.forEach(c => COURSES.push(c));
+  renderCourseManager();
+  renderContentManager();
+}
+
+function cmAddCourse() {
+  if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
+  const icons = ['🚒','🪢','🌊','🏔️','⚡','🧯','🛠️','📡'];
+  const colors = ['#0891b2','#16a34a','#9333ea','#e11d48','#ea580c','#ca8a04'];
+  const idx = portalContent.courses.length;
+  const newId = 'course_' + Date.now();
+  portalContent.courses.push({
+    id: newId,
+    label: 'New Course',
+    color: colors[idx % colors.length],
+    icon: icons[idx % icons.length],
+  });
+  // Initialize content bucket
+  if (!portalContent[newId]) portalContent[newId] = emptyCourseContent();
+  COURSES.length = 0;
+  portalContent.courses.forEach(c => COURSES.push(c));
+  renderCourseManager();
+  renderContentManager();
+}
+
+function cmDeleteCourse(i) {
+  if (!portalContent.courses || portalContent.courses.length <= 1) {
+    alert('You must have at least one course.');
+    return;
+  }
+  const c = portalContent.courses[i];
+  if (!confirm(`Remove "${c.label}"? This will hide it from the portal. Content is preserved in Firebase.`)) return;
+  portalContent.courses.splice(i, 1);
+  COURSES.length = 0;
+  portalContent.courses.forEach(c => COURSES.push(c));
+  if (activeCourse === c.id) activeCourse = COURSES[0].id;
+  renderCourseManager();
+  renderContentManager();
+}
+
 function switchContentCourse(courseId) {
   activeCourse = courseId;
   renderContentManager();
 }
 
 function renderContentManager() {
+  // Render course manager
+  renderCourseManager();
   // Render course tabs
   const tabsEl = document.getElementById('cm-course-tabs');
   if (tabsEl) {
