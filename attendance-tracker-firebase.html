@@ -292,6 +292,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 
   <!-- GRADES -->
   <div class="tab-panel" id="panel-grades">
+    <div id="gradesCourseSelector" style="padding:16px 0 0 0;"></div>
     <div class="grades-layout">
       <div class="assignments-panel">
         <div class="panel-title">Grade Management</div>
@@ -336,12 +337,14 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
         <button onclick="refreshAnalysis()" style="background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;color:#4a6080;padding:7px 14px;cursor:pointer;font-size:12px;font-family:Georgia,serif;transition:all 0.2s;" onmouseover="this.style.borderColor='#2563eb';this.style.color='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe';this.style.color='#4a6080'">⟳ Refresh</button>
       </div>
     </div>
+    <div id="analysisCourseSelector" style="padding:16px 0 8px 0;"></div>
     <div id="analysisContent"></div>
   </div>
 
   <!-- SUMMARY -->
   <div class="tab-panel" id="panel-summary">
     <div class="summary-meta" id="summaryMeta"></div>
+    <div id="summaryCourseSelector" style="margin-bottom:16px;"></div>
     <div id="summaryList"></div>
   </div>
 
@@ -717,7 +720,10 @@ function setStatus(sid,status){if(!data.attendance[selectedDate])data.attendance
 function markAll(status){if(!data.attendance[selectedDate])data.attendance[selectedDate]={};data.students.forEach(s=>data.attendance[selectedDate][s.id]=status);scheduleSave();renderAttendance();}
 
 /* ── GRADES ── */
+function switchGradesCourse(c){activeGradesCourse=c;renderGradesTab();}
 function renderGradesTab(){
+  const gsel = document.getElementById('gradesCourseSelector');
+  if (gsel) gsel.innerHTML = renderCourseSelectorHTML(activeGradesCourse,'switchGradesCourse');
   // Only show quiz category in assignment manager
   renderAssignmentManager();
   renderGradesGrid();
@@ -886,6 +892,9 @@ function switchSummaryCourse(c){activeSummaryCourse=c;renderSummary();}
 function renderSummary(){
   const allDates=Object.keys(data.attendance);
   document.getElementById('summaryMeta').textContent=allDates.length+' session'+(allDates.length!==1?'s':'')+' recorded · '+data.assignments.length+' assignment'+(data.assignments.length!==1?'s':'');
+  // Render course selector above the list
+  const summarySelEl = document.getElementById('summaryCourseSelector');
+  if (summarySelEl) summarySelEl.innerHTML = renderCourseSelectorHTML(activeSummaryCourse,'switchSummaryCourse');
   const list=document.getElementById('summaryList');list.innerHTML='';
   data.students.forEach((student,idx)=>{
     const att=getAttStats(student.id),wavg=calcWeightedAverage(student.id),letter=avgToLetter(wavg),lc=letterToColor(letter);
@@ -916,8 +925,9 @@ function renderSummary(){
         <span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span>
         <button onclick="showResetModal('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑 Reset Exams</button>
       </div></div>${attStats}${gradesRow}`;
-    // Add practice exam attempts to card
-    const practiceExams = EXAM_DEFS.filter(d => d.category === 'practice');
+    // Add practice exam attempts to card (search all courses)
+    const allDefs = Object.values(EXAM_DEFS).flat();
+    const practiceExams = allDefs.filter(d => d.category === 'practice');
     const studentKey = student.name.toLowerCase().trim();
     const practiceAttempts = practiceExams
       .map(d => ({ label: d.label, result: examResults[studentKey]?.[d.assignId] || null }))
@@ -1276,7 +1286,10 @@ async function refreshAnalysis() {
   renderAnalysis();
 }
 
+async function switchAnalysisCourse(c){activeAnalysisCourse=c;renderAnalysis();}
 async function renderAnalysis() {
+  const asel = document.getElementById('analysisCourseSelector');
+  if (asel) asel.innerHTML = renderCourseSelectorHTML(activeAnalysisCourse,'switchAnalysisCourse');
   const container = document.getElementById('analysisContent');
   if (!container) return;
   const examLabel = document.getElementById('analysisExamSelect')?.value;
