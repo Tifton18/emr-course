@@ -1262,8 +1262,6 @@ async function fetchExamQuestions(examLabel) {
   if (EXAM_QUESTION_CACHE[examLabel]) return EXAM_QUESTION_CACHE[examLabel];
   const def = Object.values(EXAM_DEFS).flat().find(d => d.label === examLabel);
   if (!def) return null;
-  // Map exam label to file name
-  // Build file map from EXAM_DEFS + content manager exams
   const fileMap = {
     'Week 1 Exam':    'EMR_Week1_Exam.html',
     'Week 4 Exam':    'EMR_Week4_Exam.html',
@@ -1273,7 +1271,6 @@ async function fetchExamQuestions(examLabel) {
     'Practice Exam 2':'EMR_Practice_Exam_2.html',
     'Practice Exam 3':'EMR_Practice_Exam_3.html',
   };
-  // Also pull file from content manager exams for any course
   if (!fileMap[examLabel]) {
     for (const c of COURSES) {
       const cmExam = (portalContent[c.id]?.exams || []).find(e => e.name === examLabel);
@@ -1285,12 +1282,22 @@ async function fetchExamQuestions(examLabel) {
   try {
     const resp = await fetch(file);
     const html = await resp.text();
-    // Extract questions array from the file
-    // Support both 'questions' (main exams) and 'QUESTIONS' (practice exams)
-    let match = html.match(/const questions\s*=\s*([\s\S]*?);\s*const SECTION_COLORS/);
-        if (!match) { const qm = html.match(/const QUESTIONS[\s\S]{0,10}=([\s\S]*\]);/); if(qm) match = qm; }
-    if (!match) return null;
-    const questions = eval(match[1]); // safe — our own file
+    function extractArray(src, varName) {
+      const marker = 'const ' + varName + ' = [';
+      const start = src.indexOf(marker);
+      if (start === -1) return null;
+      let i = start + marker.length - 1;
+      let depth = 0;
+      while (i < src.length) {
+        if (src[i] === '[') depth++;
+        else if (src[i] === ']') { depth--; if (depth === 0) return src.substring(start + marker.length - 1, i + 1); }
+        i++;
+      }
+      return null;
+    }
+    const arrayStr = extractArray(html, 'questions') || extractArray(html, 'QUESTIONS');
+    if (!arrayStr) { console.error('fetchExamQuestions: no array found in', file); return null; }
+    const questions = eval(arrayStr);
     EXAM_QUESTION_CACHE[examLabel] = questions;
     return questions;
   } catch(e) {
