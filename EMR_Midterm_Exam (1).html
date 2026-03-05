@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Midterm Exam</title>
+<style>
+  /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
+  /* See SETUP_INSTRUCTIONS.txt for how to get this */
+
+  :root {
+    --bg: #0d1117;
+    --surface: #111827;
+    --border: #1e2a3a;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --blue: #2196F3;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── INTRO ── */
+  .intro-wrap {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0e27 0%, #0f1e3d 50%, #0a1628 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .intro-card { max-width: 680px; width: 100%; text-align: center; }
+  .intro-eyebrow { font-size: 12px; letter-spacing: 6px; color: #64b5f6; text-transform: uppercase; margin-bottom: 14px; }
+  .intro-title { font-size: 52px; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 8px; }
+  .intro-sub { font-size: 28px; color: #90caf9; margin-bottom: 40px; }
+  .info-grid { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px 36px; margin-bottom: 32px; text-align: left; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #e0e0e0; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #90caf9; font-weight: 600; }
+  .info-val { max-width: 340px; text-align: right; }
+  .intro-instructions { color: #aaa; font-size: 13px; line-height: 1.7; margin-bottom: 24px; }
+  .name-label { display: block; color: #90caf9; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; text-align: left; }
+  .name-input {
+    width: 100%; background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 14px 18px; font-size: 16px; color: #fff;
+    outline: none; font-family: Georgia, serif; margin-bottom: 24px; transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: #1565c0; }
+  .name-input.has-value { border-color: #1565c0; }
+  .btn-begin {
+    background: rgba(255,255,255,0.08); color: #555; border: none; border-radius: 12px;
+    padding: 18px 56px; font-size: 18px; font-weight: 700; cursor: default;
+    letter-spacing: 1px; transition: all 0.2s; font-family: Georgia, serif;
+  }
+  .btn-begin.active {
+    background: linear-gradient(135deg, #1565c0, #0d47a1); color: #fff;
+    cursor: pointer; box-shadow: 0 8px 32px rgba(21,101,192,0.5);
+  }
+  .btn-begin.active:hover { transform: translateY(-2px); }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: #0d1117; border-bottom: 1px solid #1e2a3a; padding: 0 24px;
+  }
+  .topbar-inner {
+    max-width: 860px; margin: 0 auto; display: flex;
+    align-items: center; gap: 16px; height: 60px;
+  }
+  .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .progress-bar { flex: 1; height: 6px; background: #1e2a3a; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .progress-text { color: #64748b; font-size: 13px; white-space: nowrap; }
+  .timer-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #111827; border-radius: 8px; padding: 6px 14px;
+    border: 1px solid #1e2a3a;
+  }
+  .timer-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .timer-dot.pulse { animation: pulse 1s infinite; }
+  .timer-text { font-weight: 700; font-size: 18px; font-family: monospace; letter-spacing: 2px; }
+  .timer-bar { height: 3px; background: #1e2a3a; transition: none; }
+  .timer-bar-fill { height: 100%; transition: width 1s linear, background 1s; }
+  .btn-submit-top {
+    background: #2196F3; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; font-family: Georgia, serif;
+  }
+
+  /* ── EXAM BODY ── */
+  .exam-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 20px; padding: 5px 14px; margin-bottom: 20px;
+  }
+  .section-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .q-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .q-label { font-size: 13px; color: #4a5568; font-weight: 600; letter-spacing: 1px; }
+  .q-number { font-size: 42px; font-weight: 700; color: #fff; line-height: 1; }
+  .q-badge {
+    border-radius: 6px; padding: 3px 10px; font-size: 12px;
+    font-weight: 700; letter-spacing: 1px;
+  }
+  .q-points { margin-left: auto; color: #4a5568; font-size: 13px; }
+  .q-stem { font-size: 19px; color: #e2e8f0; line-height: 1.7; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #1e2a3a; }
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .best2-hint { color: #a78bfa; font-size: 13px; margin-bottom: 8px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px;
+    background: #111827; border: 2px solid #1e2a3a; border-radius: 10px;
+    cursor: pointer; text-align: left; transition: all 0.15s;
+    color: #cbd5e1; font-family: Georgia, serif; font-size: 16px; width: 100%;
+  }
+  .option-btn:hover { border-color: #2d3748; }
+  .option-btn.selected { background: rgba(33,150,243,0.13); border-color: #2196F3; color: #fff; }
+  .option-indicator {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #374151;
+    background: transparent; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: #6b7280; font-weight: 700; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .option-btn.selected .option-indicator {
+    background: #2196F3; border-color: #2196F3; color: #fff;
+  }
+  .option-btn.best2 .option-indicator { border-radius: 6px; }
+  .option-text { padding-top: 2px; line-height: 1.6; }
+
+  /* ── MATCHING ── */
+  .match-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .match-instructions strong { color: #38bdf8; }
+  .bank-label { color: #64748b; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .def-bank {
+    min-height: 48px; background: #0a0f1a; border: 2px dashed #1e2a3a;
+    border-radius: 10px; padding: 10px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .def-bank.dragover { border-color: #38bdf8; background: #0a1525; }
+  .def-chip {
+    padding: 10px 14px; background: #111827; border: 1px solid #2d3748;
+    border-radius: 8px; cursor: grab; color: #cbd5e1; font-size: 14px;
+    line-height: 1.5; user-select: none; transition: box-shadow 0.15s;
+    font-family: Georgia, serif;
+  }
+  .def-chip:hover { box-shadow: 0 0 0 2px #38bdf8; }
+  .def-chip.dragging { opacity: 0.4; }
+  .def-bank-empty { color: #374151; font-size: 13px; font-style: italic; padding: 8px 14px; }
+  .terms-label { color: #64748b; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .term-rows { display: flex; flex-direction: column; gap: 8px; }
+  .term-row {
+    display: grid; grid-template-columns: 200px 1fr; border-radius: 10px;
+    overflow: hidden; border: 2px solid #1e2a3a; transition: border-color 0.15s;
+  }
+  .term-row.dragover { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.13); }
+  .term-row.assigned { border-color: #22c55e; }
+  .term-name { background: #0f1a2e; padding: 14px 16px; display: flex; align-items: center; }
+  .term-name span { color: #e2e8f0; font-weight: 700; font-size: 14px; }
+  .term-drop { background: #111827; padding: 12px 16px; display: flex; align-items: center; min-height: 52px; }
+  .term-row.dragover .term-drop { background: #0a1f3a; }
+  .term-row.assigned .term-drop { background: #0a1f14; }
+  .term-placeholder { color: #374151; font-size: 13px; font-style: italic; }
+  .term-placeholder.active { color: #38bdf8; }
+
+  /* ── NAV ── */
+  .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #1e2a3a; }
+  .btn-prev, .btn-next, .btn-submit-exam {
+    border-radius: 8px; padding: 10px 24px; font-size: 14px;
+    cursor: pointer; font-family: Georgia, serif; transition: all 0.15s;
+  }
+  .btn-prev { background: transparent; color: #94a3b8; border: 1px solid #374151; }
+  .btn-prev:disabled { color: #2d3748; border-color: #1e2a3a; cursor: default; }
+  .btn-next { background: #2196F3; color: #fff; border: none; font-weight: 700; }
+  .btn-submit-exam { background: #22c55e; color: #fff; border: none; font-weight: 700; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+  .dot { height: 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s; background: #1e2a3a; }
+  .dot.answered { background: #374151; }
+  .dot.current { background: #2196F3; }
+
+  /* ── RESULTS ── */
+  .results-wrap { min-height: 100vh; padding: 40px 20px; font-family: Georgia, serif; }
+  .results-inner { max-width: 780px; margin: 0 auto; }
+  .results-hero { text-align: center; margin-bottom: 40px; }
+  .results-icon { font-size: 80px; margin-bottom: 8px; }
+  .results-name { font-size: 22px; color: #64748b; margin-bottom: 4px; }
+  .results-pct { font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .results-verdict { font-size: 22px; margin-bottom: 4px; }
+  .results-detail { color: #aaa; font-size: 15px; }
+  .results-card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .results-card-title { color: #90caf9; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 16px; }
+  .result-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .result-row:last-child { border-bottom: none; }
+  .result-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .result-badge.correct { background: #2e7d32; }
+  .result-badge.wrong { background: #c62828; }
+  .result-stem { color: #e0e0e0; font-size: 14px; margin-bottom: 4px; }
+  .result-correct-ans { font-size: 13px; color: #81c784; }
+  .result-pts { font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .submitting-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 16px; }
+  .submitting-spinner { width: 48px; height: 48px; border: 4px solid #1e2a3a; border-top-color: #2196F3; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .submitting-text { color: #94a3b8; font-size: 16px; }
+  .submit-status { text-align: center; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; }
+  .submit-status.success { background: #0a2a14; border: 1px solid #166534; color: #86efac; }
+  .submit-status.error { background: #2d0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIGURATION — update this URL after deploying your
+// Google Apps Script Web App (see SETUP_INSTRUCTIONS.txt)
+// ══════════════════════════════════════════════════════
+const FB_CONFIG = {
+  apiKey:"AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  authDomain:"class-attendance-72cd9.firebaseapp.com",
+  projectId:"class-attendance-72cd9",
+};
+const EXAM_LABEL      = "Midterm Exam";
+const TOTAL_TIME      = 50 * 60; // 50 minutes
+const LETTERS         = ["A","B","C","D","E"];
+
+// ── QUESTION DATA ────────────────────────────────────
+const questions = [
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes the 'standard of care' as it applies to an EMR?",options:["The care a physician would provide in the same situation","The care a reasonable, similarly trained EMR would provide in the same or similar circumstances","Any treatment that prevents patient death","The minimum treatment listed in state protocols"],correct:[1],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR arrives on scene and a patient who appears intoxicated loudly refuses care. Which of the following is the MOST appropriate initial action?",options:["Leave the scene immediately and document the refusal","Restrain the patient to perform a rapid assessment","Attempt to assess the patient's decision-making capacity; if mental status is impaired, implied consent may apply","Contact the patient's employer before taking any action"],correct:[2],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following statements about Good Samaritan laws is MOST accurate?",options:["They provide absolute protection from all lawsuits regardless of actions taken","They generally protect off-duty providers who respond in good faith and act within the scope of their training","They apply only to physicians responding off duty","They eliminate the need for documentation when acting as a Good Samaritan"],correct:[1],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"A valid DNR order means the EMR should:",options:["Withhold all care including positioning, oxygen, and comfort measures","Not perform resuscitation but may still provide comfort care and supportive measures","Contact medical direction before looking at the order","Disregard the order until a physician arrives on scene"],correct:[1],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"best2",stem:"Which TWO elements are required for a patient's refusal of care to be legally valid?",options:["The patient is a competent adult who understands the risks of refusal","The patient must be at least 21 years old","The patient has been informed of potential consequences of refusing","Refusal must always be witnessed by law enforcement","The patient must sign a refusal form before the EMR arrives"],correct:[0,2],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Under HIPAA, which of the following represents an allowable disclosure of protected health information WITHOUT the patient's explicit authorization?",options:["Sharing the patient's diagnosis with their employer","Releasing information to other treating healthcare providers involved in the patient's care","Providing a full patient history to a news crew at a multi-vehicle crash","Discussing the patient's history with their neighbors"],correct:[1],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes the difference between negligence and abandonment?",options:["They are legally the same; both result from substandard care","Negligence involves a failure to meet the standard of care causing harm; abandonment is terminating care without ensuring a qualified provider takes over","Abandonment only occurs when a patient is left at the hospital","Negligence requires proof of intent; abandonment does not"],correct:[1],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"matching",stem:"Match each legal or ethical term with its correct definition.",pairs:[{term:"Expressed Consent",def:"Verbal or written agreement by a competent, informed patient to receive treatment"},{term:"Implied Consent",def:"Legal assumption that an unconscious or incapacitated patient would consent to life-saving treatment"},{term:"Negligence",def:"Failure to act with the expected standard of care that results in patient harm"},{term:"Scope of Practice",def:"The legal boundary defining what procedures an EMR is authorized to perform"},{term:"Mandatory Reporting",def:"Legal obligation to report suspected abuse, neglect, or certain communicable diseases to authorities"}],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"A wound is described as being on the 'lateral aspect of the right forearm.' This means the wound is located:",options:["On the palm side of the right forearm near the midline","On the outer side of the right forearm, away from the midline","On the inner side of the right forearm near the body","On the posterior (back) surface of the right forearm"],correct:[1],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The medical prefix 'tachy-' means:",options:["Slow","Painful","Fast","Absence of"],correct:[2],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The mitral and tricuspid valves of the heart prevent:",options:["Blood from flowing from the aorta back into the left ventricle","Blood from flowing backward from the ventricles into the atria","Blood from mixing between the right and left sides of the heart","Oxygen from being removed from the blood during circulation"],correct:[1],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Which of the following BEST explains why a patient in decompensated shock has an altered mental status?",options:["Excessive pain signals are overwhelming the central nervous system","Inadequate perfusion to the brain is causing cerebral hypoxia","Systemic inflammation is triggering a fever that alters cognition","The patient's blood glucose level has increased, affecting brain function"],correct:[1],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"best2",stem:"Which TWO physiological changes does the body use during the compensatory phase of shock to maintain blood pressure?",options:["Increased heart rate","Peripheral vasodilation to reduce afterload","Peripheral vasoconstriction to maintain central perfusion","Decreased respiratory rate to conserve energy","Dilation of coronary arteries only"],correct:[0,2],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Which organ is primarily responsible for filtering blood and producing urine?",options:["Liver","Pancreas","Kidney","Spleen"],correct:[2],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The epiglottis serves which of the following functions during swallowing?",options:["It propels food down the esophagus using peristalsis","It covers the trachea to prevent food and liquid from entering the airway","It filters air entering the lungs","It regulates the amount of air entering the alveoli"],correct:[1],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"matching",stem:"Match each anatomical directional term with its correct meaning.",pairs:[{term:"Anterior",def:"Toward the front of the body"},{term:"Superior",def:"Toward the head or above another structure"},{term:"Medial",def:"Toward the midline of the body"},{term:"Distal",def:"Farther from the point of attachment or origin"},{term:"Prone",def:"Lying face-down"}],points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"When using the power lift to move a patient, which of the following is MOST important to prevent rescuer injury?",options:["Lock the back in a slightly curved position for flexibility","Keep the weight close to the body with the back straight and lift using the legs","Lean forward at the waist to use body weight as leverage","Bend the knees only slightly to maintain maximum height advantage"],correct:[1],points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"A patient found unresponsive on the floor is breathing adequately with no suspected spinal injury. Which position is MOST appropriate while awaiting transport?",options:["Supine with legs elevated","Recovery position (left lateral recumbent)","Fowler's position (45 degrees upright)","Prone position"],correct:[1],points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"Which of the following patients should be placed in the left lateral recumbent (recovery) position rather than supine?",options:["A patient in respiratory distress with active wheezing","A patient with suspected tension pneumothorax","A conscious patient who is actively vomiting and has no spinal injury concern","A patient with suspected acute myocardial infarction and stable vitals"],correct:[2],points:1},
+  {section:"Airway Management",type:"mc",stem:"An NPA is preferred over an OPA in which of the following situations?",options:["The patient is completely unresponsive with no gag reflex","The patient is semi-conscious and has an intact gag reflex","The patient has suspected nasal fractures","The patient is in respiratory arrest and needs positive pressure ventilation"],correct:[1],points:1},
+  {section:"Airway Management",type:"mc",stem:"You are ventilating an adult patient with a BVM at a rate of 10 breaths per minute. Each breath should be delivered over approximately:",options:["0.5 seconds","1 second","3 seconds","5 seconds"],correct:[1],points:1},
+  {section:"Airway Management",type:"mc",stem:"When suctioning a patient's oropharynx, the catheter should be inserted:",options:["Only as far as you can visualize, then suction applied on withdrawal","As deep as possible to clear secretions from the lower airway","While continuously applying suction during insertion and withdrawal","With the suction turned off during insertion and only activated at maximum depth"],correct:[0],points:1},
+  {section:"Airway Management",type:"mc",stem:"A patient develops stridor after being stung by a bee and has hives and facial swelling. The MOST likely cause of the stridor is:",options:["Bronchospasm from allergic asthma","Upper airway angioedema causing partial obstruction of the larynx","Aspiration of the stinger","Pulmonary edema from anaphylactic cardiac depression"],correct:[1],points:1},
+  {section:"Airway Management",type:"best2",stem:"Which TWO of the following correctly describe appropriate oxygen delivery for a patient with adequate breathing and an SpO2 of 94%?",options:["Nasal cannula at 2 to 4 LPM is an appropriate initial choice","Non-rebreather mask at 15 LPM is required for all patients with SpO2 under 98%","Target SpO2 of 94 to 99% rather than 100% in most adult patients","Withhold oxygen entirely until SpO2 drops below 90%","Use a BVM for all patients with SpO2 under 97%"],correct:[0,2],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"An adult patient has a respiratory rate of 6 breaths per minute with shallow, inadequate chest rise. The MOST appropriate intervention is:",options:["Administer oxygen via nasal cannula and monitor closely","Assist ventilations with BVM at 10 to 12 breaths per minute","Encourage the patient to breathe more deeply","Position in Fowler's and reassess in two minutes"],correct:[1],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"Tripod positioning (leaning forward with hands on knees) is MOST associated with:",options:["Abdominal pain requiring a position of comfort","Significant respiratory distress; the patient is using accessory muscles and maximizing airway diameter","Hypotension causing the patient to lean forward to increase venous return","Neurological impairment affecting upright posture"],correct:[1],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"Which of the following breath sounds is MOST consistent with lower airway bronchospasm?",options:["Stridor","Crackles (rales)","Wheezing","Gurgling"],correct:[2],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"A patient with a suspected tension pneumothorax would MOST likely present with which of the following combinations?",options:["Bilateral crackles, pink frothy sputum, elevated JVD","Absent breath sounds on one side, tracheal deviation away from the affected side, hypotension, and JVD","Bilateral wheezing, prolonged expiration, accessory muscle use","Fever, productive cough, and unilateral crackles"],correct:[1],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"best2",stem:"Which TWO findings indicate a pediatric patient is in severe respiratory distress?",options:["Nasal flaring","Respiratory rate of 22 in a 4-year-old","Intercostal retractions","Bilateral clear breath sounds","SpO2 of 96% on room air"],correct:[0,2],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"Kussmaul respirations are characterized by:",options:["Slow, irregular gasping breaths seen just before death","Deep, rapid, labored breathing associated with metabolic acidosis such as diabetic ketoacidosis","A cyclic pattern of increasing and decreasing depth with periods of apnea","High-pitched crowing on inhalation due to upper airway obstruction"],correct:[1],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"matching",stem:"Match each abnormal breathing pattern or sound with its description.",pairs:[{term:"Cheyne-Stokes",def:"Cyclic pattern of increasing then decreasing depth followed by apnea; seen in brain injury or heart failure"},{term:"Agonal respirations",def:"Slow, irregular, gasping breaths occurring near death; not adequate breathing"},{term:"Stridor",def:"High-pitched sound on inhalation indicating upper airway obstruction"},{term:"Crackles (rales)",def:"Fine popping sounds on inhalation indicating fluid in the alveoli"},{term:"Grunting",def:"Expiratory sound in infants indicating the child is trying to maintain airway pressure; sign of severe distress"}],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"Which of the following BEST describes arterial bleeding?",options:["Dark red blood that oozes slowly from the wound","Bright red blood that spurts with each heartbeat","Pink frothy blood associated with pulmonary injury","Blood that seeps uniformly from the wound surface"],correct:[1],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"After applying direct pressure to a severely bleeding wound, you note the dressing is soaked through. The MOST appropriate next step is:",options:["Remove the soaked dressing and apply a fresh one to assess wound depth","Add more dressings on top of the existing ones and apply additional direct pressure","Apply a tourniquet to the torso above the wound","Pack the wound with ice to slow bleeding"],correct:[1],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"A tourniquet applied to control life-threatening extremity bleeding should be placed:",options:["Directly over a joint for best compression","2 to 3 inches proximal to the wound, tightened until bleeding stops and distal pulse is absent","Loosely at first and tightened over several minutes","As distally as possible to preserve the maximum amount of limb"],correct:[1],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"Which of the following BEST describes the pathophysiology of distributive shock?",options:["Massive blood loss reduces preload and cardiac output","The heart muscle fails to pump effectively despite adequate volume","Massive vasodilation causes blood to pool peripherally, reducing effective circulating volume","An obstruction prevents blood from returning to or leaving the heart"],correct:[2],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"A patient in decompensated hemorrhagic shock will MOST likely present with:",options:["Normal blood pressure, mild tachycardia, pale cool skin","Hypertension, bradycardia, and bounding pulses","Hypotension, tachycardia, absent radial pulses, altered mental status, and mottled skin","Bradycardia, warm skin, and hypertension from sympathetic compensation"],correct:[2],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"best2",stem:"Which TWO of the following are appropriate prehospital interventions for a patient in hemorrhagic shock?",options:["Prevent heat loss by covering the patient with a blanket","Administer oral fluids to rapidly replace lost volume","Control all external bleeding sources","Elevate the patient's head to improve cerebral perfusion","Delay transport until blood pressure normalizes"],correct:[0,2],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"matching",stem:"Match each type of shock with its primary underlying cause.",pairs:[{term:"Hypovolemic shock",def:"Loss of blood or fluid volume depletes preload and reduces cardiac output"},{term:"Cardiogenic shock",def:"The heart fails to pump effectively, reducing output despite adequate circulating volume"},{term:"Neurogenic shock",def:"Spinal cord injury disrupts sympathetic tone causing vasodilation and relative bradycardia"},{term:"Anaphylactic shock",def:"Massive histamine release causes severe vasodilation, bronchospasm, and airway edema"},{term:"Obstructive shock",def:"A physical barrier such as tension pneumothorax or tamponade prevents adequate cardiac output"}],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following is the MOST common symptom of acute myocardial infarction (AMI) in adults?",options:["Sharp stabbing chest pain that worsens with deep inspiration","Pressure or squeezing chest discomfort that may radiate to the left arm or jaw","Sudden fever and productive cough","Pleuritic chest pain relieved by leaning forward"],correct:[1],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"When performing high-quality CPR on an adult, compressions should be delivered at a rate of:",options:["60 to 80 compressions per minute","100 to 120 compressions per minute","120 to 140 compressions per minute","As fast as physically possible"],correct:[1],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Full chest recoil between compressions during CPR is important because:",options:["It prevents the rescuer from fatiguing","It allows the heart to refill with blood, maximizing stroke volume on the next compression","It reduces the risk of rib fractures","It allows time for the patient's brain to receive oxygenated blood"],correct:[1],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"The AED analyzes a rhythm and delivers a shock. Immediately after the shock, the EMR should:",options:["Check for a pulse before resuming CPR","Resume CPR immediately beginning with chest compressions","Wait 30 seconds before resuming CPR to allow the heart to stabilize","Turn off the AED and transport the patient"],correct:[1],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following correctly identifies a shockable cardiac rhythm?",options:["Asystole (flatline)","Sinus bradycardia with a pulse","Ventricular fibrillation (VF)","Pulseless electrical activity (PEA)"],correct:[2],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"best2",stem:"Which TWO of the following are considered signs of obvious death that would justify withholding resuscitation?",options:["Rigor mortis","Bradycardia with a palpable pulse","Dependent lividity (livor mortis)","Cyanosis of the lips only","An SpO2 reading of 0%"],correct:[0,2],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"During two-rescuer CPR on an adult, the compression-to-ventilation ratio is:",options:["15:2","30:2","5:1","15:1"],correct:[1],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"matching",stem:"Match each cardiac emergency term with its correct definition.",pairs:[{term:"Angina pectoris",def:"Chest pain from temporary myocardial ischemia, typically relieved by rest or nitroglycerin; no permanent cell death"},{term:"Ventricular fibrillation",def:"Chaotic disorganized electrical activity in the ventricles producing no effective cardiac output; a shockable rhythm"},{term:"Acute MI",def:"Irreversible myocardial cell death caused by sustained coronary artery occlusion"},{term:"Cardiac tamponade",def:"Fluid accumulation in the pericardial sac compressing the heart and severely reducing cardiac output"},{term:"Asystole",def:"Complete absence of cardiac electrical activity; not a shockable rhythm"}],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"A patient presents with wheezing, prolonged expiration, and is sitting upright using accessory muscles to breathe. History includes asthma. The MOST appropriate initial intervention is:",options:["Administer oxygen and assist with the patient's prescribed bronchodilator inhaler if available","Place the patient supine and apply a non-rebreather mask","Perform immediate positive pressure ventilation with BVM","Withhold oxygen to avoid suppressing their respiratory drive"],correct:[0],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"An impaled object is found embedded in a patient's thigh with moderate bleeding around it. The MOST appropriate management is:",options:["Remove the object and apply direct pressure immediately","Stabilize the object in place, control bleeding around it without removing it, and transport","Remove the object only if it is interfering with airway management","Apply a tourniquet proximal to the object and remove it during transport"],correct:[1],points:1},
+  {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following is a contraindication to using an AED?",options:["The patient is lying on a wet surface and cannot be moved","The patient is a child under 8 years old","The patient has a pacemaker implanted","There are no contraindications; always apply the AED to a pulseless patient"],correct:[0],points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR who witnesses a coworker falsifying a patient care report should:",options:["Assume it was a minor error and take no action","Report the incident through the appropriate chain of command or ethics reporting process","Correct the coworker's report without notifying a supervisor","Refuse all future calls with that coworker"],correct:[1],points:1},
+];
+
+const SECTION_COLORS = {
+  "EMS Systems, EMR Role & Medical/Legal":      {bg:"#0f3d5c", accent:"#2196F3"},
+  "Anatomy, Physiology & Medical Terminology":  {bg:"#1b4332", accent:"#4CAF50"},
+  "Lifting, Moving & Patient Positioning":      {bg:"#4a1942", accent:"#9C27B0"},
+  "Airway Management":                          {bg:"#7c2d12", accent:"#FF5722"},
+  "Ventilation & Breathing Assessment":         {bg:"#1a2f4a", accent:"#00BCD4"},
+  "Circulation, Bleeding Control & Shock":      {bg:"#3d1515", accent:"#F44336"},
+  "Cardiac Emergencies, CPR & AED":             {bg:"#2a1a00", accent:"#FF9800"},
+};
+
+// ── STATE ────────────────────────────────────────────
+let phase        = "intro";
+let studentName  = "";
+let current      = 0;
+let answers      = Array(questions.length).fill(null);
+let matchSels    = {};      // "qIdx-termIdx" -> def string
+let shuffledDefs = {};      // qIdx -> shuffled def array
+let timeLeft     = TOTAL_TIME;
+let timerInterval= null;
+let dragData     = null;    // {def, fromTermIdx}
+let startTime    = null;
+
+// ── SHUFFLE ──────────────────────────────────────────
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+function initShuffles() {
+  questions.forEach((q,i) => {
+    if (q.type === "matching") shuffledDefs[i] = shuffle(q.pairs.map(p=>p.def));
+  });
+}
+
+// ── SCORING ──────────────────────────────────────────
+function scoreQuestion(q, ans) {
+  if (!ans) return false;
+  if (q.type === "mc")      return ans[0] === q.correct[0];
+  if (q.type === "best2")   return ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "matching") return q.pairs.every((p,ti)=>ans[ti]===p.def);
+  return false;
+}
+function calcScore() {
+  let score=0, total=0;
+  questions.forEach((q,i)=>{ total+=q.points; if(scoreQuestion(q,answers[i])) score+=q.points; });
+  return {score,total};
+}
+
+// ── SAVE MATCHING ANS ────────────────────────────────
+function saveMatchingAnswers(qIdx) {
+  const q = questions[qIdx];
+  answers[qIdx] = q.pairs.map((_,ti)=>matchSels[`${qIdx}-${ti}`]||null);
+}
+
+// ── TIMER ────────────────────────────────────────────
+function startTimer() {
+  startTime = Date.now();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(); }
+  }, 1000);
+}
+function updateTimerUI() {
+  const m = Math.floor(timeLeft/60), s = timeLeft%60;
+  const str = `${m}:${String(s).padStart(2,"0")}`;
+  const color = timeLeft<60?"#ef4444":timeLeft<180?"#f59e0b":"#22c55e";
+  document.querySelectorAll(".timer-text").forEach(el=>{ el.textContent=str; el.style.color=color; });
+  document.querySelectorAll(".timer-dot").forEach(el=>{ el.style.background=color; el.classList.toggle("pulse",timeLeft<60); });
+  document.querySelectorAll(".timer-bar-fill").forEach(el=>{ el.style.width=`${(timeLeft/TOTAL_TIME)*100}%`; el.style.background=color; });
+}
+
+// ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
+// Uses GET with ?payload= because Apps Script cross-origin POST is blocked
+// by CORS preflight. GET requests follow the redirect and reach doGet().
+async function submitToFirebase(subData) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults`;
+    const answersStr = JSON.stringify(subData.answersData);
+    const body = {
+      fields: {
+        examLabel:  {stringValue: subData.examLabel},
+        category:   {stringValue: EXAM_CATEGORY},
+        name:       {stringValue: subData.name},
+        score:      {integerValue: subData.score},
+        total:      {integerValue: subData.total},
+        pct:        {integerValue: subData.pct},
+        timeUsed:   {integerValue: subData.timeUsed},
+        submittedAt:{stringValue: subData.submittedAt},
+        answersData:{stringValue: answersStr},
+      }
+    };
+    const resp = await fetch(url + `?key=${FB_CONFIG.apiKey}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) { const errText = await resp.text(); throw new Error(errText); }
+    return { success: true };
+  } catch(e) {
+    clearTimeout(timeout);
+    console.error("Firebase submit error:", e);
+    return { success: false, error: e.toString() };
+  }
+}
+
+// ── FINISH EXAM ──────────────────────────────────────
+async function finishExam() {
+  clearInterval(timerInterval);
+  const {score,total} = calcScore();
+  const pct = Math.round((score/total)*100);
+  const timeUsed = TOTAL_TIME - timeLeft;
+  const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
+
+  const subData = {
+    examLabel: EXAM_LABEL,
+    name: studentName,
+    score, total, pct, timeUsed,
+    questionResults,
+    submittedAt: new Date().toISOString(),
+  };
+
+  phase = "submitting";
+  render();
+
+  const result = await submitToFirebase(subData);
+  phase = "results";
+  window._submitResult = result;
+  window._examScore = {score,total,pct};
+  window._questionResults = questionResults;
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────
+function render() {
+  const root = document.getElementById("root");
+  if (phase === "intro")       root.innerHTML = renderIntro();
+  else if (phase === "submitting") root.innerHTML = renderSubmitting();
+  else if (phase === "results") root.innerHTML = renderResults();
+  else                          root.innerHTML = renderExam();
+  attachEvents();
+}
+
+function renderIntro() {
+  return `
+    <div class="intro-wrap">
+      <div class="intro-card">
+        <div class="intro-eyebrow">Georgia OEMST · NHTSA 2021</div>
+        <div class="intro-title">Midterm</div>
+        <div class="intro-sub">Examination</div>
+        <div class="info-grid">
+          ${[["Questions","50"],["Total Points","50"],["Time Allowed","50 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management"]]
+            .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
+        </div>
+        <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
+        <label class="name-label">Student Name</label>
+        <input class="name-input" id="nameInput" type="text" placeholder="Enter your full name to begin..." autocomplete="off">
+        <br>
+        <button class="btn-begin" id="beginBtn" disabled>Begin Exam</button>
+      </div>
+    </div>`;
+}
+
+function renderSubmitting() {
+  return `
+    <div style="min-height:100vh;background:#0d1117;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;">
+      <div class="submitting-spinner"></div>
+      <div class="submitting-text">Submitting your exam…</div>
+    </div>`;
+}
+
+function renderResults() {
+  const {score,total,pct} = window._examScore;
+  const passed = pct >= 70;
+  const qr = window._questionResults;
+  const sr = window._submitResult;
+
+  let statusHtml = "";
+  if (sr && !sr.noUrl) {
+    statusHtml = sr.success
+      ? `<div class="submit-status success">✓ Your results have been submitted to your instructor.</div>`
+      : `<div class="submit-status error">⚠ Could not reach the server. Please notify your instructor. Your score: ${pct}% (${score}/${total})</div>`;
+  }
+
+  const reviewRows = questions.map((q,i)=>{
+    const correct = qr[i];
+    let correctAns = "";
+    if (!correct) {
+      if (q.type==="mc") correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
+      else if (q.type==="best2") correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+    }
+    return `
+      <div class="result-row">
+        <div class="result-badge ${correct?"correct":"wrong"}">${correct?"✓":"✗"}</div>
+        <div style="flex:1">
+          <div class="result-stem"><strong style="color:#90caf9">Q${i+1}.</strong> ${q.stem.length>100?q.stem.slice(0,100)+"…":q.stem}</div>
+          ${correctAns?`<div class="result-correct-ans">${correctAns}</div>`:""}
+        </div>
+        <div class="result-pts" style="color:${correct?"#81c784":"#ef9a9a"}">${correct?"+"+q.points:"0"}</div>
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="results-wrap" style="background:${passed?"linear-gradient(135deg,#0d2818,#1b4332,#0d2818)":"linear-gradient(135deg,#2d0a0a,#4a1010,#2d0a0a)"}">
+      <div class="results-inner">
+        ${statusHtml}
+        <div class="results-hero">
+          <div class="results-icon">${passed?"✓":"✗"}</div>
+          <div class="results-name">${studentName}</div>
+          <div class="results-pct">${pct}%</div>
+          <div class="results-verdict" style="color:${passed?"#81c784":"#ef9a9a"}">${passed?"PASSED":"DID NOT PASS"}</div>
+          <div class="results-detail">${score} / ${total} points · Passing score: 70% (${Math.ceil(total*0.7)} pts)</div>
+        </div>
+        <div class="results-card">
+          <div class="results-card-title">Question Review</div>
+          ${reviewRows}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderExam() {
+  const q = questions[current];
+  const sc = SECTION_COLORS[q.section] || {bg:"#1a1a2e",accent:"#2196F3"};
+  const progress = ((current+1)/questions.length)*100;
+  const ans = answers[current] || [];
+
+  let questionBody = "";
+  if (q.type==="mc" || q.type==="best2") {
+    const hint = q.type==="best2"
+      ? `<div class="best2-hint">★ Select the TWO best answers ${ans.length>0?"("+ans.length+"/2 selected)":""}</div>` : "";
+    const opts = q.options.map((opt,idx)=>{
+      const sel = ans.includes(idx);
+      return `<button class="option-btn ${q.type==="best2"?"best2":""} ${sel?"selected":""}" data-idx="${idx}">
+        <div class="option-indicator">${LETTERS[idx]}</div>
+        <div class="option-text">${opt}</div>
+      </button>`;
+    }).join("");
+    questionBody = `<div class="options-list">${hint}${opts}</div>`;
+
+  } else if (q.type==="matching") {
+    const defs = shuffledDefs[current] || q.pairs.map(p=>p.def);
+    const usedDefs = new Set(Object.entries(matchSels).filter(([k])=>k.startsWith(current+"-")).map(([,v])=>v));
+    const bankDefs = defs.filter(d=>!usedDefs.has(d));
+
+    const bankChips = bankDefs.map(def=>`<div class="def-chip" draggable="true" data-def="${encodeURIComponent(def)}">${def}</div>`).join("") ||
+      `<div class="def-bank-empty">All definitions assigned</div>`;
+
+    const termRows = q.pairs.map((pair,ti)=>{
+      const assigned = matchSels[`${current}-${ti}`];
+      return `
+        <div class="term-row ${assigned?"assigned":""}" data-term-idx="${ti}">
+          <div class="term-name"><span>${pair.term}</span></div>
+          <div class="term-drop">
+            ${assigned
+              ? `<div class="def-chip" draggable="true" data-def="${encodeURIComponent(assigned)}" data-from-term="${ti}" style="margin:0;width:100%">${assigned}</div>`
+              : `<span class="term-placeholder">— drag a definition here —</span>`}
+          </div>
+        </div>`;
+    }).join("");
+
+    questionBody = `
+      <div class="match-instructions"><strong>Drag</strong> a definition from the bank and <strong>drop</strong> it onto the matching term. Drag a placed definition back to the bank to unassign it.</div>
+      <div class="bank-label">Definition Bank</div>
+      <div class="def-bank" id="defBank">${bankChips}</div>
+      <div class="terms-label">Terms — Drop definitions here</div>
+      <div class="term-rows">${termRows}</div>`;
+  }
+
+  const typeBadge = q.type==="best2"
+    ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
+
+  const dots = questions.map((_,i)=>
+    `<div class="dot ${i===current?"current":answers[i]?"answered":""}" style="width:${i===current?20:10}px" data-dot="${i}"></div>`
+  ).join("");
+
+  const navRight = current < questions.length-1
+    ? `<button class="btn-next" id="nextBtn">Next →</button>`
+    : `<button class="btn-submit-exam" id="submitExamBtn">Submit Exam</button>`;
+
+  return `
+    <div>
+      <div class="topbar">
+        <div class="topbar-inner">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${sc.accent}"></div></div>
+            <span class="progress-text">${current+1} / ${questions.length}</span>
+          </div>
+          <div class="timer-box" style="border-color:#1e2a3a">
+            <div class="timer-dot" style="background:#22c55e"></div>
+            <span class="timer-text" style="color:#22c55e">25:00</span>
+          </div>
+          <button class="btn-submit-top" id="submitTopBtn" style="background:${sc.accent}">Submit</button>
+        </div>
+        <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:#22c55e"></div></div>
+      </div>
+
+      <div class="exam-wrap">
+        <div class="section-badge" style="background:${sc.bg}">
+          <div class="section-dot" style="background:${sc.accent}"></div>
+          <span class="section-label" style="color:${sc.accent}">${q.section}</span>
+        </div>
+
+        <div class="q-header">
+          <span class="q-label">QUESTION</span>
+          <span class="q-number">${current+1}</span>
+          ${typeBadge}
+          <span class="q-points">${q.points} pt</span>
+        </div>
+
+        <div class="q-stem">${q.stem}</div>
+        ${questionBody}
+
+        <div class="nav-bar">
+          <button class="btn-prev" id="prevBtn" ${current===0?"disabled":""}>← Previous</button>
+          <div class="dots">${dots}</div>
+          ${navRight}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── EVENT BINDING ────────────────────────────────────
+function attachEvents() {
+  // INTRO
+  const nameInput = document.getElementById("nameInput");
+  const beginBtn  = document.getElementById("beginBtn");
+  if (nameInput) {
+    nameInput.value = studentName;
+    nameInput.addEventListener("input", e=>{
+      studentName = e.target.value.trim();
+      nameInput.classList.toggle("has-value", !!studentName);
+      beginBtn.disabled = !studentName;
+      beginBtn.classList.toggle("active", !!studentName);
+    });
+    nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName) beginExam(); });
+  }
+  if (beginBtn) {
+    beginBtn.classList.toggle("active", !!studentName);
+    beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
+  }
+
+  // EXAM — MC / Best2
+  document.querySelectorAll(".option-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const q = questions[current];
+      if (q.type==="mc") {
+        answers[current] = [idx];
+      } else {
+        const prev = answers[current] || [];
+        if (prev.includes(idx)) answers[current] = prev.filter(i=>i!==idx);
+        else if (prev.length<2) answers[current] = [...prev,idx];
+        else answers[current] = [prev[1],idx];
+      }
+      render();
+    });
+  });
+
+  // EXAM — Matching drag & drop
+  let draggingEl = null;
+  document.querySelectorAll(".def-chip").forEach(chip=>{
+    chip.addEventListener("dragstart", e=>{
+      draggingEl = chip;
+      chip.classList.add("dragging");
+      const def = decodeURIComponent(chip.dataset.def);
+      const fromTerm = chip.dataset.fromTerm !== undefined ? parseInt(chip.dataset.fromTerm) : null;
+      dragData = {def, fromTermIdx: fromTerm};
+      e.dataTransfer.effectAllowed = "move";
+    });
+    chip.addEventListener("dragend", ()=>{ chip.classList.remove("dragging"); draggingEl = null; });
+  });
+
+  // Drop on term rows
+  document.querySelectorAll(".term-row").forEach(row=>{
+    row.addEventListener("dragover", e=>{ e.preventDefault(); row.classList.add("dragover"); });
+    row.addEventListener("dragleave", ()=>row.classList.remove("dragover"));
+    row.addEventListener("drop", e=>{
+      e.preventDefault(); row.classList.remove("dragover");
+      if (!dragData) return;
+      const termIdx = parseInt(row.dataset.termIdx);
+      const {def, fromTermIdx} = dragData; dragData = null;
+      // Remove from old slot
+      if (fromTermIdx !== null && fromTermIdx !== undefined) delete matchSels[`${current}-${fromTermIdx}`];
+      // Remove any slot that had this def
+      Object.keys(matchSels).forEach(k=>{ if(matchSels[k]===def) delete matchSels[k]; });
+      matchSels[`${current}-${termIdx}`] = def;
+      saveMatchingAnswers(current);
+      render();
+    });
+  });
+
+  // Drop on bank (return)
+  const bank = document.getElementById("defBank");
+  if (bank) {
+    bank.addEventListener("dragover", e=>{ e.preventDefault(); bank.classList.add("dragover"); });
+    bank.addEventListener("dragleave", ()=>bank.classList.remove("dragover"));
+    bank.addEventListener("drop", e=>{
+      e.preventDefault(); bank.classList.remove("dragover");
+      if (!dragData) return;
+      const {fromTermIdx} = dragData; dragData = null;
+      if (fromTermIdx !== null && fromTermIdx !== undefined) {
+        delete matchSels[`${current}-${fromTermIdx}`];
+        saveMatchingAnswers(current);
+        render();
+      }
+    });
+  }
+
+  // NAV
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const submitExamBtn = document.getElementById("submitExamBtn");
+  const submitTopBtn  = document.getElementById("submitTopBtn");
+
+  if (prevBtn) prevBtn.addEventListener("click", ()=>{ if(current>0){ current--; render(); }});
+  if (nextBtn) nextBtn.addEventListener("click", ()=>{ if(current<questions.length-1){ current++; render(); }});
+  if (submitExamBtn) submitExamBtn.addEventListener("click", finishExam);
+  if (submitTopBtn)  submitTopBtn.addEventListener("click",  finishExam);
+
+  // Dot nav
+  document.querySelectorAll(".dot").forEach(dot=>{
+    dot.addEventListener("click", ()=>{ current=parseInt(dot.dataset.dot); render(); });
+  });
+
+  // Update timer display immediately
+  updateTimerUI();
+}
+
+function beginExam() {
+  initShuffles();
+  phase = "exam";
+  render();
+  startTimer();
+}
+
+// ── BOOT ─────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("root").innerHTML = "";
+  render();
+});
+</script>
+
+<div id="root"></div>
+</body>
+</html>
