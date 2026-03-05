@@ -1296,12 +1296,14 @@ async function fetchExamQuestions(examLabel) {
       return null;
     }
     const arrayStr = extractArray(html, 'questions') || extractArray(html, 'QUESTIONS');
+    console.log('fetchExamQuestions:', examLabel, 'file:', file, 'arrayStr length:', arrayStr?.length);
     if (!arrayStr) { console.error('fetchExamQuestions: no array found in', file); return null; }
     const questions = eval(arrayStr);
+    console.log('fetchExamQuestions: evaled', questions?.length, 'questions, first:', JSON.stringify(questions?.[0]).slice(0,100));
     EXAM_QUESTION_CACHE[examLabel] = questions;
     return questions;
   } catch(e) {
-    console.error('fetchExamQuestions error:', e);
+    console.error('fetchExamQuestions error:', e.message, e);
     return null;
   }
 }
@@ -1365,6 +1367,7 @@ async function renderAnalysis() {
 
   // Fetch questions
   const questions = await fetchExamQuestions(examLabel);
+  console.log('renderAnalysis: questions returned:', questions?.length, 'for', examLabel);
   if (!questions) {
     container.innerHTML = '<div style="color:#f87171;font-size:14px;padding:20px 0;">Could not load question data. Make sure the exam file is in the same folder.</div>';
     return;
@@ -1396,7 +1399,7 @@ async function renderAnalysis() {
       if (isCorrect) correct++;
     });
     const pct = answered > 0 ? Math.round((correct / answered) * 100) : null;
-    return { qi, stem: q.stem, section: q.section, type: q.type, correct, answered, pct, flagged: pct !== null && pct < 70 };
+    return { qi, stem: q.stem || q.text || q.prompt || '', section: q.section || q.sectionTitle || '', type: q.type, correct, answered, pct, flagged: pct !== null && pct < 70 };
   });
 
   // Build HTML
