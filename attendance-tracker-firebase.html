@@ -635,8 +635,13 @@ async function loadExamResults(){
       if(!name||!def){ console.log('SKIPPED row '+rowIdx+' - name empty?', !name, 'def not found?', !def, 'label:', JSON.stringify(label)); return; }
       if(!examResults[name])examResults[name]={};
       const existing=examResults[name][def.assignId];
+         const answersRaw = f.answersData?.stringValue;
+      const answersData = answersRaw ? (() => { try { return JSON.parse(answersRaw); } catch(e) { return null; } })() : null;
       if(!existing||pct>existing.pct){
-        examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category,examLabel:label};
+        examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category,examLabel:label,answersData};
+      } else if(answersData && !existing.answersData) {
+        // Keep higher score but add answersData if it was missing
+        existing.answersData = answersData;
       }
     });
     console.log('examResults loaded:', JSON.stringify(examResults));
@@ -1381,20 +1386,35 @@ async function renderAnalysis() {
   const qStats = questions.map((q, qi) => {
     let correct = 0, answered = 0;
     submissions.forEach(sub => {
-      if (!sub.answersData || !sub.answersData[qi]) return;
+      if (!sub.answersData) return;
+      // Support both index-based (main exams) and qid-based (practice exams)
+      let ansEntry = Array.isArray(sub.answersData)
+        ? sub.answersData.find(a => String(a.qid) === String(q.id))
+        : sub.answersData?.[qi];
+      if (!ansEntry) return;
       answered++;
-      const given = sub.answersData[qi].given;
-      // Score the question
+      const given = ansEntry.given;
+      // If the answer entry already has correct stored (practice exams do), use it directly
       let isCorrect = false;
-      if (q.type === 'mc') {
-        const correctIdx = q.correct ? q.correct[0] : q.answer;
-        isCorrect = Array.isArray(given) ? given[0] === correctIdx : given === correctIdx;
-      } else if (q.type === 'best2') {
-        const correctSet = new Set(q.correct || q.answers || []);
-        const givenSet = new Set(Array.isArray(given) ? given : []);
-        isCorrect = correctSet.size === givenSet.size && [...correctSet].every(x => givenSet.has(x));
-      } else if (q.type === 'matching') {
-        isCorrect = Array.isArray(given) && q.pairs.every((p, pi) => given[pi] === p.def);
+      if (ansEntry.correct !== undefined) {
+        if (Array.isArray(given) && Array.isArray(ansEntry.correct)) {
+          const gs = new Set(given), cs = new Set(ansEntry.correct);
+          isCorrect = gs.size === cs.size && [...cs].every(x => gs.has(x));
+        } else {
+          isCorrect = String(given) === String(ansEntry.correct);
+        }
+      } else {
+        // Fall back to deriving from question def (main exams)
+        if (q.type === 'mc') {
+          const correctIdx = q.correct ? q.correct[0] : q.answer;
+          isCorrect = Array.isArray(given) ? given[0] === correctIdx : given === correctIdx;
+        } else if (q.type === 'best2') {
+          const correctSet = new Set(q.correct || q.answers || []);
+          const givenSet = new Set(Array.isArray(given) ? given : []);
+          isCorrect = correctSet.size === givenSet.size && [...correctSet].every(x => givenSet.has(x));
+        } else if (q.type === 'matching') {
+          isCorrect = Array.isArray(given) && q.pairs.every((p, pi) => given[pi] === p.def);
+        }
       }
       if (isCorrect) correct++;
     });
