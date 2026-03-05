@@ -1288,7 +1288,7 @@ async function fetchExamQuestions(examLabel) {
     // Extract questions array from the file
     // Support both 'questions' (main exams) and 'QUESTIONS' (practice exams)
     let match = html.match(/const questions\s*=\s*([\s\S]*?);\s*const SECTION_COLORS/);
-    if (!match) match = html.match(/const QUESTIONS\s*=\s*([\s\S]*?\]);\s*\n/);
+        if (!match) { const qm = html.match(/const QUESTIONS[\s\S]{0,10}=([\s\S]*\]);/); if(qm) match = qm; }
     if (!match) return null;
     const questions = eval(match[1]); // safe — our own file
     EXAM_QUESTION_CACHE[examLabel] = questions;
