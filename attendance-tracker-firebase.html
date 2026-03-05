@@ -531,13 +531,19 @@ const EXAM_DEFS={
 function getExamDefs(course) {
   // Merge hardcoded defs with any from portalContent
   const base = EXAM_DEFS[course] || [];
-  const fromContent = (portalContent[course]?.exams || []).map(e => ({
-    label: e.name, category: e.category || 'module',
-    assignId: '__' + (course) + '_' + (e.id || e.name.replace(/\s+/g,'_').toLowerCase()) + '__'
-  }));
+  const baseByLabel = {};
+  base.forEach(e => { baseByLabel[e.label] = e; });
+  const fromContent = (portalContent[course]?.exams || []).map(e => {
+    // If this exam exists in base defs, reuse its assignId for consistency
+    const baseMatch = baseByLabel[e.name];
+    const assignId = baseMatch
+      ? baseMatch.assignId
+      : '__' + course + '_' + (e.id || e.name.replace(/\s+/g,'_').toLowerCase()) + '__';
+    return { label: e.name, category: e.category || 'module', assignId };
+  });
   // Merge: fromContent overrides base by label
-  const baseLabels = new Set(fromContent.map(e => e.label));
-  return [...fromContent, ...base.filter(e => !baseLabels.has(e.label))];
+  const fbLabels = new Set(fromContent.map(e => e.label));
+  return [...fromContent, ...base.filter(e => !fbLabels.has(e.label))];
 }
 // examResults: studentName (lowercase) -> { assignId -> {pct,score,total,submittedAt} }
 let examResults={};
@@ -630,7 +636,7 @@ async function loadExamResults(){
       if(!examResults[name])examResults[name]={};
       const existing=examResults[name][def.assignId];
       if(!existing||pct>existing.pct){
-        examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category};
+        examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category,examLabel:label};
       }
     });
     console.log('examResults loaded:', JSON.stringify(examResults));
