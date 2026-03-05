@@ -844,13 +844,13 @@ function renderExams() {
             : sc
               ? `<div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
                   <span style="font-size:12px;font-weight:700;color:#16a34a;border:2px solid #16a34a;border-radius:8px;padding:8px 16px;background:#f0fdf4;white-space:nowrap;">✓ Submitted ${sc.pct}%</span>
-                  <a href="${(sc.file||ex.file)}?review=1&name=${encodeURIComponent(currentSession?.name||'')}"
+                  <a href="${(sc.file||ex.file).trim()}?review=1&name=${encodeURIComponent(currentSession?.name||'')}"
                      style="font-size:12px;color:#2563eb;border:1px solid #bfdbfe;border-radius:8px;padding:6px 14px;background:#f0f6ff;text-decoration:none;white-space:nowrap;transition:all 0.2s;"
                      onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe'">
                      📋 Review Answers
                   </a>
                 </div>`
-              : `<a class="btn-take" href="${ex.file}?student=${encodeURIComponent(currentSession?.name||'')}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
+              : `<a class="btn-take" href="${ex.file.trim()}?student=${encodeURIComponent(currentSession?.name||'')}" style="color:${ex.color};border-color:${ex.color};background:${ex.color}11"
                   onmouseover="this.style.background='${ex.color}22'" onmouseout="this.style.background='${ex.color}11'">
                   Take Exam →
                 </a>`}
