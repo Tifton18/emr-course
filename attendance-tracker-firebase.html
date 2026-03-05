@@ -1388,13 +1388,27 @@ async function renderAnalysis() {
     submissions.forEach(sub => {
       if (!sub.answersData) return;
       // Support both index-based (main exams) and qid-based (practice exams)
+      if (q.type === 'match' && q.matchGroups) {
+        // Matching: each pair stored separately as qid="m21","m22"...
+        const allPairs = q.matchGroups.flatMap(g => g.pairs || []);
+        if (!Array.isArray(sub.answersData)) return;
+        const pairNums = new Set(allPairs.map(p => 'm' + p.num));
+        const pairAnswers = sub.answersData.filter(a => pairNums.has(String(a.qid)));
+        if (pairAnswers.length === 0) return;
+        answered++;
+        const pairCorrect = pairAnswers.filter(a => String(a.given) === String(a.correct)).length;
+        // Count as correct if all pairs answered correctly
+        if (pairCorrect === allPairs.length) correct++;
+        return; // handled
+      }
+
       let ansEntry = Array.isArray(sub.answersData)
         ? sub.answersData.find(a => String(a.qid) === String(q.id))
         : sub.answersData?.[qi];
       if (!ansEntry) return;
       answered++;
       const given = ansEntry.given;
-      // If the answer entry already has correct stored (practice exams do), use it directly
+      // If the answer entry has correct stored (practice exams), use it directly
       let isCorrect = false;
       if (ansEntry.correct !== undefined) {
         if (Array.isArray(given) && Array.isArray(ansEntry.correct)) {
@@ -1419,7 +1433,13 @@ async function renderAnalysis() {
       if (isCorrect) correct++;
     });
     const pct = answered > 0 ? Math.round((correct / answered) * 100) : null;
-    return { qi, stem: q.stem || q.text || q.prompt || '', section: q.section || q.sectionTitle || '', type: q.type, correct, answered, pct, flagged: pct !== null && pct < 70 };
+    // Build a readable stem for match questions
+    let stem = q.stem || q.text || q.prompt || '';
+    if (!stem && q.type === 'match' && q.matchGroups) {
+      const allPairs = q.matchGroups.flatMap(g => g.pairs || []);
+      stem = 'Matching — ' + allPairs.map(p => p.prompt).join(' / ').slice(0, 120) + (allPairs.length > 2 ? '…' : '');
+    }
+    return { qi, stem, section: q.section || q.sectionTitle || '', type: q.type, correct, answered, pct, flagged: pct !== null && pct < 70 };
   });
 
   // Build HTML
