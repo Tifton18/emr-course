@@ -1342,6 +1342,66 @@ async function refreshAnalysis() {
 }
 
 async function switchAnalysisCourse(c){activeAnalysisCourse=c;renderAnalysis();}
+
+function buildAnswerBreakdown(q) {
+  if (!q.answered || q.answered === 0) return '';
+  let html = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">';
+
+  if ((q.type === 'mc' || q.type === 'best2') && q.options.length > 0) {
+    const total = q.answered;
+    q.options.forEach((opt, i) => {
+      const count = q.optionCounts[i] || 0;
+      const pct = Math.round((count / total) * 100);
+      const isCorrect = q.type === 'mc'
+        ? i === q.correctIdx
+        : (q.correctSet && q.correctSet.includes(i));
+      const barColor = isCorrect ? '#4ade80' : (count > 0 ? '#f87171' : '#e2e8f0');
+      const textWeight = isCorrect ? '700' : '400';
+      const icon = isCorrect ? '✓' : (count > 0 ? '✗' : '');
+      html += `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <div style="width:16px;font-size:11px;font-weight:700;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};text-align:center;">${icon}</div>
+          <div style="width:16px;font-size:11px;color:#6b82a0;text-align:right;">${String.fromCharCode(65+i)}.</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;color:#1e3a5f;font-weight:${textWeight};margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${opt}</div>
+            <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div style="width:44px;text-align:right;font-size:11px;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};font-weight:${count>0?'600':'400'};">${count > 0 ? count + ' (' + pct + '%)' : '—'}</div>
+        </div>`;
+    });
+
+  } else if (q.isPair && q.pairChoiceLabels) {
+    // Show choice distribution for match pair
+    const choices = Object.entries(q.pairChoiceLabels);
+    const total = q.answered;
+    if (choices.length > 0) {
+      choices.forEach(([letter, label]) => {
+        const count = q.optionCounts[letter] || 0;
+        const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+        const isCorrect = letter === q.pairCorrectAnswer;
+        const barColor = isCorrect ? '#4ade80' : (count > 0 ? '#f87171' : '#e2e8f0');
+        html += `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <div style="width:16px;font-size:11px;font-weight:700;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};text-align:center;">${isCorrect?'✓':count>0?'✗':''}</div>
+            <div style="width:16px;font-size:11px;color:#6b82a0;text-align:right;">${letter}.</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:12px;color:#1e3a5f;font-weight:${isCorrect?'700':'400'};margin-bottom:2px;">${label}</div>
+              <div style="height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;"></div>
+              </div>
+            </div>
+            <div style="width:44px;text-align:right;font-size:11px;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};font-weight:${count>0?'600':'400'};">${count>0?count+' ('+pct+'%)':'—'}</div>
+          </div>`;
+      });
+    }
+  }
+
+  html += '</div>';
+  return html;
+}
+
 async function renderAnalysis() {
   const asel = document.getElementById('analysisCourseSelector');
   if (asel) asel.innerHTML = renderCourseSelectorHTML(activeAnalysisCourse,'switchAnalysisCourse');
@@ -1383,23 +1443,46 @@ async function renderAnalysis() {
   const passing = submissions.filter(r => r.pct >= 70).length;
 
   // Per-question analysis
-  const qStats = questions.map((q, qi) => {
+  // Expand match questions into individual pair rows
+const expandedQuestions = [];
+questions.forEach((q, qi) => {
+  if (q.type === 'match' && q.matchGroups) {
+    const allPairs = q.matchGroups.flatMap(g => g.pairs || []);
+    allPairs.forEach(pair => {
+      expandedQuestions.push({
+        ...q,
+        _isPair: true,
+        _pairNum: pair.num,
+        _pairPrompt: pair.prompt,
+        _pairCorrect: pair.correct,
+        _pairChoiceLabels: pair.choiceLabels || {},
+        stem: pair.prompt,
+        id: 'm' + pair.num,
+        _origQi: qi,
+      });
+    });
+  } else {
+    expandedQuestions.push({ ...q, _origQi: qi });
+  }
+});
+
+const qStats = expandedQuestions.map((q, qi) => {
     let correct = 0, answered = 0;
+    const optionCounts = {}; // for MC: counts per option index
+    const pairResults = [];  // unused now but kept for compat
     submissions.forEach(sub => {
       if (!sub.answersData) return;
       // Support both index-based (main exams) and qid-based (practice exams)
-      if (q.type === 'match' && q.matchGroups) {
-        // Matching: each pair stored separately as qid="m21","m22"...
-        const allPairs = q.matchGroups.flatMap(g => g.pairs || []);
+      if (q._isPair) {
+        // Each match pair is now its own row
         if (!Array.isArray(sub.answersData)) return;
-        const pairNums = new Set(allPairs.map(p => 'm' + p.num));
-        const pairAnswers = sub.answersData.filter(a => pairNums.has(String(a.qid)));
-        if (pairAnswers.length === 0) return;
+        const ans = sub.answersData.find(a => String(a.qid) === 'm' + q._pairNum);
+        if (!ans) return;
         answered++;
-        const pairCorrect = pairAnswers.filter(a => String(a.given) === String(a.correct)).length;
-        // Count as correct if all pairs answered correctly
-        if (pairCorrect === allPairs.length) correct++;
-        return; // handled
+        // Track what answer was chosen
+        if (ans.given) optionCounts[ans.given] = (optionCounts[ans.given] || 0) + 1;
+        if (String(ans.given) === String(ans.correct)) correct++;
+        return;
       }
 
       let ansEntry = Array.isArray(sub.answersData)
@@ -1410,6 +1493,11 @@ async function renderAnalysis() {
       const given = ansEntry.given;
       // If the answer entry has correct stored (practice exams), use it directly
       let isCorrect = false;
+      // Track option distribution for MC/best2
+      if (q.type === 'mc' || q.type === 'best2') {
+        const picks = Array.isArray(given) ? given : [given];
+        picks.forEach(p => { if (p !== undefined && p !== null) optionCounts[p] = (optionCounts[p] || 0) + 1; });
+      }
       if (ansEntry.correct !== undefined) {
         if (Array.isArray(given) && Array.isArray(ansEntry.correct)) {
           const gs = new Set(given), cs = new Set(ansEntry.correct);
@@ -1433,13 +1521,21 @@ async function renderAnalysis() {
       if (isCorrect) correct++;
     });
     const pct = answered > 0 ? Math.round((correct / answered) * 100) : null;
-    // Build a readable stem for match questions
-    let stem = q.stem || q.text || q.prompt || '';
-    if (!stem && q.type === 'match' && q.matchGroups) {
-      const allPairs = q.matchGroups.flatMap(g => g.pairs || []);
-      stem = 'Matching — ' + allPairs.map(p => p.prompt).join(' / ').slice(0, 120) + (allPairs.length > 2 ? '…' : '');
-    }
-    return { qi, stem, section: q.section || q.sectionTitle || '', type: q.type, correct, answered, pct, flagged: pct !== null && pct < 70 };
+    const stem = q.stem || q.text || q.prompt || q._pairPrompt || '';
+    let correctIdx = null;
+    if (q.type === 'mc') correctIdx = q.correct ? q.correct[0] : q.answer;
+    const correctSet = (q.type === 'best2') ? new Set(q.correct || []) : null;
+    return {
+      qi, stem, section: q.section || q.sectionTitle || '', type: q._isPair ? 'match' : q.type,
+      correct, answered, pct, flagged: pct !== null && pct < 70,
+      options: q.options || [],
+      optionCounts,
+      correctIdx,
+      correctSet: correctSet ? [...correctSet] : null,
+      isPair: !!q._isPair,
+      pairCorrectAnswer: q._pairCorrect,
+      pairChoiceLabels: q._pairChoiceLabels || {},
+    };
   });
 
   // Build HTML
@@ -1495,6 +1591,7 @@ async function renderAnalysis() {
                 ${q.flagged ? '<span style="color:#dc2626;font-weight:700;">⚠ Review</span>' : ''}
               </div>
             </div>
+            ${buildAnswerBreakdown(q)}
           </div>
         </div>
       </div>`;
