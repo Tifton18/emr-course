@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Week 4 Exam</title>
+<style>
+  /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
+  /* See SETUP_INSTRUCTIONS.txt for how to get this */
+
+  :root {
+    --bg: #0d1117;
+    --surface: #111827;
+    --border: #1e2a3a;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --blue: #2196F3;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── INTRO ── */
+  .intro-wrap {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0e27 0%, #0f1e3d 50%, #0a1628 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .intro-card { max-width: 680px; width: 100%; text-align: center; }
+  .intro-eyebrow { font-size: 12px; letter-spacing: 6px; color: #64b5f6; text-transform: uppercase; margin-bottom: 14px; }
+  .intro-title { font-size: 52px; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 8px; }
+  .intro-sub { font-size: 28px; color: #90caf9; margin-bottom: 40px; }
+  .info-grid { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px 36px; margin-bottom: 32px; text-align: left; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #e0e0e0; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #90caf9; font-weight: 600; }
+  .info-val { max-width: 340px; text-align: right; }
+  .intro-instructions { color: #aaa; font-size: 13px; line-height: 1.7; margin-bottom: 24px; }
+  .name-label { display: block; color: #90caf9; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; text-align: left; }
+  .name-input {
+    width: 100%; background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 14px 18px; font-size: 16px; color: #fff;
+    outline: none; font-family: Georgia, serif; margin-bottom: 24px; transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: #1565c0; }
+  .name-input.has-value { border-color: #1565c0; }
+  .btn-begin {
+    background: rgba(255,255,255,0.08); color: #555; border: none; border-radius: 12px;
+    padding: 18px 56px; font-size: 18px; font-weight: 700; cursor: default;
+    letter-spacing: 1px; transition: all 0.2s; font-family: Georgia, serif;
+  }
+  .btn-begin.active {
+    background: linear-gradient(135deg, #1565c0, #0d47a1); color: #fff;
+    cursor: pointer; box-shadow: 0 8px 32px rgba(21,101,192,0.5);
+  }
+  .btn-begin.active:hover { transform: translateY(-2px); }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: #0d1117; border-bottom: 1px solid #1e2a3a; padding: 0 24px;
+  }
+  .topbar-inner {
+    max-width: 860px; margin: 0 auto; display: flex;
+    align-items: center; gap: 16px; height: 60px;
+  }
+  .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .progress-bar { flex: 1; height: 6px; background: #1e2a3a; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .progress-text { color: #64748b; font-size: 13px; white-space: nowrap; }
+  .timer-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #111827; border-radius: 8px; padding: 6px 14px;
+    border: 1px solid #1e2a3a;
+  }
+  .timer-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .timer-dot.pulse { animation: pulse 1s infinite; }
+  .timer-text { font-weight: 700; font-size: 18px; font-family: monospace; letter-spacing: 2px; }
+  .timer-bar { height: 3px; background: #1e2a3a; transition: none; }
+  .timer-bar-fill { height: 100%; transition: width 1s linear, background 1s; }
+  .btn-submit-top {
+    background: #2196F3; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; font-family: Georgia, serif;
+  }
+
+  /* ── EXAM BODY ── */
+  .exam-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 20px; padding: 5px 14px; margin-bottom: 20px;
+  }
+  .section-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .q-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .q-label { font-size: 13px; color: #4a5568; font-weight: 600; letter-spacing: 1px; }
+  .q-number { font-size: 42px; font-weight: 700; color: #fff; line-height: 1; }
+  .q-badge {
+    border-radius: 6px; padding: 3px 10px; font-size: 12px;
+    font-weight: 700; letter-spacing: 1px;
+  }
+  .q-points { margin-left: auto; color: #4a5568; font-size: 13px; }
+  .q-stem { font-size: 19px; color: #e2e8f0; line-height: 1.7; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #1e2a3a; }
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .best2-hint { color: #a78bfa; font-size: 13px; margin-bottom: 8px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px;
+    background: #111827; border: 2px solid #1e2a3a; border-radius: 10px;
+    cursor: pointer; text-align: left; transition: all 0.15s;
+    color: #cbd5e1; font-family: Georgia, serif; font-size: 16px; width: 100%;
+  }
+  .option-btn:hover { border-color: #2d3748; }
+  .option-btn.selected { background: rgba(33,150,243,0.13); border-color: #2196F3; color: #fff; }
+  .option-indicator {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #374151;
+    background: transparent; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: #6b7280; font-weight: 700; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .option-btn.selected .option-indicator {
+    background: #2196F3; border-color: #2196F3; color: #fff;
+  }
+  .option-btn.best2 .option-indicator { border-radius: 6px; }
+  .option-text { padding-top: 2px; line-height: 1.6; }
+
+  /* ── MATCHING ── */
+  .match-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .match-instructions strong { color: #38bdf8; }
+  .bank-label { color: #64748b; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .def-bank {
+    min-height: 48px; background: #0a0f1a; border: 2px dashed #1e2a3a;
+    border-radius: 10px; padding: 10px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .def-bank.dragover { border-color: #38bdf8; background: #0a1525; }
+  .def-chip {
+    padding: 10px 14px; background: #111827; border: 1px solid #2d3748;
+    border-radius: 8px; cursor: grab; color: #cbd5e1; font-size: 14px;
+    line-height: 1.5; user-select: none; transition: box-shadow 0.15s;
+    font-family: Georgia, serif;
+  }
+  .def-chip:hover { box-shadow: 0 0 0 2px #38bdf8; }
+  .def-chip.dragging { opacity: 0.4; }
+  .def-bank-empty { color: #374151; font-size: 13px; font-style: italic; padding: 8px 14px; }
+  .terms-label { color: #64748b; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .term-rows { display: flex; flex-direction: column; gap: 8px; }
+  .term-row {
+    display: grid; grid-template-columns: 200px 1fr; border-radius: 10px;
+    overflow: hidden; border: 2px solid #1e2a3a; transition: border-color 0.15s;
+  }
+  .term-row.dragover { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.13); }
+  .term-row.assigned { border-color: #22c55e; }
+  .term-name { background: #0f1a2e; padding: 14px 16px; display: flex; align-items: center; }
+  .term-name span { color: #e2e8f0; font-weight: 700; font-size: 14px; }
+  .term-drop { background: #111827; padding: 12px 16px; display: flex; align-items: center; min-height: 52px; }
+  .term-row.dragover .term-drop { background: #0a1f3a; }
+  .term-row.assigned .term-drop { background: #0a1f14; }
+  .term-placeholder { color: #374151; font-size: 13px; font-style: italic; }
+  .term-placeholder.active { color: #38bdf8; }
+
+  /* ── NAV ── */
+  .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #1e2a3a; }
+  .btn-prev, .btn-next, .btn-submit-exam {
+    border-radius: 8px; padding: 10px 24px; font-size: 14px;
+    cursor: pointer; font-family: Georgia, serif; transition: all 0.15s;
+  }
+  .btn-prev { background: transparent; color: #94a3b8; border: 1px solid #374151; }
+  .btn-prev:disabled { color: #2d3748; border-color: #1e2a3a; cursor: default; }
+  .btn-next { background: #2196F3; color: #fff; border: none; font-weight: 700; }
+  .btn-submit-exam { background: #22c55e; color: #fff; border: none; font-weight: 700; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+  .dot { height: 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s; background: #1e2a3a; }
+  .dot.answered { background: #374151; }
+  .dot.current { background: #2196F3; }
+
+  /* ── RESULTS ── */
+  .results-wrap { min-height: 100vh; padding: 40px 20px; font-family: Georgia, serif; }
+  .results-inner { max-width: 780px; margin: 0 auto; }
+  .results-hero { text-align: center; margin-bottom: 40px; }
+  .results-icon { font-size: 80px; margin-bottom: 8px; }
+  .results-name { font-size: 22px; color: #64748b; margin-bottom: 4px; }
+  .results-pct { font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .results-verdict { font-size: 22px; margin-bottom: 4px; }
+  .results-detail { color: #aaa; font-size: 15px; }
+  .results-card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .results-card-title { color: #90caf9; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 16px; }
+  .result-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .result-row:last-child { border-bottom: none; }
+  .result-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .result-badge.correct { background: #2e7d32; }
+  .result-badge.wrong { background: #c62828; }
+  .result-stem { color: #e0e0e0; font-size: 14px; margin-bottom: 4px; }
+  .result-correct-ans { font-size: 13px; color: #81c784; }
+  .result-pts { font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .submitting-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 16px; }
+  .submitting-spinner { width: 48px; height: 48px; border: 4px solid #1e2a3a; border-top-color: #2196F3; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .submitting-text { color: #94a3b8; font-size: 16px; }
+  .submit-status { text-align: center; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; }
+  .submit-status.success { background: #0a2a14; border: 1px solid #166534; color: #86efac; }
+  .submit-status.error { background: #2d0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIGURATION — update this URL after deploying your
+// Google Apps Script Web App (see SETUP_INSTRUCTIONS.txt)
+// ══════════════════════════════════════════════════════
+const FB_CONFIG = {
+  apiKey:"AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  authDomain:"class-attendance-72cd9.firebaseapp.com",
+  projectId:"class-attendance-72cd9",
+};
+const EXAM_LABEL      = "Week 4 Exam";
+const TOTAL_TIME      = 24 * 60; // 24 minutes
+const LETTERS         = ["A","B","C","D","E"];
+
+// ── QUESTION DATA ────────────────────────────────────
+const questions = [
+  {section:"Medical Emergencies I",type:"mc",stem:"You respond to a 58-year-old male who is confused, diaphoretic, and trembling. His wife states he is diabetic and 'hasn't eaten since yesterday.' Which of the following is the MOST likely cause of his presentation?",options:["Hemorrhagic stroke","Hypoglycemia","Hypertensive emergency","Postictal state following a seizure"],correct:[1],points:1},
+  {section:"Medical Emergencies I",type:"mc",stem:"A conscious patient with a known history of diabetes is suspected to be hypoglycemic. The patient is alert enough to swallow. The MOST appropriate intervention is:",options:["Administer high-flow oxygen via non-rebreather mask","Administer oral glucose and reassess mental status","Place the patient supine and monitor","Withhold glucose until blood sugar is confirmed by a glucometer"],correct:[1],points:1},
+  {section:"Medical Emergencies I",type:"mc",stem:"Which of the following BEST describes the mnemonic AEIOU-TIPS as used in assessing altered mental status?",options:["A tool to assess stroke severity using neurological scoring","A systematic list of potential causes of altered mental status including alcohol, epilepsy, insulin, opiates, trauma, infection, and more","A protocol for airway management in unresponsive patients","A method for assessing pain level in conscious patients"],correct:[1],points:1},
+  {section:"Medical Emergencies I",type:"mc",stem:"A patient is in the postictal phase following a generalized tonic-clonic seizure. Which presentation would you MOST expect?",options:["Agitation, hypertension, and active muscle contractions","Unresponsiveness or deep confusion, fatigue, and slow recovery of consciousness","Focal one-sided weakness and slurred speech only","Fever above 104 degrees and neck stiffness"],correct:[1],points:1},
+  {section:"Medical Emergencies I",type:"best2",stem:"A patient presents with sudden facial droop on the right side, left arm weakness, and difficulty speaking. Which TWO actions are MOST appropriate?",options:["Perform the Cincinnati Stroke Scale assessment","Administer aspirin immediately","Note the time of symptom onset and transport rapidly to a stroke center","Apply a tourniquet to the left arm to assess motor response","Have the patient walk to test gait and balance"],correct:[0,2],points:1},
+  {section:"Medical Emergencies I",type:"mc",stem:"Which of the following is a contraindication to administering oral glucose to a diabetic patient?",options:["Blood glucose above 80 mg/dL","The patient is unable to swallow or is unconscious","A known allergy to insulin","The patient has previously taken oral glucose within the last hour"],correct:[1],points:1},
+  {section:"Medical Emergencies I",type:"matching",stem:"Match each medical emergency with its key assessment finding or defining feature.",pairs:[{term:"Hypoglycemia",def:"Diaphoresis, trembling, altered mental status in a diabetic patient who has not eaten"},{term:"Ischemic stroke",def:"Sudden focal neurological deficits caused by a blocked cerebral artery; time-sensitive transport"},{term:"Tonic-clonic seizure",def:"Rhythmic full-body muscle contractions followed by a postictal period of confusion and fatigue"},{term:"Hyperglycemia",def:"Gradual onset of altered mental status, fruity breath, Kussmaul respirations, and dehydration in a diabetic"},{term:"Transient ischemic attack",def:"Stroke-like symptoms that resolve completely within 24 hours; a warning sign of impending stroke"}],points:1},
+  {section:"Medical Emergencies II",type:"mc",stem:"A patient presents with sudden onset hives, facial swelling, wheezing, and hypotension after eating at a restaurant. The MOST appropriate initial intervention is:",options:["Administer high-flow oxygen only and transport","Assist with the patient's epinephrine auto-injector and call for ALS backup","Administer oral diphenhydramine and monitor","Position supine and apply a cold compress to the face"],correct:[1],points:1},
+  {section:"Medical Emergencies II",type:"mc",stem:"Which of the following presentations is MOST consistent with a patient experiencing an acute asthma attack?",options:["Bilateral crackles, productive pink frothy sputum, and hypertension","Expiratory wheezing, prolonged expiration, accessory muscle use, and decreased SpO2","Inspiratory stridor, drooling, and tripod positioning in a child with fever","Sudden onset pleuritic chest pain with absent breath sounds on one side"],correct:[1],points:1},
+  {section:"Medical Emergencies II",type:"mc",stem:"You respond to a patient who ingested an unknown quantity of pills. The patient is drowsy with slow, shallow respirations, pinpoint pupils, and bradycardia. Which toxidrome is MOST consistent with this presentation?",options:["Sympathomimetic toxidrome (stimulant overdose)","Anticholinergic toxidrome","Opioid toxidrome","Cholinergic toxidrome (organophosphate poisoning)"],correct:[2],points:1},
+  {section:"Medical Emergencies II",type:"mc",stem:"A patient with a behavioral emergency is becoming increasingly agitated and threatening. Which of the following is the MOST important initial action?",options:["Physically restrain the patient before they can harm themselves or others","Ensure scene safety and position yourself near an exit while attempting verbal de-escalation","Administer a sedative from your kit to calm the patient","Leave the scene and wait for law enforcement before returning"],correct:[1],points:1},
+  {section:"Medical Emergencies II",type:"best2",stem:"Which TWO findings are MOST associated with anaphylaxis rather than a mild allergic reaction?",options:["Urticaria (hives) limited to the forearm","Hypotension and signs of shock","Audible wheezing with decreased SpO2","Localized redness and itching at a bee sting site","Runny nose and watery eyes after pollen exposure"],correct:[1,2],points:1},
+  {section:"Medical Emergencies II",type:"matching",stem:"Match each toxidrome with its classic presentation.",pairs:[{term:"Opioid toxidrome",def:"Pinpoint pupils, decreased respirations, decreased level of consciousness, bradycardia"},{term:"Sympathomimetic toxidrome",def:"Dilated pupils, tachycardia, hypertension, hyperthermia, agitation"},{term:"Cholinergic toxidrome",def:"SLUDGE: salivation, lacrimation, urination, defecation, GI distress, emesis; bradycardia"},{term:"Anticholinergic toxidrome",def:"Dry skin, dilated pupils, urinary retention, tachycardia, hyperthermia, confusion"},{term:"Sedative-hypnotic toxidrome",def:"Drowsiness, slurred speech, ataxia, normal or mildly decreased respirations"}],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"A patient was an unrestrained driver in a high-speed frontal collision. Based on kinematics, which injury pattern should the EMR MOST anticipate?",options:["Isolated head injury only","Multi-system trauma including head, chest, abdomen, and lower extremity injuries from dashboard and steering wheel contact","Posterior spinal compression fractures only","Bilateral ankle fractures from bracing against the footwell"],correct:[1],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"You are assessing a burn patient. The patient has full-thickness burns covering the entire right arm and the anterior chest. Using the Rule of Nines, what percentage of body surface area (BSA) is burned?",options:["18%","27%","36%","45%"],correct:[1],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"Which of the following BEST describes the appearance of a full-thickness (third-degree) burn?",options:["Red, moist, and extremely painful with blisters","Leathery, waxy, or charred appearance; may be white or brown; painless due to nerve destruction","Superficial redness and pain without blistering","Mottled red and white with intact skin surface"],correct:[1],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"An evisceration (exposed abdominal organs) is discovered during patient assessment. The MOST appropriate management is:",options:["Gently replace the organs into the abdominal cavity and apply a pressure dressing","Cover the organs with a moist sterile dressing and do not attempt to replace them","Apply dry gauze and an occlusive dressing with firm pressure","Leave the wound uncovered to prevent contamination of the sterile organs"],correct:[1],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"best2",stem:"Which TWO of the following are correct principles of burn management in the prehospital setting?",options:["Stop the burning process by removing clothing and jewelry from the burned area","Apply ice directly to the burn to reduce pain and tissue damage","Cover the burn with a dry sterile dressing or burn sheet","Rupture large blisters to prevent infection","Immerse the burned area in cold water for at least 30 minutes"],correct:[0,2],points:1},
+  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"Which of the following findings is MOST indicative of a closed femur fracture requiring immediate intervention?",options:["Mild tenderness over the mid-thigh with full range of motion","Severe deformity, swelling, and potential blood loss of 1 to 2 liters into the thigh compartment","Crepitus only with active movement","Ecchymosis without pain or deformity"],correct:[1],points:1},
+  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"When assessing circulation, sensation, and movement (CSM) distal to a fracture, which finding would MOST concern you?",options:["Mild pain with palpation at the fracture site","Absent distal pulse, numbness, and inability to move fingers or toes","Capillary refill of 2 seconds","Moderate swelling without deformity"],correct:[1],points:1},
+  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient fell from a ladder and has a suspected spinal injury. He is currently ambulatory and says his neck hurts. The MOST appropriate action is:",options:["Allow him to continue walking since he has no neurological deficits","Have him sit in the ambulance and reassess","Manually stabilize the spine and assess for criteria that may clear spinal precautions in the field","Ask him to gently move his neck to assess range of motion"],correct:[2],points:1},
+  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient with a head injury is becoming increasingly combative, has a widening pulse pressure (rising systolic, falling diastolic), and a slowing heart rate. These findings MOST suggest:",options:["Hypovolemic shock from internal bleeding","Increasing intracranial pressure \u2014 this is Cushing's triad","An anxiety response to pain and fear","Neurogenic shock from spinal cord involvement"],correct:[1],points:1},
+  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"best2",stem:"Which TWO of the following are correct prehospital principles when managing a suspected open pneumothorax (sucking chest wound)?",options:["Apply a vented (three-sided) chest seal or occlusive dressing taped on three sides","Pack the wound tightly with gauze and apply firm pressure","Monitor for signs of tension pneumothorax after sealing the wound","Apply the dressing only during exhalation to trap air inside","Remove the dressing every 5 minutes to allow air to escape"],correct:[0,2],points:1},
+  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"matching",stem:"Match each injury type with its key clinical finding or management principle.",pairs:[{term:"Flail chest",def:"Segment of chest wall moves paradoxically (inward on inhalation) due to multiple consecutive rib fractures"},{term:"Open pneumothorax",def:"Air enters the pleural space through a chest wall wound; treated with a vented chest seal"},{term:"Tension pneumothorax",def:"Air accumulates under pressure collapsing the lung; tracheal deviation, absent breath sounds, hypotension"},{term:"Spinal precautions",def:"Manual in-line stabilization maintained whenever mechanism or symptoms suggest possible spinal injury"},{term:"Cushing's triad",def:"Hypertension with widening pulse pressure, bradycardia, and irregular respirations indicating rising ICP"}],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"When applying the Rule of Nines to calculate burn BSA in an adult, which of the following values is CORRECT?",options:["Each arm = 18%, each leg = 9%, head = 9%","Head and neck = 9%, each arm = 9%, chest = 18%, abdomen = 18%, each leg = 18%, genitalia = 1%","Head = 18%, each arm = 9%, each leg = 9%, trunk = 36%","Each leg = 9%, torso = 36%, head = 18%"],correct:[1],points:1},
+];
+
+const SECTION_COLORS = {
+  "Medical Emergencies I":                       {bg:"#1a2f1a", accent:"#4CAF50"},
+  "Medical Emergencies II":                      {bg:"#2a1a2a", accent:"#9C27B0"},
+  "Trauma Assessment, Soft Tissue & Burns":      {bg:"#3d2000", accent:"#FF9800"},
+  "Musculoskeletal, Spinal, Head & Chest Trauma":{bg:"#3d1515", accent:"#F44336"},
+};
+
+// ── STATE ────────────────────────────────────────────
+// Pre-fill student name from portal URL param
+const _urlParams = new URLSearchParams(window.location.search);
+const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
+
+let phase        = "intro";
+let studentName  = _portalStudent || "";
+let current      = 0;
+let answers      = Array(questions.length).fill(null);
+let matchSels    = {};      // "qIdx-termIdx" -> def string
+let shuffledDefs = {};      // qIdx -> shuffled def array
+let timeLeft     = TOTAL_TIME;
+let timerInterval= null;
+let dragData     = null;    // {def, fromTermIdx}
+let startTime    = null;
+
+// ── SHUFFLE ──────────────────────────────────────────
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+function initShuffles() {
+  questions.forEach((q,i) => {
+    if (q.type === "matching") shuffledDefs[i] = shuffle(q.pairs.map(p=>p.def));
+  });
+}
+
+// ── SCORING ──────────────────────────────────────────
+function scoreQuestion(q, ans) {
+  if (!ans) return false;
+  if (q.type === "mc")      return ans[0] === q.correct[0];
+  if (q.type === "best2")   return ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "matching") return q.pairs.every((p,ti)=>ans[ti]===p.def);
+  return false;
+}
+function calcScore() {
+  let score=0, total=0;
+  questions.forEach((q,i)=>{ total+=q.points; if(scoreQuestion(q,answers[i])) score+=q.points; });
+  return {score,total};
+}
+
+// ── SAVE MATCHING ANS ────────────────────────────────
+function saveMatchingAnswers(qIdx) {
+  const q = questions[qIdx];
+  answers[qIdx] = q.pairs.map((_,ti)=>matchSels[`${qIdx}-${ti}`]||null);
+}
+
+// ── TIMER ────────────────────────────────────────────
+function startTimer() {
+  startTime = Date.now();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(); }
+  }, 1000);
+}
+function updateTimerUI() {
+  const m = Math.floor(timeLeft/60), s = timeLeft%60;
+  const str = `${m}:${String(s).padStart(2,"0")}`;
+  const color = timeLeft<60?"#ef4444":timeLeft<180?"#f59e0b":"#22c55e";
+  document.querySelectorAll(".timer-text").forEach(el=>{ el.textContent=str; el.style.color=color; });
+  document.querySelectorAll(".timer-dot").forEach(el=>{ el.style.background=color; el.classList.toggle("pulse",timeLeft<60); });
+  document.querySelectorAll(".timer-bar-fill").forEach(el=>{ el.style.width=`${(timeLeft/TOTAL_TIME)*100}%`; el.style.background=color; });
+}
+
+// ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
+// Uses GET with ?payload= because Apps Script cross-origin POST is blocked
+// by CORS preflight. GET requests follow the redirect and reach doGet().
+async function submitToFirebase(subData) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults`;
+    const answersStr = JSON.stringify(subData.answersData);
+    const body = {
+      fields: {
+        examLabel:  {stringValue: subData.examLabel},
+        category:   {stringValue: EXAM_CATEGORY},
+        name:       {stringValue: subData.name},
+        score:      {integerValue: subData.score},
+        total:      {integerValue: subData.total},
+        pct:        {integerValue: subData.pct},
+        timeUsed:   {integerValue: subData.timeUsed},
+        submittedAt:{stringValue: subData.submittedAt},
+        answersData:{stringValue: answersStr},
+      }
+    };
+    const resp = await fetch(url + `?key=${FB_CONFIG.apiKey}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) { const errText = await resp.text(); throw new Error(errText); }
+    return { success: true };
+  } catch(e) {
+    clearTimeout(timeout);
+    console.error("Firebase submit error:", e);
+    return { success: false, error: e.toString() };
+  }
+}
+
+// ── FINISH EXAM ──────────────────────────────────────
+async function finishExam() {
+  clearInterval(timerInterval);
+  const {score,total} = calcScore();
+  const pct = Math.round((score/total)*100);
+  const timeUsed = TOTAL_TIME - timeLeft;
+  const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
+
+  const subData = {
+    examLabel: EXAM_LABEL,
+    name: studentName,
+    score, total, pct, timeUsed,
+    questionResults,
+    submittedAt: new Date().toISOString(),
+  };
+
+  phase = "submitting";
+  render();
+
+  const result = await submitToFirebase(subData);
+  phase = "results";
+  window._submitResult = result;
+  window._examScore = {score,total,pct};
+  window._questionResults = questionResults;
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────
+function render() {
+  const root = document.getElementById("root");
+  if (phase === "intro")       root.innerHTML = renderIntro();
+  else if (phase === "submitting") root.innerHTML = renderSubmitting();
+  else if (phase === "results") root.innerHTML = renderResults();
+  else                          root.innerHTML = renderExam();
+  attachEvents();
+}
+
+function renderIntro() {
+  return `
+    <div class="intro-wrap">
+      <div class="intro-card">
+        <div class="intro-eyebrow">Georgia OEMST · NHTSA 2021 · Week 4</div>
+        <div class="intro-title">Week 4</div>
+        <div class="intro-sub">Examination</div>
+        <div class="info-grid">
+          ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Medical Emergencies I & II · Trauma Assessment · Burns · Musculoskeletal & Spinal Trauma · Head & Chest Trauma"]]
+            .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
+        </div>
+        <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
+        <label class="name-label">Student Name</label>
+        <input class="name-input ${_portalStudent ? 'has-value' : ''}" id="nameInput" type="text" 
+          placeholder="Enter your full name to begin..." autocomplete="off"
+          ${_portalStudent ? `value="${_portalStudent}" readonly style="background:#e6f0fb;color:#1e3a5f;cursor:default;border-color:#93c5fd;"` : ''}>
+        <br>
+        <button class="btn-begin ${_portalStudent ? 'active' : ''}" id="beginBtn" ${_portalStudent ? '' : 'disabled'}>Begin Exam</button>
+      </div>
+    </div>`;
+}
+
+function renderSubmitting() {
+  return `
+    <div style="min-height:100vh;background:#0d1117;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;">
+      <div class="submitting-spinner"></div>
+      <div class="submitting-text">Submitting your exam…</div>
+    </div>`;
+}
+
+function renderResults() {
+  const {score,total,pct} = window._examScore;
+  const passed = pct >= 70;
+  const qr = window._questionResults;
+  const sr = window._submitResult;
+
+  let statusHtml = "";
+  if (sr && !sr.noUrl) {
+    statusHtml = sr.success
+      ? `<div class="submit-status success">✓ Your results have been submitted to your instructor.</div>`
+      : `<div class="submit-status error">⚠ Could not reach the server. Please notify your instructor. Your score: ${pct}% (${score}/${total})</div>`;
+  }
+
+  const reviewRows = questions.map((q,i)=>{
+    const correct = qr[i];
+    let correctAns = "";
+    if (!correct) {
+      if (q.type==="mc") correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
+      else if (q.type==="best2") correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+    }
+    return `
+      <div class="result-row">
+        <div class="result-badge ${correct?"correct":"wrong"}">${correct?"✓":"✗"}</div>
+        <div style="flex:1">
+          <div class="result-stem"><strong style="color:#90caf9">Q${i+1}.</strong> ${q.stem.length>100?q.stem.slice(0,100)+"…":q.stem}</div>
+          ${correctAns?`<div class="result-correct-ans">${correctAns}</div>`:""}
+        </div>
+        <div class="result-pts" style="color:${correct?"#81c784":"#ef9a9a"}">${correct?"+"+q.points:"0"}</div>
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="results-wrap" style="background:${passed?"linear-gradient(135deg,#0d2818,#1b4332,#0d2818)":"linear-gradient(135deg,#2d0a0a,#4a1010,#2d0a0a)"}">
+      <div class="results-inner">
+        ${statusHtml}
+        <div class="results-hero">
+          <div class="results-icon">${passed?"✓":"✗"}</div>
+          <div class="results-name">${studentName}</div>
+          <div class="results-pct">${pct}%</div>
+          <div class="results-verdict" style="color:${passed?"#81c784":"#ef9a9a"}">${passed?"PASSED":"DID NOT PASS"}</div>
+          <div class="results-detail">${score} / ${total} points · Passing score: 70% (${Math.ceil(total*0.7)} pts)</div>
+        </div>
+        <div class="results-card">
+          <div class="results-card-title">Question Review</div>
+          ${reviewRows}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderExam() {
+  const q = questions[current];
+  const sc = SECTION_COLORS[q.section] || {bg:"#1a1a2e",accent:"#2196F3"};
+  const progress = ((current+1)/questions.length)*100;
+  const ans = answers[current] || [];
+
+  let questionBody = "";
+  if (q.type==="mc" || q.type==="best2") {
+    const hint = q.type==="best2"
+      ? `<div class="best2-hint">★ Select the TWO best answers ${ans.length>0?"("+ans.length+"/2 selected)":""}</div>` : "";
+    const opts = q.options.map((opt,idx)=>{
+      const sel = ans.includes(idx);
+      return `<button class="option-btn ${q.type==="best2"?"best2":""} ${sel?"selected":""}" data-idx="${idx}">
+        <div class="option-indicator">${LETTERS[idx]}</div>
+        <div class="option-text">${opt}</div>
+      </button>`;
+    }).join("");
+    questionBody = `<div class="options-list">${hint}${opts}</div>`;
+
+  } else if (q.type==="matching") {
+    const defs = shuffledDefs[current] || q.pairs.map(p=>p.def);
+    const usedDefs = new Set(Object.entries(matchSels).filter(([k])=>k.startsWith(current+"-")).map(([,v])=>v));
+    const bankDefs = defs.filter(d=>!usedDefs.has(d));
+
+    const bankChips = bankDefs.map(def=>`<div class="def-chip" draggable="true" data-def="${encodeURIComponent(def)}">${def}</div>`).join("") ||
+      `<div class="def-bank-empty">All definitions assigned</div>`;
+
+    const termRows = q.pairs.map((pair,ti)=>{
+      const assigned = matchSels[`${current}-${ti}`];
+      return `
+        <div class="term-row ${assigned?"assigned":""}" data-term-idx="${ti}">
+          <div class="term-name"><span>${pair.term}</span></div>
+          <div class="term-drop">
+            ${assigned
+              ? `<div class="def-chip" draggable="true" data-def="${encodeURIComponent(assigned)}" data-from-term="${ti}" style="margin:0;width:100%">${assigned}</div>`
+              : `<span class="term-placeholder">— drag a definition here —</span>`}
+          </div>
+        </div>`;
+    }).join("");
+
+    questionBody = `
+      <div class="match-instructions"><strong>Drag</strong> a definition from the bank and <strong>drop</strong> it onto the matching term. Drag a placed definition back to the bank to unassign it.</div>
+      <div class="bank-label">Definition Bank</div>
+      <div class="def-bank" id="defBank">${bankChips}</div>
+      <div class="terms-label">Terms — Drop definitions here</div>
+      <div class="term-rows">${termRows}</div>`;
+  }
+
+  const typeBadge = q.type==="best2"
+    ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
+
+  const dots = questions.map((_,i)=>
+    `<div class="dot ${i===current?"current":answers[i]?"answered":""}" style="width:${i===current?20:10}px" data-dot="${i}"></div>`
+  ).join("");
+
+  const navRight = current < questions.length-1
+    ? `<button class="btn-next" id="nextBtn">Next →</button>`
+    : `<button class="btn-submit-exam" id="submitExamBtn">Submit Exam</button>`;
+
+  return `
+    <div>
+      <div class="topbar">
+        <div class="topbar-inner">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${sc.accent}"></div></div>
+            <span class="progress-text">${current+1} / ${questions.length}</span>
+          </div>
+          <div class="timer-box" style="border-color:#1e2a3a">
+            <div class="timer-dot" style="background:#22c55e"></div>
+            <span class="timer-text" style="color:#22c55e">25:00</span>
+          </div>
+          <button class="btn-submit-top" id="submitTopBtn" style="background:${sc.accent}">Submit</button>
+        </div>
+        <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:#22c55e"></div></div>
+      </div>
+
+      <div class="exam-wrap">
+        <div class="section-badge" style="background:${sc.bg}">
+          <div class="section-dot" style="background:${sc.accent}"></div>
+          <span class="section-label" style="color:${sc.accent}">${q.section}</span>
+        </div>
+
+        <div class="q-header">
+          <span class="q-label">QUESTION</span>
+          <span class="q-number">${current+1}</span>
+          ${typeBadge}
+          <span class="q-points">${q.points} pt</span>
+        </div>
+
+        <div class="q-stem">${q.stem}</div>
+        ${questionBody}
+
+        <div class="nav-bar">
+          <button class="btn-prev" id="prevBtn" ${current===0?"disabled":""}>← Previous</button>
+          <div class="dots">${dots}</div>
+          ${navRight}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── EVENT BINDING ────────────────────────────────────
+function attachEvents() {
+  // INTRO
+  const nameInput = document.getElementById("nameInput");
+  const beginBtn  = document.getElementById("beginBtn");
+  if (nameInput) {
+    nameInput.value = studentName;
+    nameInput.addEventListener("input", e=>{
+      studentName = e.target.value.trim();
+      nameInput.classList.toggle("has-value", !!studentName);
+      beginBtn.disabled = !studentName;
+      beginBtn.classList.toggle("active", !!studentName);
+    });
+    nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName) beginExam(); });
+  }
+  if (beginBtn) {
+    beginBtn.classList.toggle("active", !!studentName);
+    beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
+  }
+
+  // EXAM — MC / Best2
+  document.querySelectorAll(".option-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const q = questions[current];
+      if (q.type==="mc") {
+        answers[current] = [idx];
+      } else {
+        const prev = answers[current] || [];
+        if (prev.includes(idx)) answers[current] = prev.filter(i=>i!==idx);
+        else if (prev.length<2) answers[current] = [...prev,idx];
+        else answers[current] = [prev[1],idx];
+      }
+      render();
+    });
+  });
+
+  // EXAM — Matching drag & drop
+  let draggingEl = null;
+  document.querySelectorAll(".def-chip").forEach(chip=>{
+    chip.addEventListener("dragstart", e=>{
+      draggingEl = chip;
+      chip.classList.add("dragging");
+      const def = decodeURIComponent(chip.dataset.def);
+      const fromTerm = chip.dataset.fromTerm !== undefined ? parseInt(chip.dataset.fromTerm) : null;
+      dragData = {def, fromTermIdx: fromTerm};
+      e.dataTransfer.effectAllowed = "move";
+    });
+    chip.addEventListener("dragend", ()=>{ chip.classList.remove("dragging"); draggingEl = null; });
+  });
+
+  // Drop on term rows
+  document.querySelectorAll(".term-row").forEach(row=>{
+    row.addEventListener("dragover", e=>{ e.preventDefault(); row.classList.add("dragover"); });
+    row.addEventListener("dragleave", ()=>row.classList.remove("dragover"));
+    row.addEventListener("drop", e=>{
+      e.preventDefault(); row.classList.remove("dragover");
+      if (!dragData) return;
+      const termIdx = parseInt(row.dataset.termIdx);
+      const {def, fromTermIdx} = dragData; dragData = null;
+      // Remove from old slot
+      if (fromTermIdx !== null && fromTermIdx !== undefined) delete matchSels[`${current}-${fromTermIdx}`];
+      // Remove any slot that had this def
+      Object.keys(matchSels).forEach(k=>{ if(matchSels[k]===def) delete matchSels[k]; });
+      matchSels[`${current}-${termIdx}`] = def;
+      saveMatchingAnswers(current);
+      render();
+    });
+  });
+
+  // Drop on bank (return)
+  const bank = document.getElementById("defBank");
+  if (bank) {
+    bank.addEventListener("dragover", e=>{ e.preventDefault(); bank.classList.add("dragover"); });
+    bank.addEventListener("dragleave", ()=>bank.classList.remove("dragover"));
+    bank.addEventListener("drop", e=>{
+      e.preventDefault(); bank.classList.remove("dragover");
+      if (!dragData) return;
+      const {fromTermIdx} = dragData; dragData = null;
+      if (fromTermIdx !== null && fromTermIdx !== undefined) {
+        delete matchSels[`${current}-${fromTermIdx}`];
+        saveMatchingAnswers(current);
+        render();
+      }
+    });
+  }
+
+  // NAV
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const submitExamBtn = document.getElementById("submitExamBtn");
+  const submitTopBtn  = document.getElementById("submitTopBtn");
+
+  if (prevBtn) prevBtn.addEventListener("click", ()=>{ if(current>0){ current--; render(); }});
+  if (nextBtn) nextBtn.addEventListener("click", ()=>{ if(current<questions.length-1){ current++; render(); }});
+  if (submitExamBtn) submitExamBtn.addEventListener("click", finishExam);
+  if (submitTopBtn)  submitTopBtn.addEventListener("click",  finishExam);
+
+  // Dot nav
+  document.querySelectorAll(".dot").forEach(dot=>{
+    dot.addEventListener("click", ()=>{ current=parseInt(dot.dataset.dot); render(); });
+  });
+
+  // Update timer display immediately
+  updateTimerUI();
+}
+
+function beginExam() {
+  initShuffles();
+  phase = "exam";
+  render();
+  startTimer();
+}
+
+// ── BOOT ─────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("root").innerHTML = "";
+  render();
+});
+</script>
+
+<div id="root"></div>
+</body>
+</html>

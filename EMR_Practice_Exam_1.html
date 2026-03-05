@@ -1,0 +1,2160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Practice Exam 1</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #1a2e45;
+    --navy-light: #243b55;
+    --teal: #1eb8a0;
+    --teal-dim: #148a77;
+    --amber: #f5a623;
+    --red: #e8433a;
+    --green: #27c47b;
+    --white: #f5f7fa;
+    --muted: #8ba3b8;
+    --card: #162236;
+    --card-border: #1f3450;
+    --font-serif: 'DM Serif Display', Georgia, serif;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(30,184,160,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 90% 80%, rgba(245,166,35,0.06) 0%, transparent 50%);
+  }
+
+  /* ===== SPLASH SCREEN ===== */
+  #splash {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .splash-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--teal);
+    text-transform: uppercase;
+    border: 1px solid rgba(30,184,160,0.4);
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 28px;
+  }
+
+  .splash-title {
+    font-family: var(--font-serif);
+    font-size: clamp(36px, 6vw, 64px);
+    line-height: 1.1;
+    text-align: center;
+    color: var(--white);
+    max-width: 700px;
+    margin-bottom: 16px;
+  }
+
+  .splash-title em {
+    font-style: italic;
+    color: var(--teal);
+  }
+
+  .splash-sub {
+    color: var(--muted);
+    font-size: 16px;
+    text-align: center;
+    max-width: 500px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 520px;
+    width: 100%;
+    margin-bottom: 48px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: var(--font-serif);
+    font-size: 36px;
+    color: var(--teal);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .name-field {
+    max-width: 400px;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+
+  .name-field label {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .name-field input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .name-field input:focus { border-color: var(--teal); }
+  .name-field input::placeholder { color: var(--muted); }
+
+  .btn-start {
+    background: var(--teal);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    padding: 16px 48px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-start:hover { background: #25d4b8; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(30,184,160,0.3); }
+  .btn-start:active { transform: translateY(0); }
+
+  /* ===== EXAM SCREEN ===== */
+  #exam { display: none; min-height: 100vh; }
+
+  .exam-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,27,42,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .exam-logo {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    color: var(--teal);
+  }
+
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 300px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--card-border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), #25d4b8);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+
+  .timer-icon { font-size: 16px; }
+
+  .timer-display {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .timer-display.warning { color: var(--amber); animation: pulse 1s ease-in-out infinite; }
+  .timer-display.critical { color: var(--red); animation: pulse 0.5s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ===== QUESTION NAV ===== */
+  .exam-body {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 32px;
+  }
+
+  .section-divider:first-child { margin-top: 0; }
+
+  .section-tag {
+    background: rgba(30,184,160,0.12);
+    border: 1px solid rgba(30,184,160,0.35);
+    color: var(--teal);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--card-border), transparent);
+  }
+
+  .section-hint {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+    scroll-margin-top: 100px;
+  }
+
+  .q-card.answered { border-color: rgba(30,184,160,0.4); }
+
+  .q-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .q-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--teal);
+    color: var(--navy);
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .q-card.answered .q-check { opacity: 1; }
+
+  .q-text {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--white);
+    margin-bottom: 22px;
+    font-weight: 400;
+  }
+
+  /* ===== OPTIONS ===== */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    user-select: none;
+  }
+
+  .option-label:hover {
+    background: rgba(30,184,160,0.07);
+    border-color: rgba(30,184,160,0.3);
+  }
+
+  .option-label input { display: none; }
+
+  .option-key {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+
+  .option-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(245,247,250,0.85);
+    transition: color 0.15s;
+    padding-top: 3px;
+  }
+
+  /* selected state */
+  .option-label.selected {
+    background: rgba(30,184,160,0.12);
+    border-color: var(--teal);
+  }
+
+  .option-label.selected .option-key {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: var(--navy);
+  }
+
+  .option-label.selected .option-text { color: var(--white); }
+
+  /* result states */
+  .option-label.correct {
+    background: rgba(39,196,123,0.12);
+    border-color: var(--green);
+  }
+  .option-label.correct .option-key { background: var(--green); border-color: var(--green); color: var(--navy); }
+
+  .option-label.wrong {
+    background: rgba(232,67,58,0.1);
+    border-color: var(--red);
+  }
+  .option-label.wrong .option-key { background: var(--red); border-color: var(--red); color: white; }
+
+  .option-label.show-correct {
+    background: rgba(39,196,123,0.07);
+    border-color: rgba(39,196,123,0.5);
+  }
+  .option-label.show-correct .option-key { border-color: var(--green); color: var(--green); }
+
+  /* ===== MATCHING ===== */
+  .match-table { width: 100%; border-collapse: collapse; }
+
+  .match-table th {
+    text-align: left;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .match-table tr.match-row td {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    vertical-align: middle;
+  }
+
+  .match-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--teal);
+    width: 30px;
+  }
+
+  .match-prompt {
+    font-size: 14px;
+    line-height: 1.5;
+    padding-right: 16px;
+    color: rgba(245,247,250,0.9);
+  }
+
+  .match-select {
+    appearance: none;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    padding: 7px 28px 7px 10px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 220px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238ba3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  .match-select:focus { border-color: var(--teal); }
+  .match-select.correct-sel { border-color: var(--green); background-color: rgba(39,196,123,0.1); }
+  .match-select.wrong-sel { border-color: var(--red); background-color: rgba(232,67,58,0.1); }
+
+  /* ===== BOTTOM NAV ===== */
+  .exam-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: rgba(13,27,42,0.97);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--card-border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .answered-count {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .answered-count span { color: var(--teal); font-weight: 600; }
+
+  .btn-submit {
+    background: var(--teal);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-submit:hover { background: #25d4b8; transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ===== RESULTS SCREEN ===== */
+  #results {
+    display: none;
+    min-height: 100vh;
+    padding: 60px 20px 80px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .results-inner { max-width: 760px; margin: 0 auto; }
+
+  .results-hero {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+
+  .score-ring {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+
+  .score-ring svg { transform: rotate(-90deg); }
+
+  .score-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-pct {
+    font-family: var(--font-serif);
+    font-size: 40px;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .score-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+  }
+
+  .results-title {
+    font-family: var(--font-serif);
+    font-size: clamp(28px, 5vw, 42px);
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .results-sub {
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .res-stat {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .res-stat-num {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .res-stat-num.green { color: var(--green); }
+  .res-stat-num.red { color: var(--red); }
+  .res-stat-num.amber { color: var(--amber); }
+
+  .res-stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .review-title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    margin-bottom: 24px;
+    color: var(--white);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 16px;
+  }
+
+  .review-item {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+
+  .review-item.r-correct { border-left: 3px solid var(--green); }
+  .review-item.r-wrong { border-left: 3px solid var(--red); }
+
+  .review-q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .review-badge {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-top: 2px;
+  }
+
+  .review-badge.correct { background: rgba(39,196,123,0.15); color: var(--green); }
+  .review-badge.wrong { background: rgba(232,67,58,0.15); color: var(--red); }
+
+  .review-q-text { font-size: 14px; color: rgba(245,247,250,0.85); line-height: 1.5; }
+
+  .review-answer {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .review-answer .correct-ans { color: var(--green); font-weight: 500; }
+  .review-answer .your-ans { color: var(--red); }
+
+  .btn-retake {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--teal);
+    color: var(--teal);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 15px;
+    padding: 12px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 32px;
+  }
+
+  .btn-retake:hover { background: rgba(30,184,160,0.1); }
+
+  /* ===== SHARE BUTTON ===== */
+  .results-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .btn-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teal);
+    color: var(--navy);
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0;
+  }
+
+  .btn-share:hover { background: #25d4b8; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,184,160,0.3); }
+
+  /* ===== SHARE MODAL ===== */
+  .share-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .share-modal-overlay.show { display: flex; animation: fadeIn 0.25s ease; }
+
+  .share-modal {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 36px;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+  }
+
+  .share-modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 20px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .share-modal-close:hover { color: var(--white); background: rgba(255,255,255,0.06); }
+
+  .share-modal-title {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    margin-bottom: 6px;
+    color: var(--white);
+  }
+
+  .share-modal-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  /* Score card preview */
+  .score-card-preview {
+    background: linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a2e45 100%);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-card-preview::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(30,184,160,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .score-card-preview::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(245,166,35,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card-logo {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    opacity: 0.8;
+  }
+
+  .card-name {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .card-score-big {
+    font-family: var(--font-serif);
+    font-size: 56px;
+    line-height: 1;
+    color: var(--teal);
+    margin: 12px 0 4px;
+  }
+
+  .card-score-big.amber { color: var(--amber); }
+  .card-score-big.red { color: var(--red); }
+
+  .card-score-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .card-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 13px;
+    color: rgba(139,163,184,0.9);
+  }
+
+  .card-stat-item strong { color: var(--white); }
+
+  .card-tagline {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 14px;
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  /* Share option buttons */
+  .share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .share-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .share-option-btn:hover {
+    background: rgba(30,184,160,0.08);
+    border-color: rgba(30,184,160,0.35);
+  }
+
+  .share-option-btn.success {
+    border-color: var(--green);
+    background: rgba(39,196,123,0.1);
+    color: var(--green);
+  }
+
+  .share-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .share-icon.copy { background: rgba(30,184,160,0.15); }
+  .share-icon.email { background: rgba(245,166,35,0.15); }
+  .share-icon.image { background: rgba(139,92,246,0.15); }
+  .share-icon.print { background: rgba(139,163,184,0.12); }
+
+  .share-option-info { flex: 1; }
+  .share-option-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .share-option-desc { font-size: 12px; color: var(--muted); }
+
+  .share-arrow { color: var(--muted); font-size: 14px; }
+
+  /* Print styles */
+  @page { margin: 0.6in; }
+  @media print {
+    body > *:not(#printArea) { display: none !important; }
+    #printArea {
+      display: block !important;
+      position: static;
+      width: 100%;
+      background: white;
+      color: black;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-card { animation: fadeIn 0.3s ease both; }
+
+  /* timeout modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+
+  .modal-box {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .modal-icon { font-size: 48px; margin-bottom: 16px; }
+  .modal-title { font-family: var(--font-serif); font-size: 28px; margin-bottom: 10px; }
+  .modal-sub { color: var(--muted); font-size: 15px; line-height: 1.5; margin-bottom: 28px; }
+
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-num { font-size: 28px; }
+    .results-stats { grid-template-columns: repeat(3, 1fr); }
+    .match-select { width: 160px; }
+    .exam-header { flex-wrap: wrap; }
+    .progress-wrap { max-width: 200px; }
+  }
+
+  input[readonly] {
+    background: #f0f6ff !important;
+    border-color: #93c5fd !important;
+    color: #1e3a5f !important;
+    cursor: default !important;
+  }
+  </style>
+</head>
+<body>
+
+<!-- ===== SPLASH ===== -->
+<div id="splash">
+  <div class="splash-badge">Tifton Fire Department · EMR Course</div>
+  <h1 class="splash-title">EMR <em>Certification</em><br>Practice Exam</h1>
+  <p class="splash-sub">Test your knowledge across patient assessment, airway management, shock, trauma, and medical emergencies.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card"><span class="stat-num">30</span><span class="stat-label">Questions</span></div>
+    <div class="stat-card"><span class="stat-num">60</span><span class="stat-label">Minutes</span></div>
+    <div class="stat-card"><span class="stat-num">3</span><span class="stat-label">Formats</span></div>
+  </div>
+
+  <div class="name-field">
+    <label for="studentName">Your Name</label>
+    <input type="text" id="studentName" placeholder="Enter your full name…" maxlength="60" autocomplete="off"/>
+  </div>
+  <div id="startError" style="color:#dc2626;font-size:13px;margin-top:8px;display:none;"></div>
+
+  <button class="btn-start" onclick="startExam()">Begin Exam →</button>
+</div>
+<script>
+// Auto-fill from portal URL param
+(function() {
+  const ps = decodeURIComponent(new URLSearchParams(window.location.search).get('student') || '').trim();
+  if (ps) {
+    const inp = document.getElementById('studentName');
+    const btn = document.getElementById('beginBtn');
+    if (inp) { inp.value = ps; inp.readOnly = true; inp.style.cssText += ';background:#e6f0fb;color:#1e3a5f;cursor:default;border-color:#93c5fd;'; }
+    if (btn) { btn.style.cssText += ';opacity:1;cursor:pointer;'; }
+  }
+})();
+</script>
+
+<!-- ===== EXAM ===== -->
+<div id="exam">
+  <header class="exam-header">
+    <div class="header-left">
+      <span class="exam-logo">EMR Exam</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-label" id="progressLabel">0 / 30</span>
+    </div>
+    <div class="timer-wrap">
+      <span class="timer-icon">⏱</span>
+      <span class="timer-display" id="timerDisplay">60:00</span>
+    </div>
+  </header>
+
+  <div class="exam-body" id="examBody"></div>
+
+  <div class="exam-footer">
+    <div class="answered-count">Answered: <span id="answeredCount">0</span> of 30</div>
+    <button class="btn-submit" id="submitBtn" onclick="submitExam()">Submit Exam</button>
+  </div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="reviewLink" style="text-align:center;"></div>
+<div id="results">
+  <div class="results-inner">
+    <div class="results-hero">
+      <div class="score-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="12"/>
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--teal)" stroke-width="12"
+            stroke-linecap="round" stroke-dasharray="427" stroke-dashoffset="427" id="scoreCircle" style="transition: stroke-dashoffset 1.2s ease"/>
+        </svg>
+        <div class="score-ring-text">
+          <span class="score-pct" id="scorePct">0%</span>
+          <span class="score-label">Score</span>
+        </div>
+      </div>
+      <h2 class="results-title" id="resultsTitle">Results</h2>
+      <p class="results-sub" id="resultsSub"></p>
+    </div>
+
+    <div class="results-stats">
+      <div class="res-stat"><span class="res-stat-num green" id="correctCount">0</span><span class="res-stat-label">Correct</span></div>
+      <div class="res-stat"><span class="res-stat-num red" id="wrongCount">0</span><span class="res-stat-label">Incorrect</span></div>
+      <div class="res-stat"><span class="res-stat-num amber" id="timeTaken">0:00</span><span class="res-stat-label">Time Used</span></div>
+    </div>
+
+    <h3 class="review-title">Question Review</h3>
+    <div id="reviewList"></div>
+    <div class="results-actions">
+      <button class="btn-share" onclick="openShareModal()">
+        <span>↗</span> Share Results
+      </button>
+      <button class="btn-retake" onclick="retakeExam()">↺  Retake Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="share-modal-overlay" id="shareModal">
+  <div class="share-modal">
+    <button class="share-modal-close" onclick="closeShareModal()">✕</button>
+    <h2 class="share-modal-title">Share Your Results</h2>
+    <p class="share-modal-sub">Choose how you'd like to share your score</p>
+    <div class="score-card-preview" id="shareCardPreview">
+      <div class="card-logo">EMR · NREMT Practice Exam</div>
+      <div class="card-name" id="cardName"></div>
+      <div class="card-score-big" id="cardScoreBig">—</div>
+      <div class="card-score-label">Final Score</div>
+      <div class="card-stats-row">
+        <span class="card-stat-item"><strong id="cardCorrect">—</strong> correct</span>
+        <span class="card-stat-item"><strong id="cardWrong">—</strong> incorrect</span>
+        <span class="card-stat-item">⏱ <strong id="cardTime">—</strong></span>
+      </div>
+      <div class="card-tagline" id="cardTagline"></div>
+    </div>
+    <div class="share-options">
+      <button class="share-option-btn" id="copyBtn" onclick="copyResults()">
+        <span class="share-icon copy">📋</span>
+        <span class="share-option-info">
+          <div class="share-option-title">Copy to Clipboard</div>
+          <div class="share-option-desc">Copy a text summary to paste anywhere</div>
+        </span>
+        <span class="share-arrow">›</span>
+      </button>
+      <button class="share-option-btn" onclick="emailResults()">
+        <span class="share-icon email">✉️</span>
+        <span class="share-option-info">
+          <div class="share-option-title">Send via Email</div>
+          <div class="share-option-desc">Opens your email client with results pre-filled</div>
+        </span>
+        <span class="share-arrow">›</span>
+      </button>
+      <button class="share-option-btn" onclick="downloadCard()">
+        <span class="share-icon image">🖼️</span>
+        <span class="share-option-info">
+          <div class="share-option-title">Download Score Card</div>
+          <div class="share-option-desc">Save a PNG image of your result card</div>
+        </span>
+        <span class="share-arrow">›</span>
+      </button>
+      <button class="share-option-btn" onclick="printResults()">
+        <span class="share-icon print">🖨️</span>
+        <span class="share-option-info">
+          <div class="share-option-title">Print / Save as PDF</div>
+          <div class="share-option-desc">Print your full results or save as PDF</div>
+        </span>
+        <span class="share-arrow">›</span>
+      </button>
+    </div>
+  </div>
+</div>
+<div id="printArea" style="display:none"></div>
+
+<!-- Timeout Modal -->
+<div class="modal-overlay" id="timeoutModal">
+  <div class="modal-box">
+    <div class="modal-icon">⏰</div>
+    <h2 class="modal-title">Time's Up!</h2>
+    <p class="modal-sub">Your 60 minutes have ended. Your exam has been automatically submitted.</p>
+    <button class="btn-submit" onclick="finalizeSubmit()">View Results →</button>
+  </div>
+</div>
+
+<script>
+const FB_CONFIG = {
+  apiKey: "AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  projectId: "class-attendance-72cd9",
+};
+const EXAM_LABEL    = "Practice Exam 1";
+const EXAM_CATEGORY = "practice";
+const EXAM_ID       = "practice1";
+
+// Pre-fill name from portal URL param
+const _portalStudent = decodeURIComponent(new URLSearchParams(window.location.search).get('student') || '').trim();
+
+// Pre-fill name from portal URL param
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const portalName = decodeURIComponent(params.get('student') || '').trim();
+  if (portalName) {
+    window.addEventListener('DOMContentLoaded', () => {
+      const inp = document.getElementById('studentName');
+      if (inp) { inp.value = portalName; inp.readOnly = true; inp.style.cssText += ';background:#f0f6ff!important;border-color:#93c5fd!important;color:#1e3a5f;cursor:default;'; }
+    });
+  }
+  // Review mode check
+  const isReview = params.get('review') === '1';
+  const reviewName = decodeURIComponent(params.get('name') || '').trim();
+  if (isReview && reviewName) {
+    window.addEventListener('DOMContentLoaded', () => { startReviewMode(reviewName); });
+  }
+})();
+
+// ===== QUESTION DATA =====
+const QUESTIONS = [
+  // ---- SECTION 1: MULTIPLE CHOICE ----
+  {
+    id: 1, type: 'mc', section: 'SECTION 1 — MULTIPLE CHOICE', sectionFirst: true,
+    sectionHint: 'Select the ONE best answer for each question.',
+    text: 'During an initial assessment of an unresponsive adult, what is the FIRST action an EMR should take after ensuring scene safety?',
+    options: [
+      'Open the airway using the head-tilt chin-lift maneuver',
+      'Check for a carotid pulse for up to 10 seconds',
+      'Establish responsiveness by tapping the shoulders and shouting',
+      'Apply an AED and analyze the rhythm'
+    ],
+    correct: 2
+  },
+  {
+    id: 2, type: 'mc',
+    text: 'The mnemonic "SAMPLE" is used during patient assessment. What does the letter "A" represent?',
+    options: ['Allergies','Age of patient','Airway status','Associated complaints'],
+    correct: 0
+  },
+  {
+    id: 3, type: 'mc',
+    text: 'A patient is found unresponsive and not breathing normally. You begin high-quality CPR. The correct compression-to-ventilation ratio for a single rescuer adult patient is:',
+    options: ['15:2','30:2','30:1','15:1'],
+    correct: 1
+  },
+  {
+    id: 4, type: 'mc',
+    text: 'Which of the following BEST describes the "duty to act" for an EMR?',
+    options: [
+      'A legal obligation that applies only when on-duty and dispatched',
+      'A moral obligation to help any person in need at any time',
+      'A legal or ethical obligation to provide care based on training and local protocols',
+      'An obligation requiring medical direction contact before any care is given'
+    ],
+    correct: 2
+  },
+  {
+    id: 5, type: 'mc',
+    text: 'You arrive on scene to find a 7-year-old child who is unresponsive. After activating EMS, you should perform how many cycles of CPR BEFORE retrieving and applying the AED?',
+    options: [
+      '1 cycle',
+      '2 cycles',
+      '5 cycles (approximately 2 minutes)',
+      'Retrieve the AED immediately before starting CPR'
+    ],
+    correct: 2
+  },
+  {
+    id: 6, type: 'mc',
+    text: 'A patient has a large laceration on the forearm with bright red, spurting blood. This indicates damage to which type of blood vessel?',
+    options: ['Vein','Capillary','Artery','Venule'],
+    correct: 2
+  },
+  {
+    id: 7, type: 'mc',
+    text: 'When should an EMR perform a secondary assessment?',
+    options: [
+      'Before ensuring scene safety',
+      'After life threats are addressed and the primary assessment is complete',
+      'Only when the patient is responsive and able to answer questions',
+      'Only after the patient is packaged and ready for transport'
+    ],
+    correct: 1
+  },
+  {
+    id: 8, type: 'mc',
+    text: 'Which of the following is the MOST appropriate initial treatment for a patient in anaphylactic shock who has prescribed epinephrine?',
+    options: [
+      'Lay the patient flat, administer oxygen, and monitor',
+      'Assist the patient in using their epinephrine auto-injector to the outer thigh',
+      'Place the patient in Trendelenburg position and wait for ALS',
+      'Administer oral diphenhydramine and transport'
+    ],
+    correct: 1
+  },
+  {
+    id: 9, type: 'mc',
+    text: 'The normal respiratory rate for an adult at rest is:',
+    options: ['8–12 breaths per minute','12–20 breaths per minute','20–30 breaths per minute','25–35 breaths per minute'],
+    correct: 1
+  },
+  {
+    id: 10, type: 'mc',
+    text: 'A patient is found with an impaled object in the left eye. The EMR should:',
+    options: [
+      'Remove the object immediately to prevent further injury',
+      'Apply direct pressure over the eye',
+      'Stabilize the object in place and cover both eyes',
+      'Irrigate the eye with water and stabilize the object'
+    ],
+    correct: 2
+  },
+  {
+    id: 11, type: 'mc',
+    text: 'Which position is MOST appropriate for a conscious patient in respiratory distress without suspected spinal injury?',
+    options: [
+      'Supine (flat on back)',
+      'Prone (face down)',
+      'Trendelenburg (feet elevated)',
+      'Position of comfort, typically sitting upright'
+    ],
+    correct: 3
+  },
+  {
+    id: 12, type: 'mc',
+    text: 'A patient presents with cool, pale, and clammy skin; a rapid, weak pulse; and altered mental status after a significant mechanism of injury. These signs and symptoms are MOST consistent with:',
+    options: ['Hypertensive crisis','Hypoglycemia','Hemorrhagic shock','Cardiac tamponade'],
+    correct: 2
+  },
+  {
+    id: 13, type: 'mc',
+    text: 'When performing a jaw-thrust maneuver, the EMR\'s purpose is to:',
+    options: [
+      'Clear a foreign body airway obstruction',
+      'Open the airway while minimizing cervical spine movement',
+      'Facilitate insertion of a nasopharyngeal airway',
+      'Decompress a tension pneumothorax'
+    ],
+    correct: 1
+  },
+  {
+    id: 14, type: 'mc',
+    text: 'Standard precautions (BSI) require an EMR to wear gloves when:',
+    options: [
+      'Only during major trauma calls',
+      'Only when the patient has a known communicable disease',
+      'Any time there is potential contact with blood or body fluids',
+      'Only when performing CPR or airway management'
+    ],
+    correct: 2
+  },
+  {
+    id: 15, type: 'mc',
+    text: 'A patient is experiencing a generalized tonic-clonic seizure. The EMR\'s PRIORITY action is to:',
+    options: [
+      'Restrain the patient to prevent injury',
+      'Insert an oral airway device during the seizure',
+      'Protect the patient from the environment, time the seizure, and maintain airway after it stops',
+      'Place something soft between the patient\'s teeth'
+    ],
+    correct: 2
+  },
+  {
+    id: 16, type: 'mc',
+    text: 'In the "chain of survival" for cardiac arrest, which link does the EMR MOST directly fulfill?',
+    options: [
+      'Early recognition and calling for help',
+      'Early CPR and defibrillation',
+      'Advanced airway management',
+      'Post-cardiac arrest care'
+    ],
+    correct: 1
+  },
+  {
+    id: 17, type: 'mc',
+    text: 'A patient has a fractured femur. The EMR should be MOST concerned about which complication?',
+    options: [
+      'Loss of distal sensation only',
+      'Significant internal blood loss leading to shock',
+      'Immediate nerve regeneration issues',
+      'Rapid onset of compartment syndrome within 5 minutes'
+    ],
+    correct: 1
+  },
+  {
+    id: 18, type: 'mc',
+    text: 'During scene size-up, the "mechanism of injury" (MOI) helps the EMR:',
+    options: [
+      'Determine the patient\'s past medical history',
+      'Estimate the forces involved and anticipate potential injuries',
+      'Identify the number of ambulances needed',
+      'Determine whether ALS or BLS units should respond'
+    ],
+    correct: 1
+  },
+  {
+    id: 19, type: 'mc',
+    text: 'An adult patient is conscious and has a complete airway obstruction (cannot speak, cough, or breathe). The CORRECT intervention is:',
+    options: [
+      'Deliver 5 back blows and 5 abdominal thrusts (Heimlich maneuver), alternating until relieved or patient becomes unresponsive',
+      'Perform a blind finger sweep to remove the object',
+      'Administer high-flow oxygen via non-rebreather mask',
+      'Lay the patient down and begin CPR immediately'
+    ],
+    correct: 0
+  },
+  {
+    id: 20, type: 'mc',
+    text: 'Implied consent allows an EMR to treat a patient who is:',
+    options: [
+      'Conscious and refusing care',
+      'Unresponsive and unable to give expressed consent',
+      'Alert but intoxicated and agreeing to treatment',
+      'A minor with a parent who is refusing care on their behalf'
+    ],
+    correct: 1
+  },
+
+  // ---- SECTION 2: MATCHING ----
+  {
+    id: 21, type: 'match', section: 'SECTION 2 — MATCHING', sectionFirst: true,
+    sectionHint: 'Match each term or description to the correct definition. Select the answer from the dropdown.',
+    matchGroups: [
+      {
+        label: 'EMS Terminology & Anatomical Terms',
+        pairs: [
+          { num: 21, prompt: 'The area of the body between the chest and pelvis; contains digestive organs', correct: 'D', choices: ['A','B','C','D','E'], choiceLabels: { A:'Cyanosis', B:'Diaphoresis', C:'Tachycardia', D:'Abdomen', E:'Bradypnea' } },
+          { num: 22, prompt: 'Bluish discoloration of the skin or mucous membranes due to low oxygen', correct: 'A', choices: ['A','B','C','D','E'], choiceLabels: { A:'Cyanosis', B:'Diaphoresis', C:'Tachycardia', D:'Abdomen', E:'Bradypnea' } },
+          { num: 23, prompt: 'Profuse sweating, often associated with shock or cardiac events', correct: 'B', choices: ['A','B','C','D','E'], choiceLabels: { A:'Cyanosis', B:'Diaphoresis', C:'Tachycardia', D:'Abdomen', E:'Bradypnea' } },
+          { num: 24, prompt: 'A heart rate greater than 100 beats per minute', correct: 'C', choices: ['A','B','C','D','E'], choiceLabels: { A:'Cyanosis', B:'Diaphoresis', C:'Tachycardia', D:'Abdomen', E:'Bradypnea' } },
+          { num: 25, prompt: 'A respiratory rate below 12 breaths per minute in an adult', correct: 'E', choices: ['A','B','C','D','E'], choiceLabels: { A:'Cyanosis', B:'Diaphoresis', C:'Tachycardia', D:'Abdomen', E:'Bradypnea' } },
+        ]
+      },
+      {
+        label: 'Shock Classification',
+        pairs: [
+          { num: 26, prompt: 'Loss of blood or fluid from the circulatory system', correct: 'B', choices: ['A','B'], choiceLabels: { A:'Neurogenic shock', B:'Hypovolemic shock' } },
+          { num: 27, prompt: 'Disruption of nerve signals causing massive vasodilation following spinal injury', correct: 'A', choices: ['A','B'], choiceLabels: { A:'Neurogenic shock', B:'Hypovolemic shock' } },
+        ]
+      }
+    ]
+  },
+
+  // ---- SECTION 3: BEST 2 OF 5 ----
+  {
+    id: 28, type: 'best2', section: 'SECTION 3 — BEST 2 OF 5', sectionFirst: true,
+    sectionHint: 'Select the TWO best answers for each question. Both must be correct for full credit.',
+    text: 'You arrive at the scene of a motor vehicle collision. The driver is unresponsive and not breathing. Which TWO actions should occur simultaneously or in immediate sequence as priorities?',
+    options: [
+      'Obtain a detailed past medical history from bystanders',
+      'Ensure scene safety and use appropriate BSI/PPE',
+      'Begin high-quality CPR if the patient has no pulse',
+      'Splint any visible extremity fractures',
+      'Document the incident for your report'
+    ],
+    correct: [1, 2]
+  },
+  {
+    id: 29, type: 'best2',
+    text: 'A 55-year-old male is complaining of chest pain radiating to his left arm, diaphoresis, and nausea. He has prescribed aspirin. Which TWO interventions are MOST appropriate for an EMR at this time?',
+    options: [
+      'Assist the patient to a position of comfort and administer oxygen if SpO₂ is below 94%',
+      'Assist the patient in taking aspirin per local protocol if he is not allergic',
+      'Perform a 12-lead ECG and transmit to the hospital',
+      'Administer nitroglycerin from the drug kit',
+      'Position the patient supine with legs elevated for suspected shock'
+    ],
+    correct: [0, 1]
+  },
+  {
+    id: 30, type: 'best2',
+    text: 'You are managing a patient with a suspected open chest wound (sucking chest wound). Which TWO actions represent appropriate EMR-level management?',
+    options: [
+      'Remove any impaled objects to clear the wound',
+      'Apply a vented (three-sided) chest seal or occlusive dressing taped on three sides',
+      'Assist ventilations as needed and monitor for signs of tension pneumothorax',
+      'Place the patient prone to allow fluid to drain',
+      'Immediately perform needle decompression of the chest'
+    ],
+    correct: [1, 2]
+  }
+];
+
+// State
+let timerInterval = null;
+let secondsLeft = 3600;
+let startSeconds = 3600;
+let answers = {}; // { qId: value }
+let examStarted = false;
+let currentStudentName = "";
+let examSubmitted = false;
+let timerStartTime = null;
+
+const KEYS = ['A','B','C','D','E'];
+
+function startExam() {
+  const nameVal = (document.getElementById('studentName').value || '').trim();
+  const errEl   = document.getElementById('startError');
+  errEl.style.display = 'none';
+
+  if (!nameVal) { errEl.textContent = 'Please enter your name.'; errEl.style.display = 'block'; return; }
+  currentStudentName = nameVal;
+  examStarted = true;
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('exam').style.display = 'block';
+  renderExam();
+  startTimer();
+  updateProgress();
+}
+
+function renderExam() {
+  const body = document.getElementById('examBody');
+  body.innerHTML = '';
+
+  QUESTIONS.forEach(q => {
+    if (q.type === 'match') {
+      renderMatchQuestion(q, body);
+      return;
+    }
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard-${q.id}`;
+    card.style.animationDelay = `${(q.id - 1) * 0.02}s`;
+
+    let html = '';
+
+    if (q.sectionFirst) {
+      html += `<div class="section-divider"><span class="section-tag">${q.section}</span><div class="section-line"></div></div>`;
+      if (q.sectionHint) html += `<p class="section-hint">${q.sectionHint}</p>`;
+    }
+
+    const tagType = q.type === 'best2' ? 'BEST 2 OF 5' : 'MULTIPLE CHOICE';
+    html += `<div class="q-num">Q${q.id} <span style="color:var(--muted);font-size:10px;letter-spacing:0.08em">${tagType}</span><span class="q-check">✓</span></div>`;
+    html += `<div class="q-text">${q.text}</div>`;
+    html += `<div class="options" id="opts-${q.id}">`;
+
+    q.options.forEach((opt, i) => {
+      const type = q.type === 'best2' ? 'checkbox' : 'radio';
+      const name = q.type === 'best2' ? `q${q.id}_${i}` : `q${q.id}`;
+      html += `
+        <label class="option-label" id="opt-${q.id}-${i}" onclick="selectOption(event, ${q.id}, ${i}, '${q.type}')">
+          <input type="${type}" name="${name}" value="${i}">
+          <span class="option-key">${KEYS[i]}</span>
+          <span class="option-text">${opt}</span>
+        </label>`;
+    });
+
+    html += `</div>`;
+    card.innerHTML = html;
+    body.appendChild(card);
+  });
+}
+
+function renderMatchQuestion(q, body) {
+  const wrapper = document.createElement('div');
+
+  let html = `<div class="section-divider"><span class="section-tag">${q.section}</span><div class="section-line"></div></div>`;
+  if (q.sectionHint) html += `<p class="section-hint">${q.sectionHint}</p>`;
+
+  q.matchGroups.forEach(group => {
+    html += `<div class="q-card" style="animation-delay:${(q.id-1)*0.02}s">`;
+    html += `<div class="q-num" style="margin-bottom:14px">MATCHING — ${group.label.toUpperCase()}</div>`;
+    html += `<table class="match-table"><thead><tr><th style="width:28px"></th><th>Description</th><th style="width:220px">Answer</th></tr></thead><tbody>`;
+
+    group.pairs.forEach(pair => {
+      html += `<tr class="match-row">
+        <td class="match-num">${pair.num}</td>
+        <td class="match-prompt">${pair.prompt}</td>
+        <td>
+          <select class="match-select" id="match-${pair.num}" onchange="selectMatch(${pair.num}, this.value)">
+            <option value="">— Select —</option>
+            ${pair.choices.map(c => `<option value="${c}">${c}. ${pair.choiceLabels[c]}</option>`).join('')}
+          </select>
+        </td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+  });
+
+  wrapper.innerHTML = html;
+  body.appendChild(wrapper);
+}
+
+function selectOption(event, qId, idx, type) {
+  if (type === 'best2') event.preventDefault();
+  if (examSubmitted) return;
+  const q = QUESTIONS.find(x => x.id === qId);
+
+  if (type === 'best2') {
+    if (!answers[qId]) answers[qId] = [];
+    const arr = answers[qId];
+    const pos = arr.indexOf(idx);
+    if (pos === -1) {
+      if (arr.length < 2) arr.push(idx);
+      else return; // already 2 selected
+    } else {
+      arr.splice(pos, 1);
+    }
+    // update UI
+    q.options.forEach((_, i) => {
+      const lbl = document.getElementById(`opt-${qId}-${i}`);
+      if (lbl) lbl.classList.toggle('selected', arr.includes(i));
+    });
+  } else {
+    answers[qId] = idx;
+    q.options.forEach((_, i) => {
+      const lbl = document.getElementById(`opt-${qId}-${i}`);
+      if (lbl) lbl.classList.toggle('selected', i === idx);
+    });
+  }
+
+  const card = document.getElementById(`qcard-${qId}`);
+  const isAnswered = type === 'best2' ? answers[qId].length === 2 : answers[qId] !== undefined;
+  if (card) card.classList.toggle('answered', isAnswered);
+
+  updateProgress();
+}
+
+function selectMatch(num, val) {
+  if (examSubmitted) return;
+  if (val) answers[`m${num}`] = val;
+  else delete answers[`m${num}`];
+  updateProgress();
+}
+
+function getAnsweredCount() {
+  let count = 0;
+  QUESTIONS.forEach(q => {
+    if (q.type === 'match') {
+      q.matchGroups.forEach(g => g.pairs.forEach(p => { if (answers[`m${p.num}`]) count++; }));
+    } else if (q.type === 'best2') {
+      if (answers[q.id] && answers[q.id].length === 2) count++;
+    } else {
+      if (answers[q.id] !== undefined) count++;
+    }
+  });
+  return count;
+}
+
+function updateProgress() {
+  const total = 30; // 20 MC + 7 match + 3 best2
+  const answered = getAnsweredCount();
+  document.getElementById('answeredCount').textContent = answered;
+  document.getElementById('progressLabel').textContent = `${answered} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(answered / total) * 100}%`;
+}
+
+function startTimer() {
+  timerStartTime = Date.now();
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    const display = document.getElementById('timerDisplay');
+    display.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+
+    if (secondsLeft <= 300 && secondsLeft > 60) display.className = 'timer-display warning';
+    else if (secondsLeft <= 60) display.className = 'timer-display critical';
+
+    if (secondsLeft <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById('timeoutModal').classList.add('show');
+    }
+  }, 1000);
+}
+
+function submitExam() {
+  if (examSubmitted) return;
+  clearInterval(timerInterval);
+  finalizeSubmit();
+}
+
+function finalizeSubmit() {
+  examSubmitted = true;
+  document.getElementById('timeoutModal').classList.remove('show');
+  showResults();
+  saveToFirebase();
+}
+
+async function saveToFirebase() {
+  try {
+    // Calculate score
+    let score = 0, total = 0;
+    QUESTIONS.forEach(q => {
+      if (q.type === 'mc') {
+        total++;
+        if (answers[q.id] === q.correct) score++;
+      } else if (q.type === 'best2') {
+        total++;
+        const a = answers[q.id] || [];
+        if (q.correct.every(c => a.includes(c)) && a.length === 2) score++;
+      } else if (q.type === 'match') {
+        q.matchGroups.forEach(g => g.pairs.forEach(p => {
+          total++;
+          if (answers[`m${p.num}`] === p.correct) score++;
+        }));
+      }
+    });
+    const pct = Math.round((score / total) * 100);
+    const timeUsed = startSeconds - secondsLeft;
+
+    // Serialize answers for review mode
+    const answersData = [];
+    QUESTIONS.forEach(q => {
+      if (q.type === 'mc') {
+        answersData.push({ qid: q.id, type: 'mc', given: answers[q.id] !== undefined ? answers[q.id] : null, correct: q.correct });
+      } else if (q.type === 'best2') {
+        answersData.push({ qid: q.id, type: 'best2', given: answers[q.id] || [], correct: q.correct });
+      } else if (q.type === 'match') {
+        q.matchGroups.forEach(g => g.pairs.forEach(p => {
+          answersData.push({ qid: `m${p.num}`, type: 'match', given: answers[`m${p.num}`] || null, correct: p.correct, prompt: p.prompt });
+        }));
+      }
+    });
+
+    const body = {
+      fields: {
+        examLabel:   { stringValue: EXAM_LABEL },
+        category:    { stringValue: EXAM_CATEGORY },
+        name:        { stringValue: currentStudentName },
+        score:       { integerValue: score },
+        total:       { integerValue: total },
+        pct:         { integerValue: pct },
+        timeUsed:    { integerValue: timeUsed },
+        submittedAt: { stringValue: new Date().toISOString() },
+        answersData: { stringValue: JSON.stringify(answersData) },
+      }
+    };
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const resp = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults?key=${FB_CONFIG.apiKey}`,
+      { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body), signal: controller.signal }
+    );
+    clearTimeout(timeout);
+    if (!resp.ok) throw new Error(await resp.text());
+    console.log('Saved to Firebase ✓');
+
+    // Show review link
+    const portalUrl = `${window.location.pathname.split('/').pop()}?review=1&name=${encodeURIComponent(currentStudentName)}`;
+    const reviewDiv = document.getElementById('reviewLink');
+    if (reviewDiv) {
+      reviewDiv.innerHTML = `<a href="${portalUrl}" style="display:inline-block;margin-top:16px;padding:10px 20px;background:#1a2744;color:#fff;border-radius:8px;text-decoration:none;font-size:14px;">📋 Review My Answers in Portal</a>`;
+    }
+  } catch(e) {
+    console.error('Firebase save error:', e);
+  }
+}
+
+// Review mode — load answers from Firebase and show results
+async function startReviewMode(studentName) {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents:runQuery?key=${FB_CONFIG.apiKey}`;
+    const body = { structuredQuery: {
+      from: [{ collectionId: 'examResults' }],
+      where: { fieldFilter: { field: { fieldPath: 'name' }, op: 'EQUAL', value: { stringValue: studentName } } }
+    }};
+    const resp = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const rows = await resp.json();
+    // Find matching exam
+    let match = null;
+    for (const row of rows) {
+      if (!row.document) continue;
+      const f = row.document.fields || {};
+      if (f.examLabel?.stringValue === EXAM_LABEL) { match = f; break; }
+    }
+    if (!match) return;
+
+    const saved = JSON.parse(match.answersData?.stringValue || '[]');
+    // Restore answers
+    saved.forEach(a => { answers[a.qid] = a.given; });
+    currentStudentName = studentName;
+    examSubmitted = true;
+    examStarted = true;
+    startSeconds = match.timeUsed?.integerValue || 3600;
+    secondsLeft = 0;
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    showResults();
+
+    // Mark as review mode with banner
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#1e40af;color:#fff;text-align:center;padding:10px;font-size:14px;font-weight:bold;';
+    banner.textContent = `📋 Review Mode — ${studentName} — ${EXAM_LABEL}`;
+    document.body.insertBefore(banner, document.body.firstChild);
+  } catch(e) { console.error('Review mode error:', e); }
+}
+
+function showResults() {
+  document.getElementById('exam').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  const timeUsed = startSeconds - secondsLeft;
+  const tm = Math.floor(timeUsed / 60);
+  const ts = timeUsed % 60;
+  document.getElementById('timeTaken').textContent = `${tm}:${ts.toString().padStart(2,'0')}`;
+
+  // Score
+  let correct = 0, total = 0;
+  QUESTIONS.forEach(q => {
+    if (q.type === 'mc') {
+      total++;
+      if (answers[q.id] === q.correct) correct++;
+    } else if (q.type === 'best2') {
+      total++;
+      const a = answers[q.id] || [];
+      const bothCorrect = q.correct.every(c => a.includes(c)) && a.length === 2;
+      if (bothCorrect) correct++;
+    } else if (q.type === 'match') {
+      q.matchGroups.forEach(g => g.pairs.forEach(p => {
+        total++;
+        if (answers[`m${p.num}`] === p.correct) correct++;
+      }));
+    }
+  });
+
+  const wrong = total - correct;
+  const pct = Math.round((correct / total) * 100);
+
+  document.getElementById('scorePct').textContent = `${pct}%`;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('wrongCount').textContent = wrong;
+
+  // Circumference = 2*pi*68 ≈ 427
+  const offset = 427 - (427 * pct / 100);
+  setTimeout(() => { document.getElementById('scoreCircle').style.strokeDashoffset = offset; }, 100);
+
+  let title, sub;
+  if (pct >= 90) { title = 'Outstanding Work!'; sub = 'Excellent score — you\'re well-prepared for the NREMT.'; }
+  else if (pct >= 75) { title = 'Great Job!'; sub = 'Good score. Review any missed questions and you\'ll be ready.'; }
+  else if (pct >= 60) { title = 'Keep Studying'; sub = 'You have a solid foundation. Focus on the areas below.'; }
+  else { title = 'More Practice Needed'; sub = 'Review the NREMT and JBLearning curriculum and try again.'; }
+
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('resultsSub').textContent = sub;
+
+  // Change ring color if failing
+  if (pct < 60) document.getElementById('scoreCircle').style.stroke = 'var(--red)';
+  else if (pct < 75) document.getElementById('scoreCircle').style.stroke = 'var(--amber)';
+
+  // Build review
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = '';
+
+  QUESTIONS.forEach(q => {
+    if (q.type === 'mc' || q.type === 'best2') {
+      let isCorrect = false;
+      let yourAns = '', correctAns = '';
+
+      if (q.type === 'mc') {
+        isCorrect = answers[q.id] === q.correct;
+        yourAns = answers[q.id] !== undefined ? `${KEYS[answers[q.id]]}. ${q.options[answers[q.id]]}` : 'Not answered';
+        correctAns = `${KEYS[q.correct]}. ${q.options[q.correct]}`;
+      } else {
+        const a = answers[q.id] || [];
+        isCorrect = q.correct.every(c => a.includes(c)) && a.length === 2;
+        yourAns = a.length ? a.sort().map(i => `${KEYS[i]}`).join(' & ') : 'Not answered';
+        correctAns = q.correct.map(i => KEYS[i]).join(' & ');
+      }
+
+      const div = document.createElement('div');
+      div.className = `review-item ${isCorrect ? 'r-correct' : 'r-wrong'}`;
+      div.innerHTML = `
+        <div class="review-q-header">
+          <span class="review-badge ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+          <span class="review-q-text"><strong>Q${q.id}:</strong> ${q.text}</span>
+        </div>
+        ${!isCorrect ? `<div class="review-answer">Your answer: <span class="your-ans">${yourAns}</span> — Correct: <span class="correct-ans">${correctAns}</span></div>` : ''}
+      `;
+      reviewList.appendChild(div);
+    } else if (q.type === 'match') {
+      q.matchGroups.forEach(g => g.pairs.forEach(p => {
+        const isCorrect = answers[`m${p.num}`] === p.correct;
+        const div = document.createElement('div');
+        div.className = `review-item ${isCorrect ? 'r-correct' : 'r-wrong'}`;
+        const yourAns = answers[`m${p.num}`] ? `${answers[`m${p.num}`]}. ${Object.values(p.choiceLabels)[Object.keys(p.choiceLabels).indexOf(answers[`m${p.num}`])]}` : 'Not answered';
+        const correctAns = `${p.correct}. ${p.choiceLabels[p.correct]}`;
+        div.innerHTML = `
+          <div class="review-q-header">
+            <span class="review-badge ${isCorrect ? 'correct' : 'wrong'}">${isCorrect ? '✓ Correct' : '✗ Incorrect'}</span>
+            <span class="review-q-text"><strong>Q${p.num} (Matching):</strong> ${p.prompt}</span>
+          </div>
+          ${!isCorrect ? `<div class="review-answer">Your answer: <span class="your-ans">${yourAns}</span> — Correct: <span class="correct-ans">${correctAns}</span></div>` : ''}
+        `;
+        reviewList.appendChild(div);
+      }));
+    }
+  });
+}
+
+// ===== SHARE FUNCTIONALITY =====
+let shareData = {};
+
+function openShareModal() {
+  // Gather current results data
+  const name = document.getElementById('studentName') ? document.getElementById('studentName').value.trim() : '';
+  const pct = document.getElementById('scorePct').textContent;
+  const correct = document.getElementById('correctCount').textContent;
+  const wrong = document.getElementById('wrongCount').textContent;
+  const time = document.getElementById('timeTaken').textContent;
+  const title = document.getElementById('resultsTitle').textContent;
+
+  shareData = { name, pct, correct, wrong, time, title };
+
+  // Populate card preview
+  document.getElementById('cardName').textContent = name || 'Student';
+  const scoreBig = document.getElementById('cardScoreBig');
+  scoreBig.textContent = pct;
+  const pctNum = parseInt(pct);
+  scoreBig.className = 'card-score-big' + (pctNum < 60 ? ' red' : pctNum < 75 ? ' amber' : '');
+  document.getElementById('cardCorrect').textContent = correct;
+  document.getElementById('cardWrong').textContent = wrong;
+  document.getElementById('cardTime').textContent = time;
+
+  const taglines = {
+    'Outstanding Work!': '🏆 Top marks — NREMT ready!',
+    'Great Job!': '✅ Strong performance!',
+    'Keep Studying': '📚 Solid foundation, keep going!',
+    'More Practice Needed': '💪 Keep studying — you\'ve got this!'
+  };
+  document.getElementById('cardTagline').textContent = taglines[title] || '';
+
+  document.getElementById('shareModal').classList.add('show');
+}
+
+function closeShareModal() {
+  document.getElementById('shareModal').classList.remove('show');
+  // Reset copy button
+  const btn = document.getElementById('copyBtn');
+  btn.classList.remove('success');
+  btn.querySelector('.share-option-title').textContent = 'Copy to Clipboard';
+  btn.querySelector('.share-option-desc').textContent = 'Copy a text summary to paste anywhere';
+}
+
+function buildIncorrectList() {
+  const KEYS = ['A','B','C','D','E'];
+  const items = [];
+  QUESTIONS.forEach(q => {
+    if (q.type === 'mc') {
+      if (answers[q.id] !== q.correct) {
+        const yourAns = answers[q.id] !== undefined ? `${KEYS[answers[q.id]]}. ${q.options[answers[q.id]]}` : 'Not answered';
+        const correctAns = `${KEYS[q.correct]}. ${q.options[q.correct]}`;
+        items.push({ num: q.id, text: q.text, yourAns, correctAns });
+      }
+    } else if (q.type === 'best2') {
+      const a = answers[q.id] || [];
+      const bothCorrect = q.correct.every(c => a.includes(c)) && a.length === 2;
+      if (!bothCorrect) {
+        const yourAns = a.length ? a.sort((x,y)=>x-y).map(i => KEYS[i]).join(' & ') : 'Not answered';
+        const correctAns = q.correct.map(i => KEYS[i]).join(' & ');
+        items.push({ num: q.id, text: q.text, yourAns, correctAns });
+      }
+    } else if (q.type === 'match') {
+      q.matchGroups.forEach(g => g.pairs.forEach(p => {
+        if (answers[`m${p.num}`] !== p.correct) {
+          const yourVal = answers[`m${p.num}`];
+          const yourAns = yourVal ? `${yourVal}. ${p.choiceLabels[yourVal]}` : 'Not answered';
+          const correctAns = `${p.correct}. ${p.choiceLabels[p.correct]}`;
+          items.push({ num: p.num, text: p.prompt, yourAns, correctAns });
+        }
+      }));
+    }
+  });
+  return items;
+}
+
+function buildShareText() {
+  const { name, pct, correct, wrong, time, title } = shareData;
+  const total = parseInt(correct) + parseInt(wrong);
+  const incorrectItems = buildIncorrectList();
+  let incorrectSection = '';
+  if (incorrectItems.length > 0) {
+    incorrectSection = '\n\nINCORRECT QUESTIONS:\n' + incorrectItems.map(item =>
+      `  Q${item.num}: ${item.text}\n    Your answer:    ${item.yourAns}\n    Correct answer: ${item.correctAns}`
+    ).join('\n\n');
+  }
+  return `📋 EMR Certification Practice Exam Results
+━━━━━━━━━━━━━━━━━━━━━━
+Student: ${name || 'Student'}
+Score:   ${pct} (${correct}/${total} correct)
+Wrong:   ${wrong}
+Time:    ${time}
+Result:  ${title}
+━━━━━━━━━━━━━━━━━━━━━━
+Based on NREMT & JBLearning Curriculum${incorrectSection}`;
+}
+
+function copyResults() {
+  const text = buildShareText();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('success');
+    btn.querySelector('.share-option-title').textContent = '✓ Copied!';
+    btn.querySelector('.share-option-desc').textContent = 'Results copied to clipboard';
+    setTimeout(() => {
+      btn.classList.remove('success');
+      btn.querySelector('.share-option-title').textContent = 'Copy to Clipboard';
+      btn.querySelector('.share-option-desc').textContent = 'Copy a text summary to paste anywhere';
+    }, 2500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('success');
+    btn.querySelector('.share-option-title').textContent = '✓ Copied!';
+    setTimeout(() => {
+      btn.classList.remove('success');
+      btn.querySelector('.share-option-title').textContent = 'Copy to Clipboard';
+    }, 2500);
+  });
+}
+
+function emailResults() {
+  const { name, pct, correct, wrong, time, title } = shareData;
+  const total = parseInt(correct) + parseInt(wrong);
+  const incorrectItems = buildIncorrectList();
+  let incorrectSection = '';
+  if (incorrectItems.length > 0) {
+    incorrectSection = '\n\nINCORRECT QUESTIONS:\n\n' + incorrectItems.map(item =>
+      `Q${item.num}: ${item.text}\n  Your answer:    ${item.yourAns}\n  Correct answer: ${item.correctAns}`
+    ).join('\n\n');
+  }
+  const subject = encodeURIComponent(`EMR Practice Exam Results — ${pct}`);
+  const body = encodeURIComponent(
+`Hi,
+
+I just completed the EMR Certification Practice Exam. Here are my results:
+
+Student:   ${name || 'Student'}
+Score:     ${pct} (${correct} out of ${total} correct)
+Incorrect: ${wrong}
+Time Used: ${time}
+Result:    ${title}
+
+Based on NREMT & JBLearning Curriculum.${incorrectSection}`
+  );
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+function downloadCard() {
+  // Draw the score card on a canvas and download as PNG
+  const canvas = document.createElement('canvas');
+  const scale = 2;
+  canvas.width = 600 * scale;
+  canvas.height = 320 * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+
+  const { name, pct, correct, wrong, time, title } = shareData;
+  const total = parseInt(correct) + parseInt(wrong);
+  const pctNum = parseInt(pct);
+  const scoreColor = pctNum >= 75 ? '#1eb8a0' : pctNum >= 60 ? '#f5a623' : '#e8433a';
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, 600, 320);
+  grad.addColorStop(0, '#0d1b2a');
+  grad.addColorStop(0.5, '#162236');
+  grad.addColorStop(1, '#1a2e45');
+  ctx.fillStyle = grad;
+  ctx.roundRect(0, 0, 600, 320, 16);
+  ctx.fill();
+
+  // Teal glow top-left
+  const glowL = ctx.createRadialGradient(60, 60, 0, 60, 60, 160);
+  glowL.addColorStop(0, 'rgba(30,184,160,0.2)');
+  glowL.addColorStop(1, 'rgba(30,184,160,0)');
+  ctx.fillStyle = glowL;
+  ctx.fillRect(0, 0, 600, 320);
+
+  // Amber glow bottom-right
+  const glowR = ctx.createRadialGradient(540, 280, 0, 540, 280, 130);
+  glowR.addColorStop(0, 'rgba(245,166,35,0.15)');
+  glowR.addColorStop(1, 'rgba(245,166,35,0)');
+  ctx.fillStyle = glowR;
+  ctx.fillRect(0, 0, 600, 320);
+
+  // Border
+  ctx.strokeStyle = '#1f3450';
+  ctx.lineWidth = 1.5;
+  ctx.roundRect(1, 1, 598, 318, 16);
+  ctx.stroke();
+
+  // Logo badge
+  ctx.fillStyle = 'rgba(30,184,160,0.15)';
+  ctx.strokeStyle = 'rgba(30,184,160,0.4)';
+  ctx.lineWidth = 1;
+  const badgeW = 220, badgeH = 24, badgeX = (600 - badgeW) / 2, badgeY = 28;
+  ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 12);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#1eb8a0';
+  ctx.font = '600 10px monospace';
+  ctx.textAlign = 'center';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('EMR · NREMT PRACTICE EXAM', 300, 44);
+
+  // Name
+  ctx.fillStyle = '#f5f7fa';
+  ctx.font = '500 18px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(name || 'Student', 300, 86);
+
+  // Score percentage
+  ctx.fillStyle = scoreColor;
+  ctx.font = 'bold 72px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(pct, 300, 176);
+
+  // "Final Score" label
+  ctx.fillStyle = '#8ba3b8';
+  ctx.font = '500 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('FINAL SCORE', 300, 198);
+
+  // Divider line
+  ctx.strokeStyle = '#1f3450';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(100, 214); ctx.lineTo(500, 214);
+  ctx.stroke();
+
+  // Stats row
+  const stats = [
+    `${correct} / ${total} correct`,
+    `${wrong} incorrect`,
+    `⏱ ${time}`
+  ];
+  ctx.fillStyle = '#8ba3b8';
+  ctx.font = '13px sans-serif';
+  const statPositions = [150, 300, 450];
+  stats.forEach((s, i) => {
+    ctx.textAlign = 'center';
+    ctx.fillText(s, statPositions[i], 238);
+  });
+
+  // Title / tagline
+  ctx.fillStyle = scoreColor;
+  ctx.font = 'italic 14px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(title, 300, 272);
+
+  // Bottom watermark
+  ctx.fillStyle = 'rgba(139,163,184,0.35)';
+  ctx.font = '10px monospace';
+  ctx.fillText('Based on NREMT & JBLearning Curriculum', 300, 298);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `EMR_Exam_Results_${(name || 'Student').replace(/\s+/g,'_')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function printResults() {
+  const { name, pct, correct, wrong, time, title } = shareData;
+  const total = parseInt(correct) + parseInt(wrong);
+  const incorrectItems = buildIncorrectList();
+  const incorrectRows = incorrectItems.length === 0
+    ? '<p style="color:#27c47b;font-size:14px;margin:0;">&#127881; All questions answered correctly!</p>'
+    : incorrectItems.map(item => `
+        <div style="margin-bottom:16px;padding:12px 14px;border:1px solid #e0e0e0;border-left:4px solid #e8433a;border-radius:4px;page-break-inside:avoid;">
+          <p style="font-weight:bold;font-size:13px;margin:0 0 6px;color:#111;">Q${item.num}: ${item.text}</p>
+          <p style="font-size:12px;margin:0 0 3px;color:#c0392b;">&#10007; Your answer: ${item.yourAns}</p>
+          <p style="font-size:12px;margin:0;color:#27ae60;">&#10003; Correct answer: ${item.correctAns}</p>
+        </div>`).join('');
+
+  const printArea = document.getElementById('printArea');
+  printArea.innerHTML = `
+    <div style="font-family:Arial,sans-serif;max-width:100%;color:#111;padding:32px 40px;">
+      <div style="border-bottom:3px solid #1F4E79;padding-bottom:10px;margin-bottom:20px;">
+        <h1 style="font-size:20px;margin:0 0 3px;color:#1F4E79;">EMR Certification Practice Exam</h1>
+        <p style="color:#666;font-size:11px;margin:0;">Based on NREMT &amp; JBLearning Curriculum</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:24px;font-size:13px;">
+        <tr><td style="padding:7px 10px;border:1px solid #ccc;background:#f0f4f8;font-weight:bold;width:120px;">Student</td><td style="padding:7px 10px;border:1px solid #ccc;">${name || '&#8212;'}</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #ccc;background:#f0f4f8;font-weight:bold;">Score</td><td style="padding:7px 10px;border:1px solid #ccc;font-size:17px;font-weight:bold;">${pct} <span style="font-size:12px;font-weight:normal;color:#555;">(${correct} of ${total} correct)</span></td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #ccc;background:#f0f4f8;font-weight:bold;">Incorrect</td><td style="padding:7px 10px;border:1px solid #ccc;">${wrong}</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #ccc;background:#f0f4f8;font-weight:bold;">Time Used</td><td style="padding:7px 10px;border:1px solid #ccc;">${time}</td></tr>
+        <tr><td style="padding:7px 10px;border:1px solid #ccc;background:#f0f4f8;font-weight:bold;">Result</td><td style="padding:7px 10px;border:1px solid #ccc;">${title}</td></tr>
+      </table>
+      <h2 style="font-size:15px;color:#1F4E79;border-bottom:1px solid #1F4E79;padding-bottom:5px;margin-bottom:14px;">Incorrect Questions &#8212; Study Review</h2>
+      ${incorrectRows}
+      <p style="font-size:10px;color:#aaa;margin-top:24px;border-top:1px solid #eee;padding-top:10px;">Printed from EMR Practice Exam &#8212; NREMT &amp; JBLearning Curriculum</p>
+    </div>`;
+
+  // Small delay ensures DOM is painted before print dialog opens
+  requestAnimationFrame(() => {
+    window.print();
+    setTimeout(() => { printArea.innerHTML = ''; }, 1500);
+  });
+}
+
+// Close share modal on overlay click
+document.getElementById('shareModal').addEventListener('click', function(e) {
+  if (e.target === this) closeShareModal();
+});
+
+function retakeExam() {
+  answers = {};
+  secondsLeft = 3600;
+  examSubmitted = false;
+  examStarted = false;
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('splash').style.display = 'flex';
+  clearInterval(timerInterval);
+}
+</script>
+</body>
+</html>
