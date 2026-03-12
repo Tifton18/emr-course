@@ -569,7 +569,7 @@ async function fetchPortalContent() {
     }
  
     function parseCourseFields(f) {
-      return { announcements: parseArr(f.announcements), links: parseArr(f.links), resources: parseArr(f.resources), slides: parseArr(f.slides), slidesBaseUrl: f.slidesBaseUrl?.stringValue || '' };
+      return { announcements: parseArr(f.announcements), links: parseArr(f.links), resources: parseArr(f.resources), slides: parseArr(f.slides) };
     }
  
     // Support both new per-course structure and legacy flat structure
@@ -630,7 +630,7 @@ async function renderPortalSlides() {
   const content = await getPortalContent();
   const items = content.slides || [];
   if (items.length === 0) { el.innerHTML = '<div class="portal-empty">No slides posted yet.</div>'; return; }
-  const base = (content.slidesBaseUrl || '').replace(/\/?$/, '/');
+  const base = window.location.href.replace(/\/[^\/]*$/, '/');
   el.innerHTML = items.map(s => `<div class="content-card"><div class="content-card-icon">📊</div><div class="content-card-body"><div class="content-card-title">${s.title||'Slides'}</div>${s.description?`<div class="content-card-desc">${s.description}</div>`:''}<div class="content-card-desc" style="font-size:11px;color:#93adc8;margin-top:4px;">${s.filename||''}</div></div><a href="${base}${s.filename||''}" download class="content-card-btn">⬇ Download</a></div>`).join('');
 }
  
