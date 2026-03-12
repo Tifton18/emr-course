@@ -7,7 +7,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #f0f6ff; color: #1e3a5f; font-family: 'Georgia','Times New Roman',serif; min-height: 100vh; }
-
+ 
 #syncBar { position:fixed;top:0;left:0;right:0;height:3px;z-index:999;background:transparent;transition:background 0.4s; }
 #syncBar.syncing { background:linear-gradient(90deg,#2563eb,#3b82f6,#2563eb);background-size:200%;animation:shimmer 1s infinite; }
 #syncBar.saved { background:#4ade80;animation:fadeBar 1.5s forwards; }
@@ -16,7 +16,7 @@ body { background: #f0f6ff; color: #1e3a5f; font-family: 'Georgia','Times New Ro
 @keyframes fadeBar{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
 #syncLabel { position:fixed;top:10px;right:16px;font-size:11px;letter-spacing:1px;color:#6b82a0;z-index:1000;text-transform:uppercase;transition:color 0.3s; }
 #syncLabel.syncing{color:#3b82f6} #syncLabel.saved{color:#4ade80} #syncLabel.error{color:#f87171}
-
+ 
 .header { border-bottom:1px solid #bfdbfe;padding:32px 32px 0;background:linear-gradient(180deg,#e6f0fb 0%,#f0f6ff 100%);margin-top:3px; }
 .header-top { display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px; }
 .header-label { font-size:11px;letter-spacing:3px;color:#6b82a0;text-transform:uppercase;margin-bottom:6px; }
@@ -27,18 +27,18 @@ body { background: #f0f6ff; color: #1e3a5f; font-family: 'Georgia','Times New Ro
 .tabs { display:flex; }
 .tab-btn { background:none;border:none;padding:10px 20px;color:#6b82a0;border-bottom:2px solid transparent;cursor:pointer;font-size:13px;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s;font-family:'Georgia',serif; }
 .tab-btn.active { color:#3b82f6;border-bottom-color:#2563eb; }
-
+ 
 .content { padding:28px 32px; }
 .tab-panel { display:none; }
 .tab-panel.active { display:block; }
-
+ 
 .date-row { display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap; }
 #datePicker { background:#f8faff;border:1px solid #bfdbfe;border-radius:8px;color:#1e3a5f;padding:10px 14px;font-size:14px;cursor:pointer;font-family:'Georgia',serif;outline:none; }
 .date-label { color:#6b82a0;font-size:13px; }
 .mark-all-row { margin-left:auto;display:flex;gap:8px;flex-wrap:wrap; }
 .mark-all-btn { padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;letter-spacing:1px;text-transform:uppercase;transition:opacity 0.2s; }
 .mark-all-btn:hover { opacity:0.8; }
-
+ 
 .student-list { display:flex;flex-direction:column;gap:8px; }
 .student-row { display:flex;align-items:center;gap:16px;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;border-left:3px solid #dbeafe;transition:border-color 0.2s; }
 .student-num { width:28px;text-align:center;color:#93adc8;font-size:12px; }
@@ -47,7 +47,7 @@ body { background: #f0f6ff; color: #1e3a5f; font-family: 'Georgia','Times New Ro
 .status-btn { width:36px;height:36px;border-radius:8px;border:1px solid #bfdbfe;background:transparent;color:#93adc8;cursor:pointer;font-size:12px;font-weight:bold;transition:all 0.15s; }
 .remove-btn { background:none;border:none;color:#bfdbfe;cursor:pointer;font-size:20px;padding:0 4px;transition:color 0.2s;line-height:1; }
 .remove-btn:hover { color:#f87171; }
-
+ 
 .add-row { margin-top:16px; }
 .add-form { display:flex;gap:10px; }
 #newStudentInput { flex:1;background:#f8faff;border:1px solid #2563eb;border-radius:8px;color:#1e3a5f;padding:12px 16px;font-size:14px;outline:none;font-family:'Georgia',serif; }
@@ -55,18 +55,18 @@ body { background: #f0f6ff; color: #1e3a5f; font-family: 'Georgia','Times New Ro
 .btn-secondary { background:#dbeafe;border:1px solid #bfdbfe;border-radius:8px;color:#6b82a0;padding:12px 16px;cursor:pointer;font-size:14px;font-family:'Georgia',serif; }
 #addStudentTrigger { background:none;border:1px dashed #93c5fd;border-radius:10px;color:#93adc8;padding:14px 18px;cursor:pointer;font-size:13px;width:100%;transition:all 0.2s;font-family:'Georgia',serif; }
 #addStudentTrigger:hover { border-color:#2563eb;color:#3b82f6; }
-
+ 
 .grades-layout { display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap; }
 .assignments-panel { flex:0 0 310px;min-width:260px; }
 .grades-grid-panel { flex:1;min-width:300px; }
 .panel-title { font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:14px; }
-
+ 
 .weights-info { background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px;margin-bottom:20px; }
 .weights-title { font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#6b82a0;margin-bottom:10px; }
 .weights-row { display:flex;justify-content:space-between;align-items:center;padding:3px 0; }
 .weights-label { font-size:12px; }
 .weights-val { font-size:12px;color:#6b82a0; }
-
+ 
 .category-block { margin-bottom:18px; }
 .category-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:8px; }
 .category-label { display:flex;align-items:center;gap:8px;font-size:13px; }
@@ -74,20 +74,20 @@ body { background: #f0f6ff; color: #1e3a5f; font-family: 'Georgia','Times New Ro
 .weight-badge { font-size:11px;color:#4a6080;background:#f0f6ff;border:1px solid #93c5fd;border-radius:20px;padding:2px 8px; }
 .add-assign-btn { background:none;border:1px solid #bfdbfe;border-radius:6px;color:#6b82a0;padding:4px 10px;cursor:pointer;font-size:11px;font-family:'Georgia',serif;transition:all 0.2s; }
 .add-assign-btn:hover { border-color:#2563eb;color:#3b82f6; }
-
+ 
 .assignment-item { display:flex;align-items:center;gap:8px;background:#f8fbff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 12px;margin-bottom:5px; }
 .assign-name { flex:1;font-size:13px;color:#334d6e; }
 .assign-points { font-size:11px;color:#6b82a0;white-space:nowrap; }
 .remove-assign-btn { background:none;border:none;color:#bfdbfe;cursor:pointer;font-size:16px;line-height:1;transition:color 0.2s;padding:0 2px;flex-shrink:0; }
 .remove-assign-btn:hover { color:#f87171; }
-
+ 
 .add-assign-form { display:flex;gap:6px;margin-top:6px;flex-wrap:wrap; }
 .assign-name-input { flex:1;min-width:80px;background:#f8faff;border:1px solid #2563eb;border-radius:6px;color:#1e3a5f;padding:7px 10px;font-size:13px;outline:none;font-family:'Georgia',serif; }
 .assign-pts-input { width:56px;background:#f8faff;border:1px solid #bfdbfe;border-radius:6px;color:#1e3a5f;padding:7px 8px;font-size:13px;outline:none;font-family:'Georgia',serif;text-align:center; }
 .btn-tiny { background:#2563eb;border:none;border-radius:6px;color:#fff;padding:7px 12px;cursor:pointer;font-size:12px;font-family:'Georgia',serif; }
 .btn-tiny-sec { background:#dbeafe;border:1px solid #bfdbfe;border-radius:6px;color:#6b82a0;padding:7px 10px;cursor:pointer;font-size:12px;font-family:'Georgia',serif; }
 .no-assigns-msg { font-size:12px;color:#93adc8;padding:2px 0 8px 16px; }
-
+ 
 .grades-table-wrap { overflow-x:auto; }
 table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 .grades-table th { background:#e6f0fb;color:#4a6080;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid #dbeafe;white-space:nowrap;font-weight:normal; }
@@ -103,7 +103,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 .avg-badge { display:inline-flex;align-items:center;justify-content:center;min-width:52px;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;border:1px solid; }
 .letter-badge { display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:14px;font-weight:bold;border:2px solid; }
 .no-assignments { color:#93adc8;font-size:13px;padding:20px 0;text-align:center; }
-
+ 
 .summary-meta { margin-bottom:20px;color:#6b82a0;font-size:13px; }
 .summary-row { background:#f0f6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px 20px;margin-bottom:8px; }
 .summary-top { display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap; }
@@ -116,19 +116,19 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 .no-data { padding-left:44px;color:#93adc8;font-size:12px;margin-bottom:6px; }
 .summary-grades-row { padding-left:44px;display:flex;gap:10px;flex-wrap:wrap;align-items:center; }
 .summary-cat-pill { font-size:12px;padding:4px 12px;border-radius:6px;border:1px solid; }
-
+ 
 .bottom-bar { padding:0 32px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px; }
 .legend { display:flex;gap:16px;color:#93adc8;font-size:11px;letter-spacing:1px;flex-wrap:wrap; }
 .export-btn { background:#f0f6ff;border:1px solid #93c5fd;border-radius:8px;color:#2563eb;padding:8px 16px;cursor:pointer;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-family:'Georgia',serif;transition:all 0.2s; }
 .export-btn:hover { background:#22223a;border-color:#2563eb; }
-
+ 
 #loadingOverlay { position:fixed;inset:0;background:#f0f6ff;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px; }
 .spinner { width:36px;height:36px;border-radius:50%;border:3px solid #dbeafe;border-top-color:#2563eb;animation:spin 0.8s linear infinite; }
 @keyframes spin{to{transform:rotate(360deg)}}
 #loadingOverlay p { color:#6b82a0;font-size:13px;letter-spacing:2px;text-transform:uppercase; }
-
+ 
 ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:#f0f6ff} ::-webkit-scrollbar-thumb{background:#bfdbfe;border-radius:3px}
-
+ 
 @media print {
   body{background:#fff;color:#000}
   #syncBar,#syncLabel,#loadingOverlay{display:none!important}
@@ -142,8 +142,8 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .stat-pill{border:1px solid #ccc;color:#000!important;background:#f5f5f5!important}
   .att-bar-bg{background:#1e3a5f}
 }
-
-
+ 
+ 
   /* Reset modal */
   .reset-overlay { position:fixed;inset:0;background:rgba(15,25,50,0.7);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(4px);padding:20px; }
   .reset-overlay.hidden { display:none; }
@@ -162,7 +162,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .btn-reset-confirm:hover { background:#b91c1c; }
   .btn-reset-cancel { flex:1;background:#f0f6ff;color:#4a6080;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:15px;cursor:pointer;font-family:Georgia,serif;transition:all 0.2s; }
   .btn-reset-cancel:hover { border-color:#2563eb;color:#2563eb; }
-
+ 
   /* Item Analysis */
   .analysis-stat-bar { height:10px;border-radius:5px;overflow:hidden;background:#e6f0fb;flex:1;min-width:80px; }
   .analysis-stat-fill-correct { height:100%;background:#4ade80;border-radius:5px;transition:width 0.4s; }
@@ -174,7 +174,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .analysis-overview-card { background:#fff;border:1px solid #bfdbfe;border-radius:12px;padding:16px 18px;text-align:center; }
   .analysis-overview-num { font-size:28px;font-weight:700;color:#1e3a5f; }
   .analysis-overview-label { font-size:12px;color:#6b82a0;margin-top:4px; }
-
+ 
   /* Instructor login */
   .login-overlay { position:fixed;inset:0;background:linear-gradient(160deg,#1a2744 0%,#1e3a6e 40%,#1a2744 100%);display:none;align-items:center;justify-content:center;z-index:10000;padding:20px; }
   .login-overlay.visible { display:flex !important; }
@@ -196,7 +196,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   .instructor-bar-sub { color:#93c5fd;font-size:11px; }
   .btn-instructor-signout { background:none;border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:rgba(255,255,255,0.7);padding:5px 12px;font-size:12px;cursor:pointer;font-family:Georgia,serif;transition:all 0.2s; }
   .btn-instructor-signout:hover { border-color:#dc2626;color:#fca5a5; }
-
+ 
   /* Content Manager */
   .cm-section { background:#fff;border:1px solid #bfdbfe;border-radius:12px;padding:20px 22px;margin-bottom:16px; }
   .cm-section-header { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px; }
@@ -219,11 +219,11 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 </style>
 </head>
 <body>
-
+ 
 <div id="syncBar"></div>
 <div id="syncLabel">Connecting…</div>
 <div id="loadingOverlay"><div class="spinner"></div><p>Connecting to cloud…</p></div>
-
+ 
 <!-- INSTRUCTOR LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
@@ -236,7 +236,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <button class="login-btn" onclick="attemptInstructorLogin()">Sign In</button>
   </div>
 </div>
-
+ 
 <!-- INSTRUCTOR BAR -->
 <div class="instructor-bar hidden" id="instructorBar">
   <div>
@@ -245,7 +245,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   </div>
   <button class="btn-instructor-signout" onclick="instructorSignOut()">Sign Out</button>
 </div>
-
+ 
 <div class="header">
   <div class="header-top">
     <div>
@@ -265,7 +265,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <button class="tab-btn" onclick="switchTab('content',this)">📋 Content</button>
   </div>
 </div>
-
+ 
 <div class="content">
   <!-- ATTENDANCE -->
   <div class="tab-panel active" id="panel-attendance">
@@ -289,7 +289,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       <button id="addStudentTrigger" onclick="showAddForm()">+ Add Student</button>
     </div>
   </div>
-
+ 
   <!-- GRADES -->
   <div class="tab-panel" id="panel-grades">
     <div id="gradesCourseSelector" style="padding:16px 0 0 0;"></div>
@@ -320,9 +320,9 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       </div>
     </div>
   </div>
-
-
-
+ 
+ 
+ 
   <!-- ITEM ANALYSIS -->
   <div class="tab-panel" id="panel-analysis">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
@@ -340,19 +340,19 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <div id="analysisCourseSelector" style="padding:16px 0 8px 0;"></div>
     <div id="analysisContent"></div>
   </div>
-
+ 
   <!-- SUMMARY -->
   <div class="tab-panel" id="panel-summary">
     <div class="summary-meta" id="summaryMeta"></div>
     <div id="summaryCourseSelector" style="margin-bottom:16px;"></div>
     <div id="summaryList"></div>
   </div>
-
+ 
   <!-- CONTENT MANAGER -->
   <div class="tab-panel" id="panel-content">
     <div class="panel-title" style="margin-bottom:4px;">Content Manager</div>
     <div style="font-size:13px;color:#6b82a0;margin-bottom:16px;">Manage what students see in the portal for each course.</div>
-
+ 
     <!-- COURSES SECTION -->
     <div class="cm-section" style="margin-bottom:28px;">
       <div class="cm-section-header">
@@ -363,9 +363,9 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       </div>
       <div id="cm-courses-section" style="margin-top:12px;"></div>
     </div>
-
+ 
     <div id="cm-course-tabs" style="display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;"></div>
-
+ 
     <!-- EXAMS SECTION -->
     <div class="cm-section">
       <div class="cm-section-header">
@@ -374,7 +374,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       </div>
       <div id="cm-exams"></div>
     </div>
-
+ 
     <div class="cm-section">
       <div class="cm-section-header">
         <div><div class="cm-section-title">📋 Announcements</div><div class="cm-section-sub">Messages shown at the top of the student portal</div></div>
@@ -382,7 +382,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       </div>
       <div id="cm-announcements"></div>
     </div>
-
+ 
     <div class="cm-section">
       <div class="cm-section-header">
         <div><div class="cm-section-title">🔗 Links</div><div class="cm-section-sub">External reference links for students</div></div>
@@ -390,7 +390,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       </div>
       <div id="cm-links"></div>
     </div>
-
+ 
     <div class="cm-section">
       <div class="cm-section-header">
         <div><div class="cm-section-title">📄 Resources</div><div class="cm-section-sub">PDFs and study materials (paste a URL or Google Drive share link)</div></div>
@@ -398,22 +398,28 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
       </div>
       <div id="cm-resources"></div>
     </div>
-
+ 
     <div class="cm-section">
       <div class="cm-section-header">
         <div><div class="cm-section-title">📊 Slides</div><div class="cm-section-sub">PowerPoint files — enter filename as uploaded to GitHub (e.g. Week1_Slides.pptx)</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('slides')">+ Add</button>
       </div>
+      <div style="margin-bottom:10px;">
+        <div class="cm-item-label" style="margin-bottom:4px;">📁 Slides Base URL <span style="font-weight:400;color:#94a3b8;">(GitHub Pages folder where PPTX files are hosted)</span></div>
+        <input id="cm-slides-base-url" type="text" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;color:#1e293b;"
+          placeholder="e.g. https://tifton18.github.io/emr-slides/"
+          oninput="portalContent[activeCourse].slidesBaseUrl = this.value.trim()">
+      </div>
       <div id="cm-slides"></div>
     </div>
-
+ 
     <div class="cm-save-bar">
       <button class="cm-save-btn" onclick="savePortalContent()">💾 Save &amp; Publish to Portal</button>
     </div>
   </div>
-
+ 
 </div>
-
+ 
 <!-- RESET MODAL -->
 <div class="reset-overlay hidden" id="resetModal">
   <div class="reset-card">
@@ -456,8 +462,8 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     </div>
   </div>
 </div>
-
-
+ 
+ 
 <div class="bottom-bar">
   <div class="legend">
     <span style="color:#4ade80">P — Present</span>
@@ -468,7 +474,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
   <button class="export-btn" onclick="exportReport()">⬇ Export / Print</button>
   <button class="export-btn" onclick="resetCourse()" style="border-color:#fca5a5;color:#dc2626;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#f0f6ff'">↺ Reset for New Course</button>
 </div>
-
+ 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
@@ -483,7 +489,7 @@ firebase.initializeApp({
 const db=firebase.firestore();
 const DOC_REF=db.collection('tracker').doc('main');
 const INSTRUCTOR_PASSWORD='81.notfiT'; // ← change to update instructor password
-
+ 
 const STATUS_CONFIG={
   present:{label:'P',color:'#4ade80',bg:'#dcfce7'},
   absent:{label:'A',color:'#f87171',bg:'#fee2e2'},
@@ -497,7 +503,7 @@ const COURSES = [
   {id:'hazmat', label:'Hazmat',        color:'#d97706'},
   {id:'ff2',    label:'Firefighter 2', color:'#7c3aed'},
 ];
-
+ 
 const CATEGORIES=[
   {id:'quiz',    label:'Quizzes',      color:'#818cf8',weight:0.10},
   {id:'module',  label:'Module Exams', color:'#fbbf24',weight:0.20},
@@ -505,14 +511,14 @@ const CATEGORIES=[
   {id:'final',   label:'Final Exam',   color:'#f87171',weight:0.40},
 ];
 const DEFAULT_STUDENTS=['Alex Johnson','Brianna Smith','Carlos Rivera','Diana Chen','Ethan Williams','Fiona Patel','George Kim','Hannah Moore'];
-
+ 
 let data={className:'My Class',students:[],attendance:{},assignments:[],scores:{}};
 let saveTimer=null, selectedDate=todayStr(), activeTab='attendance';
 let activeSummaryCourse='emr';
 let activeGradesCourse='emr';
 let activeAnalysisCourse='emr';
 let addFormOpen={quiz:false,module:false,midterm:false,final:false};
-
+ 
 // Exam definitions — labels must match what the exam files submit to Firebase
 const EXAM_DEFS={
   emr: [
@@ -547,8 +553,8 @@ function getExamDefs(course) {
 }
 // examResults: studentName (lowercase) -> { assignId -> {pct,score,total,submittedAt} }
 let examResults={};
-
-
+ 
+ 
 // ── INSTRUCTOR AUTH ───────────────────────────────────
 function attemptInstructorLogin() {
   const pw = document.getElementById('loginPw').value;
@@ -564,7 +570,7 @@ function attemptInstructorLogin() {
   document.getElementById('loginOverlay').classList.remove('visible');
   document.getElementById('instructorBar').classList.remove('hidden');
 }
-
+ 
 function instructorSignOut() {
   try { sessionStorage.removeItem('tfd_instructor'); } catch(e) {}
   document.getElementById('instructorBar').classList.add('hidden');
@@ -572,7 +578,7 @@ function instructorSignOut() {
   document.getElementById('loginPw').value = '';
   document.getElementById('loginError').style.display = 'none';
 }
-
+ 
 function setSyncStatus(s,text){document.getElementById('syncBar').className=s;const l=document.getElementById('syncLabel');l.className=s;l.textContent=text;}
 function scheduleSave(){setSyncStatus('syncing','Saving…');clearTimeout(saveTimer);saveTimer=setTimeout(saveToFirebase,800);}
 async function saveToFirebase(){
@@ -602,7 +608,7 @@ async function saveToFirebase(){
     setSyncStatus('error','✗ Save failed: '+e.message);
   }
 }
-
+ 
 // ── FETCH EXAM RESULTS FROM FIRESTORE ─────────────────
 async function loadExamResults(){
   try{
@@ -647,13 +653,13 @@ async function loadExamResults(){
     console.log('examResults loaded:', JSON.stringify(examResults));
   }catch(e){console.error('loadExamResults error:',e);}
 }
-
+ 
 // Get exam score for a student (matched by name, case-insensitive)
 function getExamScore(studentName,assignId){
   const key=studentName.toLowerCase().trim();
   return examResults[key]?.[assignId]||null;
 }
-
+ 
 async function loadFromFirebase(){
   try{
     const snap=await DOC_REF.get();
@@ -687,7 +693,7 @@ async function loadFromFirebase(){
   });
   renderAttendance();updateTodayCount();
 }
-
+ 
 function switchTab(name,btn){
   activeTab=name;
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -702,23 +708,23 @@ function renderCurrent(){
   else if(activeTab==='content')renderContentManager();
   else if(activeTab==='summary')renderSummary();
 }
-
+ 
 const display=document.getElementById('classNameDisplay');
 const nameInput=document.getElementById('classNameInput');
 display.addEventListener('click',()=>{nameInput.value=data.className;display.style.display='none';nameInput.style.display='inline-block';nameInput.focus();});
 nameInput.addEventListener('blur',commitClassName);
 nameInput.addEventListener('keydown',e=>{if(e.key==='Enter')commitClassName();});
 function commitClassName(){data.className=nameInput.value.trim()||'My Class';display.textContent=data.className;display.style.display='inline-block';nameInput.style.display='none';scheduleSave();}
-
+ 
 function todayStr(){return new Date().toISOString().split('T')[0];}
 function formatDate(str){return new Date(str+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 const dp=document.getElementById('datePicker');
 dp.value=selectedDate;
 document.getElementById('dateLabel').textContent=formatDate(selectedDate);
 dp.addEventListener('change',()=>{selectedDate=dp.value;document.getElementById('dateLabel').textContent=formatDate(selectedDate);renderAttendance();});
-
+ 
 function updateTodayCount(){const rec=data.attendance[todayStr()]||{};const p=Object.values(rec).filter(v=>v==='present').length;document.getElementById('todayCount').textContent=p+'/'+data.students.length;}
-
+ 
 function renderAttendance(){
   const list=document.getElementById('attendanceList'),rec=data.attendance[selectedDate]||{};
   list.innerHTML='';
@@ -744,7 +750,7 @@ function renderAttendance(){
 }
 function setStatus(sid,status){if(!data.attendance[selectedDate])data.attendance[selectedDate]={};const cur=data.attendance[selectedDate][sid];if(cur===status)delete data.attendance[selectedDate][sid];else data.attendance[selectedDate][sid]=status;scheduleSave();renderAttendance();}
 function markAll(status){if(!data.attendance[selectedDate])data.attendance[selectedDate]={};data.students.forEach(s=>data.attendance[selectedDate][s.id]=status);scheduleSave();renderAttendance();}
-
+ 
 /* ── GRADES ── */
 function switchGradesCourse(c){activeGradesCourse=c;renderGradesTab();}
 function renderGradesTab(){
@@ -754,7 +760,7 @@ function renderGradesTab(){
   renderAssignmentManager();
   renderGradesGrid();
 }
-
+ 
 function renderAssignmentManager(){
   const container=document.getElementById('assignmentCategories');
   container.innerHTML='';
@@ -775,7 +781,7 @@ function renderAssignmentManager(){
   container.appendChild(block);
   if(isOpen){const ni=document.getElementById('aname-quiz');if(ni){ni.focus();ni.addEventListener('keydown',e=>{if(e.key==='Enter')addAssignment('quiz');});}}
 }
-
+ 
 function toggleAddForm(catId){addFormOpen[catId]=!addFormOpen[catId];renderGradesTab();}
 function addAssignment(catId){
   const nameEl=document.getElementById('aname-'+catId),ptsEl=document.getElementById('apts-'+catId);
@@ -790,14 +796,14 @@ function removeAssignment(aid){
   Object.keys(data.scores).forEach(sid=>{if(data.scores[sid])delete data.scores[sid][aid];});
   scheduleSave();renderGradesTab();
 }
-
+ 
 function renderGradesGrid(){
   const container=document.getElementById('gradesGrid');
   const quizAssigns=data.assignments.filter(a=>a.category==='quiz'&&(a.course||'emr')===activeGradesCourse);
-
+ 
   // Single unified table: Student | Quizzes... | Week1 | Week4 | Midterm | Final | Avg | Grade
   let html=`<table class="grades-table"><thead><tr><th>Student</th>`;
-
+ 
   // Quiz columns (manual)
   quizAssigns.forEach(a=>{
     const cat=CATEGORIES.find(c=>c.id==='quiz');
@@ -806,19 +812,19 @@ function renderGradesGrid(){
   if(quizAssigns.length===0){
     html+=`<th class="center" style="color:#818cf8">Quizzes<br><span style="color:#93adc8;font-size:9px">none yet</span></th>`;
   }
-
+ 
   // Exam columns (auto-synced)
   Object.values(EXAM_DEFS).flat().forEach(d=>{
     const cat=CATEGORIES.find(c=>c.id===d.category);
     html+=`<th class="center" style="color:${cat?cat.color:'#6b82a0'}">${d.label}<br><span style="color:#93adc8;font-size:9px">auto-synced</span></th>`;
   });
-
+ 
   html+=`<th class="center">Avg</th><th class="center">Grade</th></tr></thead><tbody>`;
-
+ 
   data.students.forEach((student,idx)=>{
     const avg=calcWeightedAverage(student.id),letter=avgToLetter(avg),lc=letterToColor(letter);
     html+=`<tr class="sgrow"><td class="td-name"><span style="color:#93adc8;font-size:11px;margin-right:8px">${String(idx+1).padStart(2,'0')}</span>${escHtml(student.name)}</td>`;
-
+ 
     // Quiz score inputs
     if(quizAssigns.length===0){
       html+=`<td class="center"><span style="color:#93adc8;font-size:12px;">—</span></td>`;
@@ -828,7 +834,7 @@ function renderGradesGrid(){
         html+=`<td class="center"><div class="pts-input-wrap"><input class="pts-scored" type="number" min="0" max="${a.points}" value="${scored===null?'':scored}" placeholder="—" onchange="setScore(${student.id},'${a.id}',this.value,${a.points})"/><span class="pts-denom">/${a.points}</span></div></td>`;
       });
     }
-
+ 
     // Exam score cells (read-only, auto-synced)
     Object.values(EXAM_DEFS).flat().forEach(d=>{
       const er=getExamScore(student.name,d.assignId);
@@ -839,15 +845,15 @@ function renderGradesGrid(){
           :`<span style="color:#93adc8;font-size:13px;">—</span>`}
       </td>`;
     });
-
+ 
     html+=`<td class="center"><span class="avg-badge" style="color:${lc};border-color:${lc}33;background:${lc}11">${avg===null?'—':avg+'%'}</span></td>`;
     html+=`<td class="center"><span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span></td></tr>`;
   });
-
+ 
   html+=`</tbody></table>`;
   container.innerHTML=html;
 }
-
+ 
 function getScore(studentId,assignId){
   // Check if this is an exam assignment
   const examDef=Object.values(EXAM_DEFS).flat().find(d=>d.assignId===assignId);
@@ -866,7 +872,7 @@ function setScore(studentId,assignId,value,maxPts){
   else data.scores[sid][assignId]=Math.min(Math.max(num,0),maxPts);
   scheduleSave();renderGradesGrid();
 }
-
+ 
 function calcWeightedAverage(studentId, course='emr'){
   let totalWeight=0,weightedSum=0;
   const student=data.students.find(s=>s.id===studentId);
@@ -905,7 +911,7 @@ function getCatAverage(studentId,catId){
   console.log(`getCatAverage result: student="${student?.name}" cat="${catId}" earned=${earned} possible=${possible} hasAny=${hasAny}`);
   if(!hasAny||possible===0)return null;return Math.round((earned/possible)*100);
 }
-
+ 
 /* ── SUMMARY ── */
 function getAttStats(studentId){
   let present=0,absent=0,late=0,excused=0;
@@ -913,7 +919,7 @@ function getAttStats(studentId){
   const total=present+absent+late+excused,pct=total>0?Math.round(((present+late)/total)*100):null;
   return{present,absent,late,excused,total,pct};
 }
-
+ 
 function switchSummaryCourse(c){activeSummaryCourse=c;renderSummary();}
 function renderSummary(){
   try {
@@ -962,7 +968,7 @@ function renderSummary(){
     const practiceAttempts = practiceExams
       .map(d => ({ label: d.label, result: examResults[studentKey]?.[d.assignId] || null }))
       .filter(p => p.result !== null);
-
+ 
     if (practiceAttempts.length > 0) {
       const practiceHtml = document.createElement('div');
       practiceHtml.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid #e6f0fb;';
@@ -976,7 +982,7 @@ function renderSummary(){
         + '</div>';
       div.appendChild(practiceHtml);
     }
-
+ 
     // Load certs for this student asynchronously and append
     list.appendChild(div);
     loadStudentCertsForSummary(student.name, div);
@@ -984,7 +990,7 @@ function renderSummary(){
   });
   } catch(e) { console.error('renderSummary outer error:', e); }
 }
-
+ 
 async function loadStudentCertsForSummary(studentName, cardEl) {
   try {
     const url = `https://firestore.googleapis.com/v1/projects/class-attendance-72cd9/databases/(default)/documents:runQuery?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`;
@@ -1027,10 +1033,10 @@ async function loadStudentCertsForSummary(studentName, cardEl) {
     cardEl.insertAdjacentHTML('beforeend', certsHtml);
   } catch(e) { console.error('loadStudentCertsForSummary error:', e); }
 }
-
+ 
 // ── EXAM RESET MODAL ─────────────────────────────────
 let _resetModalDocs = []; // [{docName, examLabel, pct, submittedAt}]
-
+ 
 async function showResetModal(studentName) {
   setSyncStatus('syncing', 'Loading submissions…');
   try {
@@ -1061,11 +1067,11 @@ async function showResetModal(studentName) {
     setSyncStatus('error', '✗ Failed to load submissions');
   }
 }
-
+ 
 function renderResetModal(studentName) {
   const existing = document.getElementById('examResetModal');
   if (existing) existing.remove();
-
+ 
   const rows = _resetModalDocs.length === 0
     ? `<div style="color:#93adc8;font-size:14px;padding:16px 0;">No exam submissions found for ${studentName}.</div>`
     : _resetModalDocs.map((doc, i) => {
@@ -1081,7 +1087,7 @@ function renderResetModal(studentName) {
           <div style="font-size:12px;color:#6b82a0;">${doc.score}/${doc.total}</div>
         </label>`;
       }).join('');
-
+ 
   const modal = document.createElement('div');
   modal.id = 'examResetModal';
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,25,50,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;backdrop-filter:blur(4px);';
@@ -1101,7 +1107,7 @@ function renderResetModal(studentName) {
     </div>`;
   document.body.appendChild(modal);
 }
-
+ 
 async function confirmResetSelected(studentName) {
   const checkboxes = document.querySelectorAll('#resetCheckList input[type=checkbox]:checked');
   if (checkboxes.length === 0) { alert('No exams selected.'); return; }
@@ -1123,18 +1129,18 @@ async function confirmResetSelected(studentName) {
   setSyncStatus('saved', `✓ Deleted ${deleted} submission${deleted!==1?'s':''} for ${studentName}`);
   setTimeout(()=>setSyncStatus('',''), 3000);
 }
-
+ 
 function removeStudent(id){if(!confirm('Remove this student?'))return;data.students=data.students.filter(s=>s.id!==id);delete data.scores[String(id)];scheduleSave();renderAttendance();}
 function showAddForm(){document.getElementById('addForm').style.display='flex';document.getElementById('addStudentTrigger').style.display='none';document.getElementById('newStudentInput').focus();}
 function cancelAdd(){document.getElementById('addForm').style.display='none';document.getElementById('addStudentTrigger').style.display='block';document.getElementById('newStudentInput').value='';}
-
+ 
 function updateStudentId(sid, newId) {
   const student = data.students.find(s => s.id === sid);
   if (!student) return;
   student.tfdId = newId;
   scheduleSave();
 }
-
+ 
 function toggleStudentCourse(sid, courseId, enrolled) {
   const student = data.students.find(s => s.id === sid);
   if (!student) return;
@@ -1149,7 +1155,7 @@ function toggleStudentCourse(sid, courseId, enrolled) {
   // Re-render to update checkbox states
   renderSummary();
 }
-
+ 
 function addStudent(){
   const name=document.getElementById('newStudentInput').value.trim();
   if(!name)return;
@@ -1164,11 +1170,11 @@ function addStudent(){
   scheduleSave();cancelAdd();renderAttendance();
 }
 document.getElementById('newStudentInput').addEventListener('keydown',e=>{if(e.key==='Enter')addStudent();if(e.key==='Escape')cancelAdd();});
-
+ 
 function exportReport(){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-summary').classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));renderSummary();setTimeout(()=>window.print(),100);}
-
-
-
+ 
+ 
+ 
 function toggleExam(assignId,open){
   if(!data.examStatus)data.examStatus={};
   data.examStatus[assignId]=open;
@@ -1191,7 +1197,7 @@ function toggleExam(assignId,open){
     }
   }, 300);
 }
-
+ 
 async function refreshExamResults(){
   setSyncStatus('syncing','Refreshing exams…');
   await loadExamResults();
@@ -1200,8 +1206,8 @@ async function refreshExamResults(){
   renderGradesTab();
   if(activeTab==='summary')renderSummary();
 }
-
-
+ 
+ 
 // ── COURSE RESET ──────────────────────────────────────
 function resetCourse(){
   document.getElementById('resetModal').classList.remove('hidden');
@@ -1214,20 +1220,20 @@ async function confirmReset(){
   const clearAttendance = document.getElementById('resetAttendance').checked;
   const clearGrades     = document.getElementById('resetGrades').checked;
   const clearClassName  = document.getElementById('resetClassName').checked;
-
+ 
   if(!clearStudents && !clearAttendance && !clearGrades && !clearClassName){
     alert('Please select at least one item to reset.');
     return;
   }
-
+ 
   closeReset();
   setSyncStatus('syncing','Resetting…');
-
+ 
   if(clearStudents)   { data.students=[]; }
   if(clearAttendance) { data.attendance={}; }
   if(clearGrades)     { data.assignments=[]; data.scores={}; }
   if(clearClassName)  { data.className='My Class'; document.getElementById('classNameDisplay').textContent='My Class'; }
-
+ 
   // Also clear exam results from Firebase if resetting students
   if(clearStudents){
     try{
@@ -1238,7 +1244,7 @@ async function confirmReset(){
       await batch.commit();
     }catch(e){ console.error('Could not clear examResults:',e); }
   }
-
+ 
   try{
     const clean = JSON.parse(JSON.stringify(data));
     if(clean.scores){
@@ -1251,18 +1257,18 @@ async function confirmReset(){
     setSyncStatus('error','✗ Reset failed');
     console.error(e);
   }
-
+ 
   examResults={};
   renderCurrent();
 }
-
-
+ 
+ 
 // ── ITEM ANALYSIS ─────────────────────────────────────
-
+ 
 // Question data embedded from each exam (stem + correct answers)
 // We fetch this by reading the exam files' question arrays via a fetch
 const EXAM_QUESTION_CACHE = {}; // examLabel -> [{stem, type, options, correct, section, points}]
-
+ 
 async function fetchExamQuestions(examLabel) {
   if (EXAM_QUESTION_CACHE[examLabel]) return EXAM_QUESTION_CACHE[examLabel];
   const def = Object.values(EXAM_DEFS).flat().find(d => d.label === examLabel);
@@ -1312,7 +1318,7 @@ async function fetchExamQuestions(examLabel) {
     return null;
   }
 }
-
+ 
 async function refreshAnalysis() {
   await loadExamResults();
   await loadPortalContent();
@@ -1340,13 +1346,13 @@ async function refreshAnalysis() {
   });
   renderAnalysis();
 }
-
+ 
 async function switchAnalysisCourse(c){activeAnalysisCourse=c;renderAnalysis();}
-
+ 
 function buildAnswerBreakdown(q) {
   if (!q.answered || q.answered === 0) return '';
   let html = '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0;">';
-
+ 
   if ((q.type === 'mc' || q.type === 'best2') && q.options.length > 0) {
     const total = q.answered;
     q.options.forEach((opt, i) => {
@@ -1371,7 +1377,7 @@ function buildAnswerBreakdown(q) {
           <div style="width:44px;text-align:right;font-size:11px;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};font-weight:${count>0?'600':'400'};">${count > 0 ? count + ' (' + pct + '%)' : '—'}</div>
         </div>`;
     });
-
+ 
   } else if (q.isPair && q.pairChoiceLabels) {
     // Show choice distribution for match pair
     const choices = Object.entries(q.pairChoiceLabels);
@@ -1397,11 +1403,11 @@ function buildAnswerBreakdown(q) {
       });
     }
   }
-
+ 
   html += '</div>';
   return html;
 }
-
+ 
 async function renderAnalysis() {
   const asel = document.getElementById('analysisCourseSelector');
   if (asel) asel.innerHTML = renderCourseSelectorHTML(activeAnalysisCourse,'switchAnalysisCourse');
@@ -1413,10 +1419,10 @@ async function renderAnalysis() {
     return;
   }
   container.innerHTML = '<div style="color:#6b82a0;font-size:14px;padding:20px 0;">Loading question data…</div>';
-
+ 
   const def = Object.values(EXAM_DEFS).flat().find(d => d.label === examLabel);
   if (!def) { container.innerHTML = '<div style="color:#f87171">Exam definition not found.</div>'; return; }
-
+ 
   // Gather all submissions for this exam that have answersData
   const submissions = []; // [{studentName, answers: [...], questionResults: [...]}]
   Object.entries(examResults).forEach(([name, exams]) => {
@@ -1424,12 +1430,12 @@ async function renderAnalysis() {
     if (!r) return;
     submissions.push({ name, answersData: r.answersData || null, pct: r.pct, score: r.score, total: r.total });
   });
-
+ 
   if (submissions.length === 0) {
     container.innerHTML = '<div style="color:#93adc8;font-size:14px;padding:20px 0;">No submissions found for this exam yet.</div>';
     return;
   }
-
+ 
   // Fetch questions
   const questions = await fetchExamQuestions(examLabel);
   console.log('renderAnalysis: questions returned:', questions?.length, 'for', examLabel);
@@ -1437,11 +1443,11 @@ async function renderAnalysis() {
     container.innerHTML = '<div style="color:#f87171;font-size:14px;padding:20px 0;">Could not load question data. Make sure the exam file is in the same folder.</div>';
     return;
   }
-
+ 
   const totalSubs = submissions.length;
   const avgScore = Math.round(submissions.reduce((s,r) => s + r.pct, 0) / totalSubs);
   const passing = submissions.filter(r => r.pct >= 70).length;
-
+ 
   // Per-question analysis
   // Expand match questions into individual pair rows
 const expandedQuestions = [];
@@ -1465,7 +1471,7 @@ questions.forEach((q, qi) => {
     expandedQuestions.push({ ...q, _origQi: qi });
   }
 });
-
+ 
 const qStats = expandedQuestions.map((q, qi) => {
     let correct = 0, answered = 0;
     const optionCounts = {}; // for MC: counts per option index
@@ -1484,7 +1490,7 @@ const qStats = expandedQuestions.map((q, qi) => {
         if (String(ans.given) === String(ans.correct)) correct++;
         return;
       }
-
+ 
       let ansEntry = Array.isArray(sub.answersData)
         ? sub.answersData.find(a => String(a.qid) === String(q.id))
         : sub.answersData?.[qi];
@@ -1537,10 +1543,10 @@ const qStats = expandedQuestions.map((q, qi) => {
       pairChoiceLabels: q._pairChoiceLabels || {},
     };
   });
-
+ 
   // Build HTML
   let html = '';
-
+ 
   // Overview cards
   const flagged = qStats.filter(q => q.flagged).length;
   html += `<div class="analysis-overview">
@@ -1561,7 +1567,7 @@ const qStats = expandedQuestions.map((q, qi) => {
       <div class="analysis-overview-label">Flagged Questions <span style="font-size:10px;color:#6b82a0">(&lt;70% correct)</span></div>
     </div>
   </div>`;
-
+ 
   // Questions grouped by section
   let lastSection = null;
   qStats.forEach(q => {
@@ -1596,21 +1602,21 @@ const qStats = expandedQuestions.map((q, qi) => {
         </div>
       </div>`;
   });
-
+ 
   container.innerHTML = html;
 }
-
-
+ 
+ 
 // ── CONTENT MANAGER ───────────────────────────────────
 // portalContent stored in Firebase under tracker/portalContent
 const CONTENT_REF = db.collection('tracker').doc('portalContent');
 let activeCourse = 'emr'; // currently selected course in tracker UI
-
+ 
 function emptyCourseContent() {
-  return { announcements:[], links:[], resources:[], slides:[], exams:[] };
+  return { announcements:[], links:[], resources:[], slides:[], exams:[], slidesBaseUrl:'' };
 }
 let portalContent = { emr: emptyCourseContent(), ff1: emptyCourseContent(), hazmat: emptyCourseContent(), ff2: emptyCourseContent() };
-
+ 
 async function loadPortalContent() {
   try {
     const snap = await CONTENT_REF.get();
@@ -1648,7 +1654,7 @@ async function loadPortalContent() {
     ];
   }
 }
-
+ 
 async function savePortalContent() {
   try {
     setSyncStatus('syncing','Saving content…');
@@ -1660,7 +1666,7 @@ async function savePortalContent() {
     setSyncStatus('error','✗ Save failed');
   }
 }
-
+ 
 function cmAddItem(section) {
   const defaults = {
     exams:         { id:'', name:'', file:'', questions:'25', time:'25 min', passing:'70%', category:'module', color:'#fbbf24', icon:'📋', weight:'', topics:'', active:true },
@@ -1678,7 +1684,7 @@ function cmAddItem(section) {
     if (inputs?.length) inputs[inputs.length - (section==='announcements'?1:3)]?.focus();
   }, 50);
 }
-
+ 
 function cmMoveItem(section, idx, dir) {
   const arr = portalContent[activeCourse][section];
   const newIdx = idx + dir;
@@ -1686,17 +1692,17 @@ function cmMoveItem(section, idx, dir) {
   [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
   renderContentManager();
 }
-
+ 
 function cmRemoveItem(section, idx) {
   portalContent[activeCourse][section].splice(idx, 1);
   renderContentManager();
 }
-
+ 
 function cmUpdateField(section, idx, field, value) {
   portalContent[activeCourse][section][idx][field] = value;
 }
-
-
+ 
+ 
 function renderCourseSelectorHTML(activeId, onchangeFn) {
   return `<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
     ${COURSES.map(c => `<button onclick="${onchangeFn}('${c.id}')"
@@ -1706,14 +1712,14 @@ function renderCourseSelectorHTML(activeId, onchangeFn) {
              font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;">${c.label}</button>`).join('')}
   </div>`;
 }
-
-
+ 
+ 
 // ── COURSE MANAGER ────────────────────────────────────────────────────────
-
+ 
 function renderCourseManager() {
   const el = document.getElementById('cm-courses-section');
   if (!el) return;
-
+ 
   el.innerHTML = (portalContent.courses || COURSES).map((c, i) => `
     <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0f1e3a;border-radius:10px;margin-bottom:8px;border:1px solid #1e3a6e;">
       <div style="display:flex;flex-direction:column;gap:4px;">
@@ -1741,7 +1747,7 @@ function renderCourseManager() {
       + Add Course
     </button>`;
 }
-
+ 
 function cmUpdateCourse(i, field, value) {
   if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
   portalContent.courses[i][field] = value;
@@ -1751,7 +1757,7 @@ function cmUpdateCourse(i, field, value) {
   renderCourseManager();
   renderContentManager(); // refresh course tabs
 }
-
+ 
 function cmMoveCourse(i, dir) {
   if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
   const arr = portalContent.courses;
@@ -1763,7 +1769,7 @@ function cmMoveCourse(i, dir) {
   renderCourseManager();
   renderContentManager();
 }
-
+ 
 function cmAddCourse() {
   if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
   const icons = ['🚒','🪢','🌊','🏔️','⚡','🧯','🛠️','📡'];
@@ -1783,7 +1789,7 @@ function cmAddCourse() {
   renderCourseManager();
   renderContentManager();
 }
-
+ 
 function cmDeleteCourse(i) {
   if (!portalContent.courses || portalContent.courses.length <= 1) {
     alert('You must have at least one course.');
@@ -1798,12 +1804,12 @@ function cmDeleteCourse(i) {
   renderCourseManager();
   renderContentManager();
 }
-
+ 
 function switchContentCourse(courseId) {
   activeCourse = courseId;
   renderContentManager();
 }
-
+ 
 function renderContentManager() {
   // Render course manager
   renderCourseManager();
@@ -1819,14 +1825,14 @@ function renderContentManager() {
         ${c.label}
       </button>`).join('');
   }
-
+ 
   const TYPE_COLORS = { info:'#2563eb', warning:'#f59e0b', success:'#16a34a', urgent:'#dc2626' };
-
+ 
   const renderSection = (section) => {
     const items = (portalContent[activeCourse] || {})[section] || [];
     const el = document.getElementById(`cm-${section}`);
     if (!el) return;
-
+ 
     // Exams section uses DOM building (handled separately to avoid quote issues)
     if (section === 'exams') {
       const cats = ['module','midterm','final','quiz'];
@@ -1906,13 +1912,13 @@ function renderContentManager() {
       });
       return;
     }
-
+ 
     // All other sections use innerHTML map
     if (items.length === 0) {
       el.innerHTML = `<div class="cm-empty">No items yet — click + Add to create one.</div>`;
       return;
     }
-
+ 
     el.innerHTML = items.map((item, i) => {
       if (section === 'announcements') {
         return `<div class="cm-item">
@@ -1964,19 +1970,23 @@ function renderContentManager() {
         </div>`;
       }
     }).join('');
-
+ 
   }; // end renderSection
-
+ 
   ['exams','announcements','links','resources','slides'].forEach(renderSection);
-
+ 
+  // Populate slides base URL field
+  const baseUrlInput = document.getElementById('cm-slides-base-url');
+  if (baseUrlInput) baseUrlInput.value = (portalContent[activeCourse] || {}).slidesBaseUrl || '';
+ 
   // Save bar is in static HTML
 }
-
+ 
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
+ 
 // Start Firebase load immediately — don't block on auth
 loadFromFirebase();
-
+ 
 document.addEventListener('DOMContentLoaded', () => {
   try {
     if (sessionStorage.getItem('tfd_instructor') === '1') {
