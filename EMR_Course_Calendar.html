@@ -33,7 +33,7 @@
     --nremt:     #1e1b4b;
     --nremt-lite:#eef2ff;
     --nremt-mid: #c7d2fe;
-
+ 
     --ink:       #0f172a;
     --ink-mid:   #334155;
     --ink-light: #64748b;
@@ -42,13 +42,13 @@
     --bg:        #f8fafc;
     --border:    #e2e8f0;
     --border-mid:#cbd5e1;
-
+ 
     --radius:    10px;
     --cell-min:  130px;
   }
-
+ 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
@@ -56,7 +56,7 @@
     min-height: 100vh;
     padding: 0 0 60px;
   }
-
+ 
   /* ── Header ─────────────────────────────────────────────────────────────── */
   .page-header {
     background: var(--ink);
@@ -115,7 +115,7 @@
     color: #e2e8f0;
   }
   .header-pill strong { color: #fff; }
-
+ 
   /* ── Legend ──────────────────────────────────────────────────────────────── */
   .legend-bar {
     background: var(--surface);
@@ -152,10 +152,10 @@
     border-radius: 3px;
     flex-shrink: 0;
   }
-
+ 
   /* ── Main layout ─────────────────────────────────────────────────────────── */
   .main { max-width: 1200px; margin: 0 auto; padding: 32px 40px 0; }
-
+ 
   /* ── Week block ──────────────────────────────────────────────────────────── */
   .week-block { margin-bottom: 28px; }
   .week-heading {
@@ -178,7 +178,7 @@
     font-size: 13px;
     color: var(--ink-light);
   }
-
+ 
   /* ── Day grid ────────────────────────────────────────────────────────────── */
   .day-grid {
     display: grid;
@@ -187,7 +187,7 @@
   }
   @media (max-width: 900px) { .day-grid { grid-template-columns: repeat(2,1fr); } }
   @media (max-width: 500px) { .day-grid { grid-template-columns: 1fr; } }
-
+ 
   /* ── Day card ────────────────────────────────────────────────────────────── */
   .day-card {
     background: var(--surface);
@@ -209,7 +209,7 @@
     opacity: .55;
   }
   .day-card.wfh-card { border-style: dashed; }
-
+ 
   .card-top {
     height: 4px;
     flex-shrink: 0;
@@ -273,7 +273,7 @@
     border-radius: 5px;
     margin-top: 6px;
   }
-
+ 
   .nremt-badge {
     display: inline-flex;
     align-items: center;
@@ -304,7 +304,7 @@
     color: var(--ink-faint);
     font-style: italic;
   }
-
+ 
   /* ── Exam summary footer ─────────────────────────────────────────────────── */
   .exam-summary {
     max-width: 1200px;
@@ -337,7 +337,7 @@
     font-size: 12px;
     color: #fed7aa;
   }
-
+ 
   /* ── Animations ──────────────────────────────────────────────────────────── */
   .week-block {
     opacity: 0;
@@ -350,11 +350,11 @@
   .week-block:nth-child(4) { animation-delay: .26s; }
   .week-block:nth-child(5) { animation-delay: .33s; }
   .week-block:nth-child(6) { animation-delay: .40s; }
-
+ 
   @keyframes fadeUp {
     to { opacity: 1; transform: translateY(0); }
   }
-
+ 
   /* ── Responsive tweaks ───────────────────────────────────────────────────── */
   @media (max-width: 680px) {
     .page-header { padding: 32px 20px 24px; }
@@ -365,7 +365,7 @@
 </style>
 </head>
 <body>
-
+ 
 <!-- ── Header ────────────────────────────────────────────────────────────── -->
 <header class="page-header">
   <div class="header-inner">
@@ -381,7 +381,7 @@
     </div>
   </div>
 </header>
-
+ 
 <!-- ── Sticky legend ──────────────────────────────────────────────────────── -->
 <div class="legend-bar">
   <span class="legend-label">Legend</span>
@@ -397,10 +397,10 @@
     <span class="legend-item"><span class="legend-dot" style="background:var(--nremt)"></span>NREMT Testing</span>
   </div>
 </div>
-
+ 
 <!-- ── Main calendar ──────────────────────────────────────────────────────── -->
 <main class="main">
-
+ 
   <!-- WEEK 1 -->
   <div class="week-block">
     <div class="week-heading">
@@ -408,7 +408,7 @@
       <span class="week-dates">April 13 – 16, 2026</span>
     </div>
     <div class="day-grid">
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w1)"></div>
         <div class="card-body">
@@ -420,7 +420,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w1)"></div>
         <div class="card-body">
@@ -432,7 +432,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w1)"></div>
         <div class="card-body">
@@ -444,7 +444,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w1)"></div>
         <div class="card-body">
@@ -454,13 +454,12 @@
             <div class="card-chapters">Ch. 6</div>
             9 hrs &nbsp;·&nbsp; OPA/NPA, suctioning, BVM ventilation, oxygen delivery
           </div>
-          <div class="exam-badge">✏️ Week 1 Exam</div>
         </div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- WEEK 2 -->
   <div class="week-block">
     <div class="week-heading">
@@ -468,19 +467,20 @@
       <span class="week-dates">April 20 – 23, 2026</span>
     </div>
     <div class="day-grid">
-
+ 
       <div class="day-card">
-        <div class="card-top" style="background:var(--w2)"></div>
+        <div class="card-top" style="background:var(--exam)"></div>
         <div class="card-body">
-          <div class="card-date" style="color:var(--w2)">Mon · Apr 20</div>
-          <div class="card-title">CPR / AED Certification — AHA BLS Provider</div>
+          <div class="card-date" style="color:var(--exam)">Mon · Apr 20</div>
+          <div class="card-title">Week 1 Review &amp; Exam · CPR / AED Certification</div>
           <div class="card-meta">
-            <div class="card-chapters">AHA BLS</div>
-            9 hrs &nbsp;·&nbsp; Adult, child &amp; infant CPR · AED · 2-rescuer techniques
+            <div class="card-chapters">Ch. 1–6 · AHA BLS</div>
+            AM &nbsp;·&nbsp; Week 1 review session, then Week 1 Exam &nbsp;|&nbsp; PM (after lunch) &nbsp;·&nbsp; AHA BLS CPR/AED certification
           </div>
+          <div class="exam-badge">✏️ Week 1 Exam — Morning</div>
         </div>
       </div>
-
+ 
       <div class="day-card wfh-card">
         <div class="card-top" style="background:var(--wfh)"></div>
         <div class="card-body">
@@ -493,7 +493,7 @@
           <div class="wfh-badge">🏠 Work From Home</div>
         </div>
       </div>
-
+ 
       <div class="day-card wfh-card">
         <div class="card-top" style="background:var(--wfh)"></div>
         <div class="card-body">
@@ -506,7 +506,7 @@
           <div class="wfh-badge">🏠 Work From Home</div>
         </div>
       </div>
-
+ 
       <div class="day-card wfh-card">
         <div class="card-top" style="background:var(--wfh)"></div>
         <div class="card-body">
@@ -519,10 +519,10 @@
           <div class="wfh-badge">🏠 Work From Home</div>
         </div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- WEEK 3 -->
   <div class="week-block">
     <div class="week-heading">
@@ -530,7 +530,7 @@
       <span class="week-dates">April 27 – 30, 2026</span>
     </div>
     <div class="day-grid">
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w3)"></div>
         <div class="card-body">
@@ -542,7 +542,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w3)"></div>
         <div class="card-body">
@@ -554,7 +554,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w3)"></div>
         <div class="card-body">
@@ -566,23 +566,23 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--exam)"></div>
         <div class="card-body">
           <div class="card-date" style="color:var(--exam)">Thu · Apr 30</div>
-          <div class="card-title">Cardiac Emergencies, CPR &amp; AED</div>
+          <div class="card-title">Cardiac Emergencies, CPR &amp; AED · Midterm Exam</div>
           <div class="card-meta">
             <div class="card-chapters">Ch. 10</div>
-            9 hrs &nbsp;·&nbsp; AMI recognition, high-quality CPR, AED protocols, post-resuscitation care
+            AM &nbsp;·&nbsp; Ch. 10 instruction (AMI recognition, high-quality CPR, AED protocols) &nbsp;|&nbsp; 1 hr review before lunch &nbsp;·&nbsp; 1 hr review after lunch &nbsp;|&nbsp; PM &nbsp;·&nbsp; Midterm Exam
           </div>
           <div class="exam-badge">✏️ Midterm Exam — Weeks 1 &amp; 3</div>
         </div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- WEEK 4 -->
   <div class="week-block">
     <div class="week-heading">
@@ -590,7 +590,7 @@
       <span class="week-dates">May 4 – 7, 2026</span>
     </div>
     <div class="day-grid">
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w4)"></div>
         <div class="card-body">
@@ -602,7 +602,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w4)"></div>
         <div class="card-body">
@@ -614,7 +614,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w4)"></div>
         <div class="card-body">
@@ -626,23 +626,22 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
-        <div class="card-top" style="background:var(--exam)"></div>
+        <div class="card-top" style="background:var(--w4)"></div>
         <div class="card-body">
-          <div class="card-date" style="color:var(--exam)">Thu · May 7</div>
+          <div class="card-date" style="color:var(--w4)">Thu · May 7</div>
           <div class="card-title">Musculoskeletal, Spinal, Head &amp; Chest Trauma</div>
           <div class="card-meta">
             <div class="card-chapters">Ch. 15–16</div>
             9 hrs &nbsp;·&nbsp; Splinting, CSM, Cushing's triad, open pneumothorax, flail chest
           </div>
-          <div class="exam-badge">✏️ Week 4 Exam</div>
         </div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- WEEK 5 -->
   <div class="week-block">
     <div class="week-heading">
@@ -650,19 +649,20 @@
       <span class="week-dates">May 11 – 14, 2026</span>
     </div>
     <div class="day-grid">
-
+ 
       <div class="day-card">
-        <div class="card-top" style="background:var(--w5)"></div>
+        <div class="card-top" style="background:var(--exam)"></div>
         <div class="card-body">
-          <div class="card-date" style="color:var(--w5)">Mon · May 11</div>
-          <div class="card-title">Obstetrics, Pediatrics &amp; Geriatrics</div>
+          <div class="card-date" style="color:var(--exam)">Mon · May 11</div>
+          <div class="card-title">Week 4 Exam · Obstetrics, Pediatrics &amp; Geriatrics</div>
           <div class="card-meta">
-            <div class="card-chapters">Ch. 17</div>
-            9 hrs &nbsp;·&nbsp; Field delivery, newborn resuscitation, JumpSTART, geriatric considerations
+            <div class="card-chapters">Ch. 11–16 · Ch. 17</div>
+            AM &nbsp;·&nbsp; Week 4 Exam &nbsp;|&nbsp; PM &nbsp;·&nbsp; Field delivery, newborn resuscitation, JumpSTART, geriatric considerations
           </div>
+          <div class="exam-badge">✏️ Week 4 Exam — Morning</div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w5)"></div>
         <div class="card-body">
@@ -674,7 +674,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--w5)"></div>
         <div class="card-body">
@@ -686,7 +686,7 @@
           </div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--exam)"></div>
         <div class="card-body">
@@ -694,15 +694,15 @@
           <div class="card-title">Comprehensive Review &amp; Final Examination</div>
           <div class="card-meta">
             <div class="card-chapters">All Chapters</div>
-            9 hrs &nbsp;·&nbsp; Course review, 120-question written final, SMC skills evaluation
+            AM &nbsp;·&nbsp; Comprehensive course review &nbsp;|&nbsp; PM (after lunch) &nbsp;·&nbsp; 120-question Final Exam &amp; SMC skills evaluation
           </div>
-          <div class="exam-badge">🎓 Final Exam &amp; Skills Eval</div>
+          <div class="exam-badge">🎓 Final Exam — After Lunch</div>
         </div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
   <!-- WEEK 6 — REVIEW & NREMT -->
   <div class="week-block">
     <div class="week-heading">
@@ -710,7 +710,7 @@
       <span class="week-dates">May 18 – 21, 2026</span>
     </div>
     <div class="day-grid">
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--review)"></div>
         <div class="card-body">
@@ -723,7 +723,7 @@
           <div class="review-badge">📚 Final Review</div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--nremt)"></div>
         <div class="card-body">
@@ -736,7 +736,7 @@
           <div class="nremt-badge">🏅 NREMT Testing</div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--nremt)"></div>
         <div class="card-body">
@@ -749,7 +749,7 @@
           <div class="nremt-badge">🏅 NREMT Testing</div>
         </div>
       </div>
-
+ 
       <div class="day-card">
         <div class="card-top" style="background:var(--nremt)"></div>
         <div class="card-body">
@@ -762,19 +762,19 @@
           <div class="nremt-badge">🏅 NREMT Testing</div>
         </div>
       </div>
-
+ 
     </div>
   </div>
-
+ 
 </main>
-
+ 
 <!-- ── Exam summary ───────────────────────────────────────────────────────── -->
 <div class="exam-summary">
   <div class="exam-summary-inner">
     <div class="exam-item">
       <span class="exam-item-label">Exam 1</span>
       <span class="exam-item-name">Week 1 Exam</span>
-      <span class="exam-item-date">Thu · Apr 16</span>
+      <span class="exam-item-date">Mon · Apr 20</span>
     </div>
     <div class="exam-item">
       <span class="exam-item-label">Exam 2</span>
@@ -784,12 +784,12 @@
     <div class="exam-item">
       <span class="exam-item-label">Exam 3</span>
       <span class="exam-item-name">Week 4 Exam</span>
-      <span class="exam-item-date">Thu · May 7</span>
+      <span class="exam-item-date">Mon · May 11 — Morning</span>
     </div>
     <div class="exam-item">
       <span class="exam-item-label">Exam 4</span>
       <span class="exam-item-name">Final Exam</span>
-      <span class="exam-item-date">Thu · May 14 &nbsp;·&nbsp; All Chapters · 120 Qs · 70% to pass</span>
+      <span class="exam-item-date">Thu · May 14 (after lunch) &nbsp;·&nbsp; All Chapters · 120 Qs · 70% to pass</span>
     </div>
     <div class="exam-item">
       <span class="exam-item-label">Final Review</span>
@@ -813,6 +813,6 @@
     </div>
   </div>
 </div>
-
+ 
 </body>
 </html>
