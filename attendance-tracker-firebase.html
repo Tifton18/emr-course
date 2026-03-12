@@ -404,12 +404,6 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
         <div><div class="cm-section-title">📊 Slides</div><div class="cm-section-sub">PowerPoint files — enter filename as uploaded to GitHub (e.g. Week1_Slides.pptx)</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('slides')">+ Add</button>
       </div>
-      <div style="margin-bottom:10px;">
-        <div class="cm-item-label" style="margin-bottom:4px;">📁 Slides Base URL <span style="font-weight:400;color:#94a3b8;">(GitHub Pages folder where PPTX files are hosted)</span></div>
-        <input id="cm-slides-base-url" type="text" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;color:#1e293b;"
-          placeholder="e.g. https://tifton18.github.io/emr-slides/"
-          oninput="portalContent[activeCourse].slidesBaseUrl = this.value.trim()">
-      </div>
       <div id="cm-slides"></div>
     </div>
  
@@ -1613,7 +1607,7 @@ const CONTENT_REF = db.collection('tracker').doc('portalContent');
 let activeCourse = 'emr'; // currently selected course in tracker UI
  
 function emptyCourseContent() {
-  return { announcements:[], links:[], resources:[], slides:[], exams:[], slidesBaseUrl:'' };
+  return { announcements:[], links:[], resources:[], slides:[], exams:[] };
 }
 let portalContent = { emr: emptyCourseContent(), ff1: emptyCourseContent(), hazmat: emptyCourseContent(), ff2: emptyCourseContent() };
  
@@ -1974,10 +1968,6 @@ function renderContentManager() {
   }; // end renderSection
  
   ['exams','announcements','links','resources','slides'].forEach(renderSection);
- 
-  // Populate slides base URL field
-  const baseUrlInput = document.getElementById('cm-slides-base-url');
-  if (baseUrlInput) baseUrlInput.value = (portalContent[activeCourse] || {}).slidesBaseUrl || '';
  
   // Save bar is in static HTML
 }
