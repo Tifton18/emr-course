@@ -298,8 +298,8 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
         <div class="panel-title">Grade Management</div>
         <div class="weights-info">
           <div class="weights-title">Category Weights</div>
-          <div class="weights-row"><span class="weights-label" style="color:#818cf8">● Quizzes</span><span class="weights-val">10%</span></div>
-          <div class="weights-row"><span class="weights-label" style="color:#fbbf24">● Module Exams</span><span class="weights-val">20%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#818cf8">● Quizzes</span><span class="weights-val">5%</span></div>
+          <div class="weights-row"><span class="weights-label" style="color:#fbbf24">● Module Exams</span><span class="weights-val">25%</span></div>
           <div class="weights-row"><span class="weights-label" style="color:#f97316">● Midterm Exam</span><span class="weights-val">30%</span></div>
           <div class="weights-row"><span class="weights-label" style="color:#f87171">● Final Exam</span><span class="weights-val">40%</span></div>
         </div>
@@ -499,8 +499,8 @@ const COURSES = [
 ];
  
 const CATEGORIES=[
-  {id:'quiz',    label:'Quizzes',      color:'#818cf8',weight:0.10},
-  {id:'module',  label:'Module Exams', color:'#fbbf24',weight:0.20},
+  {id:'quiz',    label:'Quizzes',      color:'#818cf8',weight:0.05},
+  {id:'module',  label:'Module Exams', color:'#fbbf24',weight:0.25},
   {id:'midterm', label:'Midterm Exam', color:'#f97316',weight:0.30},
   {id:'final',   label:'Final Exam',   color:'#f87171',weight:0.40},
 ];
@@ -1641,9 +1641,9 @@ async function loadPortalContent() {
   // Seed default EMR exams if none saved yet
   if (portalContent.emr.exams.length === 0) {
     portalContent.emr.exams = [
-      { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'20% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management', active:true },
+      { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management', active:true },
       { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'📝', weight:'30% (Midterm)',      topics:'All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED', active:true },
-      { id:'week4',   name:'Week 4 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'20% (Module Exams)', topics:'Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies', active:true },
+      { id:'week4',   name:'Week 4 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies', active:true },
       { id:'final',   name:'Final Exam',    file:'EMR_Final_Exam.html',   questions:'120', time:'120 min', passing:'70%', category:'final',   color:'#f87171', icon:'🎓', weight:'40% (Final)',        topics:'Comprehensive — all course topics', active:true },
     ];
   }
