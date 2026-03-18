@@ -428,9 +428,9 @@ const FB = {
 // Fallback defaults used if Firebase has no exam data yet
 const DEFAULT_EXAMS = {
   emr: [
-    { id:"week1",     name:"Week 1 Exam",      file:"EMR_Week1_Exam.html",       questions:25,  time:"25 min",  passing:"70%", category:"module",   color:"#fbbf24", icon:"📋", weight:"20% (Module Exams)", topics:"EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management", active:true },
+    { id:"week1",     name:"Week 1 Exam",      file:"EMR_Week1_Exam.html",       questions:25,  time:"25 min",  passing:"70%", category:"module",   color:"#fbbf24", icon:"📋", weight:"25% (Module Exams)", topics:"EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management", active:true },
     { id:"midterm",   name:"Midterm Exam",      file:"EMR_Midterm_Exam.html",     questions:50,  time:"50 min",  passing:"70%", category:"midterm",  color:"#f97316", icon:"📝", weight:"30% (Midterm)",      topics:"All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED", active:true },
-    { id:"week4",     name:"Week 4 Exam",        file:"EMR_Week4_Exam.html",       questions:25,  time:"25 min",  passing:"70%", category:"module",   color:"#fbbf24", icon:"📋", weight:"20% (Module Exams)", topics:"Trauma · Musculoskeletal · Head & Spine · Environmental & Behavioral Emergencies", active:true },
+    { id:"week4",     name:"Week 4 Exam",        file:"EMR_Week4_Exam.html",       questions:25,  time:"25 min",  passing:"70%", category:"module",   color:"#fbbf24", icon:"📋", weight:"25% (Module Exams)", topics:"Trauma · Musculoskeletal · Head & Spine · Environmental & Behavioral Emergencies", active:true },
     { id:"final",     name:"Final Exam",          file:"EMR_Final_Exam.html",       questions:120, time:"120 min", passing:"70%", category:"final",    color:"#f87171", icon:"🎓", weight:"40% (Final)",        topics:"Comprehensive — all course topics", active:true },
     { id:"practice1", name:"Practice Exam 1",    file:"EMR_Practice_Exam_1.html",  questions:30,  time:"60 min",  passing:"70%", category:"practice", color:"#06b6d4", icon:"📝", weight:"Ungraded Practice",  topics:"Patient Assessment · Airway · Shock · Trauma · Medical Emergencies", active:true },
     { id:"practice2", name:"Practice Exam 2",    file:"EMR_Practice_Exam_2.html",  questions:30,  time:"60 min",  passing:"70%", category:"practice", color:"#06b6d4", icon:"📝", weight:"Ungraded Practice",  topics:"Patient Assessment · Airway · Shock · Trauma · Medical Emergencies", active:true },
@@ -494,8 +494,8 @@ async function loadExamsFromFirebase() {
 }
  
 const CATEGORIES = [
-  { id:"quiz",    label:"Quizzes",      color:"#818cf8", weight:0.10 },
-  { id:"module",  label:"Module Exams", color:"#fbbf24", weight:0.20 },
+  { id:"quiz",    label:"Quizzes",      color:"#818cf8", weight:0.05 },
+  { id:"module",  label:"Module Exams", color:"#fbbf24", weight:0.25 },
   { id:"midterm", label:"Midterm Exam", color:"#f97316", weight:0.30 },
   { id:"final",   label:"Final Exam",   color:"#f87171", weight:0.40 },
 ];
