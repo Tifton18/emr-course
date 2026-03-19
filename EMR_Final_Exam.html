@@ -7,7 +7,7 @@
 <style>
   /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
   /* See SETUP_INSTRUCTIONS.txt for how to get this */
-
+ 
   :root {
     --bg: #0d1117;
     --surface: #111827;
@@ -19,16 +19,16 @@
     --red: #ef4444;
     --amber: #f59e0b;
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     font-family: Georgia, serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
   }
-
+ 
   /* ── INTRO ── */
   .intro-wrap {
     min-height: 100vh;
@@ -64,7 +64,7 @@
     cursor: pointer; box-shadow: 0 8px 32px rgba(21,101,192,0.5);
   }
   .btn-begin.active:hover { transform: translateY(-2px); }
-
+ 
   /* ── TOP BAR ── */
   .topbar {
     position: sticky; top: 0; z-index: 100;
@@ -93,7 +93,7 @@
     padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
     white-space: nowrap; font-family: Georgia, serif;
   }
-
+ 
   /* ── EXAM BODY ── */
   .exam-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
   .section-badge {
@@ -132,7 +132,7 @@
   }
   .option-btn.best2 .option-indicator { border-radius: 6px; }
   .option-text { padding-top: 2px; line-height: 1.6; }
-
+ 
   /* ── MATCHING ── */
   .match-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
   .match-instructions strong { color: #38bdf8; }
@@ -167,7 +167,7 @@
   .term-row.assigned .term-drop { background: #0a1f14; }
   .term-placeholder { color: #374151; font-size: 13px; font-style: italic; }
   .term-placeholder.active { color: #38bdf8; }
-
+ 
   /* ── NAV ── */
   .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #1e2a3a; }
   .btn-prev, .btn-next, .btn-submit-exam {
@@ -182,7 +182,7 @@
   .dot { height: 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s; background: #1e2a3a; }
   .dot.answered { background: #374151; }
   .dot.current { background: #2196F3; }
-
+ 
   /* ── RESULTS ── */
   .results-wrap { min-height: 100vh; padding: 40px 20px; font-family: Georgia, serif; }
   .results-inner { max-width: 780px; margin: 0 auto; }
@@ -208,13 +208,13 @@
   .submit-status { text-align: center; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; }
   .submit-status.success { background: #0a2a14; border: 1px solid #166534; color: #86efac; }
   .submit-status.error { background: #2d0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
-
+ 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-
+ 
 <script>
 // ══════════════════════════════════════════════════════
 // CONFIGURATION — update this URL after deploying your
@@ -228,7 +228,7 @@ const FB_CONFIG = {
 const EXAM_LABEL      = "Final Exam";
 const TOTAL_TIME      = 120 * 60; // 120 minutes
 const LETTERS         = ["A","B","C","D","E"];
-
+ 
 // ── QUESTION DATA ────────────────────────────────────
 const questions = [
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR is treating a patient when a paramedic unit arrives on scene. The EMR's responsibility at this point is to:",options:["Immediately stop all interventions and step back","Give a concise patient handoff report and transfer care only when the paramedic assumes responsibility","Leave the scene once the paramedic makes eye contact","Continue treating independently and let the paramedic assess separately"],correct:[1],points:1},
@@ -236,7 +236,7 @@ const questions = [
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes 'scope of practice' for an EMR?",options:["Any skill the EMR feels comfortable performing based on experience","The legally defined set of skills and interventions an EMR is authorized to perform","Skills approved by the medical director on a case-by-case basis","All skills taught in the EMR course regardless of state authorization"],correct:[1],points:1},
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"To prove negligence against an EMR, which of the following four elements must ALL be established?",options:["Duty, intent, harm, documentation","Duty to act, breach of that duty, causation, and damages","Licensure, certification, documentation, and harm","Scope of practice violation, intent, breach, and apology"],correct:[1],points:1},
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR responds off-duty to a car accident and provides care. Which statement BEST applies?",options:["The EMR is required to respond and is covered by their agency's liability insurance","Good Samaritan laws may offer protection if the EMR acts in good faith within their training","The EMR has no legal protection outside their jurisdiction","The EMR must contact medical direction before providing any care"],correct:[1],points:1},
-  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Critical Incident Stress Management (CISM) is primarily designed to:",options:["Provide legal protection after a patient complaint","Help EMS providers process and recover from psychologically traumatic calls","Replace standard debriefing after any ALS response","Serve as a disciplinary process after adverse patient outcomes"],correct:[1],points:1},
+  {section:"Communications & Documentation",type:"mc",stem:"An EMR is completing a patient care report after a patient refused transport. Which of the following BEST describes the documentation responsibility?",options:["No documentation is required since the patient refused care","Document only that the patient refused — no further detail needed","Document the patient's condition, risks of refusal explained, that the patient demonstrated capacity, that refusal was signed and witnessed, and instructions given","Document the refusal only if the patient appeared intoxicated or altered"],correct:[2],points:1},
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"A patient hands you a card stating 'Do Not Resuscitate.' The card is signed by the patient and their physician. You should:",options:["Disregard it and begin resuscitation \u2014 only hospital-issued forms are valid","Honor the order; withhold resuscitation but provide comfort measures as appropriate","Begin CPR and contact medical direction for guidance while continuing","Ask a family member to confirm before honoring the order"],correct:[1],points:1},
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"best2",stem:"Which TWO of the following are components that must be present for a patient's refusal of care to be legally valid?",options:["The patient demonstrates decision-making capacity","The patient must be over 21 years of age","The patient has been informed of the risks of refusal","A family member must co-sign the refusal form","The EMR must agree with the patient's decision"],correct:[0,2],points:1},
   {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"A laceration is described as being on the 'medial aspect of the left thigh, proximal to the knee.' This means the wound is:",options:["On the outer left thigh, close to the ankle","On the inner left thigh, closer to the hip than the knee","On the back of the left thigh near the knee","On the outer left thigh near the knee"],correct:[1],points:1},
@@ -352,7 +352,7 @@ const questions = [
   {section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 55-year-old male bystander helped pull a patient from a house fire. He is now anxious, has a respiratory rate of 24, SpO2 of 96% on room air, and reports a headache. He has no soot around his mouth and denies being in the smoke. The MOST likely concern and appropriate treatment is:",options:["Anxiety reaction; reassure and discharge from scene","Carbon monoxide poisoning from smoke exposure; administer high-flow oxygen via NRB mask and transport for evaluation","Thermal airway injury; intubation is required immediately","Stress-induced hypertension; monitor blood pressure and transport if it does not resolve"],correct:[1],points:1},
   {section:"Critical Thinking & Integrated Assessment",type:"matching",stem:"Match each patient presentation with the MOST likely diagnosis.",pairs:[{term:"Hot dry skin, altered mental status, temp 104.6\u00b0F after outdoor exertion",def:"Heat stroke \u2014 a life-threatening emergency requiring immediate aggressive cooling"},{term:"Diaphoresis, pallor, crushing chest pressure radiating to left arm in a 58-year-old male",def:"Acute myocardial infarction \u2014 treat as cardiac emergency, rapid transport"},{term:"Sudden facial droop, slurred speech, and left arm weakness of 45-minute duration",def:"Ischemic stroke \u2014 Cincinnati Stroke Scale, note onset time, rapid transport to stroke center"},{term:"Anxiety, tachycardia, flushed skin, dilated pupils, and agitation after unknown pill ingestion",def:"Sympathomimetic toxidrome \u2014 stimulant or decongestant overdose"},{term:"Gradual onset confusion, Kussmaul breathing, fruity breath, and dehydration in a known diabetic",def:"Diabetic ketoacidosis (DKA) \u2014 hyperglycemic emergency requiring IV fluid and insulin at the hospital"}],points:1},
 ];
-
+ 
 const SECTION_COLORS = {
   "EMS Systems, EMR Role & Medical/Legal":      {bg:"#0f3d5c", accent:"#2196F3"},
   "Anatomy, Physiology & Medical Terminology":  {bg:"#1b4332", accent:"#4CAF50"},
@@ -370,12 +370,12 @@ const SECTION_COLORS = {
   "MCI, ICS, Hazmat & EMS Operations":         {bg:"#2a2a10", accent:"#FFEB3B"},
   "Critical Thinking & Integrated Assessment":  {bg:"#2a0a2a", accent:"#E91E63"},
 };
-
+ 
 // ── STATE ────────────────────────────────────────────
 // Pre-fill student name from portal URL param
 const _urlParams = new URLSearchParams(window.location.search);
 const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
-
+ 
 let phase        = "intro";
 let studentName  = _portalStudent || "";
 let current      = 0;
@@ -386,7 +386,7 @@ let timeLeft     = TOTAL_TIME;
 let timerInterval= null;
 let dragData     = null;    // {def, fromTermIdx}
 let startTime    = null;
-
+ 
 // ── SHUFFLE ──────────────────────────────────────────
 function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
 function initShuffles() {
@@ -394,7 +394,7 @@ function initShuffles() {
     if (q.type === "matching") shuffledDefs[i] = shuffle(q.pairs.map(p=>p.def));
   });
 }
-
+ 
 // ── SCORING ──────────────────────────────────────────
 function scoreQuestion(q, ans) {
   if (!ans) return false;
@@ -408,13 +408,13 @@ function calcScore() {
   questions.forEach((q,i)=>{ total+=q.points; if(scoreQuestion(q,answers[i])) score+=q.points; });
   return {score,total};
 }
-
+ 
 // ── SAVE MATCHING ANS ────────────────────────────────
 function saveMatchingAnswers(qIdx) {
   const q = questions[qIdx];
   answers[qIdx] = q.pairs.map((_,ti)=>matchSels[`${qIdx}-${ti}`]||null);
 }
-
+ 
 // ── TIMER ────────────────────────────────────────────
 function startTimer() {
   startTime = Date.now();
@@ -432,7 +432,7 @@ function updateTimerUI() {
   document.querySelectorAll(".timer-dot").forEach(el=>{ el.style.background=color; el.classList.toggle("pulse",timeLeft<60); });
   document.querySelectorAll(".timer-bar-fill").forEach(el=>{ el.style.width=`${(timeLeft/TOTAL_TIME)*100}%`; el.style.background=color; });
 }
-
+ 
 // ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
 // Uses GET with ?payload= because Apps Script cross-origin POST is blocked
 // by CORS preflight. GET requests follow the redirect and reach doGet().
@@ -470,7 +470,7 @@ async function submitToFirebase(subData) {
     return { success: false, error: e.toString() };
   }
 }
-
+ 
 // ── FINISH EXAM ──────────────────────────────────────
 async function finishExam() {
   clearInterval(timerInterval);
@@ -478,7 +478,7 @@ async function finishExam() {
   const pct = Math.round((score/total)*100);
   const timeUsed = TOTAL_TIME - timeLeft;
   const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
-
+ 
   const subData = {
     examLabel: EXAM_LABEL,
     name: studentName,
@@ -486,10 +486,10 @@ async function finishExam() {
     questionResults,
     submittedAt: new Date().toISOString(),
   };
-
+ 
   phase = "submitting";
   render();
-
+ 
   const result = await submitToFirebase(subData);
   phase = "results";
   window._submitResult = result;
@@ -497,7 +497,7 @@ async function finishExam() {
   window._questionResults = questionResults;
   render();
 }
-
+ 
 // ── RENDER ───────────────────────────────────────────
 function render() {
   const root = document.getElementById("root");
@@ -507,7 +507,7 @@ function render() {
   else                          root.innerHTML = renderExam();
   attachEvents();
 }
-
+ 
 function renderIntro() {
   return `
     <div class="intro-wrap">
@@ -529,7 +529,7 @@ function renderIntro() {
       </div>
     </div>`;
 }
-
+ 
 function renderSubmitting() {
   return `
     <div style="min-height:100vh;background:#0d1117;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;">
@@ -537,20 +537,20 @@ function renderSubmitting() {
       <div class="submitting-text">Submitting your exam…</div>
     </div>`;
 }
-
+ 
 function renderResults() {
   const {score,total,pct} = window._examScore;
   const passed = pct >= 70;
   const qr = window._questionResults;
   const sr = window._submitResult;
-
+ 
   let statusHtml = "";
   if (sr && !sr.noUrl) {
     statusHtml = sr.success
       ? `<div class="submit-status success">✓ Your results have been submitted to your instructor.</div>`
       : `<div class="submit-status error">⚠ Could not reach the server. Please notify your instructor. Your score: ${pct}% (${score}/${total})</div>`;
   }
-
+ 
   const reviewRows = questions.map((q,i)=>{
     const correct = qr[i];
     let correctAns = "";
@@ -568,7 +568,7 @@ function renderResults() {
         <div class="result-pts" style="color:${correct?"#81c784":"#ef9a9a"}">${correct?"+"+q.points:"0"}</div>
       </div>`;
   }).join("");
-
+ 
   return `
     <div class="results-wrap" style="background:${passed?"linear-gradient(135deg,#0d2818,#1b4332,#0d2818)":"linear-gradient(135deg,#2d0a0a,#4a1010,#2d0a0a)"}">
       <div class="results-inner">
@@ -587,13 +587,13 @@ function renderResults() {
       </div>
     </div>`;
 }
-
+ 
 function renderExam() {
   const q = questions[current];
   const sc = SECTION_COLORS[q.section] || {bg:"#1a1a2e",accent:"#2196F3"};
   const progress = ((current+1)/questions.length)*100;
   const ans = answers[current] || [];
-
+ 
   let questionBody = "";
   if (q.type==="mc" || q.type==="best2") {
     const hint = q.type==="best2"
@@ -606,15 +606,15 @@ function renderExam() {
       </button>`;
     }).join("");
     questionBody = `<div class="options-list">${hint}${opts}</div>`;
-
+ 
   } else if (q.type==="matching") {
     const defs = shuffledDefs[current] || q.pairs.map(p=>p.def);
     const usedDefs = new Set(Object.entries(matchSels).filter(([k])=>k.startsWith(current+"-")).map(([,v])=>v));
     const bankDefs = defs.filter(d=>!usedDefs.has(d));
-
+ 
     const bankChips = bankDefs.map(def=>`<div class="def-chip" draggable="true" data-def="${encodeURIComponent(def)}">${def}</div>`).join("") ||
       `<div class="def-bank-empty">All definitions assigned</div>`;
-
+ 
     const termRows = q.pairs.map((pair,ti)=>{
       const assigned = matchSels[`${current}-${ti}`];
       return `
@@ -627,7 +627,7 @@ function renderExam() {
           </div>
         </div>`;
     }).join("");
-
+ 
     questionBody = `
       <div class="match-instructions"><strong>Drag</strong> a definition from the bank and <strong>drop</strong> it onto the matching term. Drag a placed definition back to the bank to unassign it.</div>
       <div class="bank-label">Definition Bank</div>
@@ -635,18 +635,18 @@ function renderExam() {
       <div class="terms-label">Terms — Drop definitions here</div>
       <div class="term-rows">${termRows}</div>`;
   }
-
+ 
   const typeBadge = q.type==="best2"
     ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
-
+ 
   const dots = questions.map((_,i)=>
     `<div class="dot ${i===current?"current":answers[i]?"answered":""}" style="width:${i===current?20:10}px" data-dot="${i}"></div>`
   ).join("");
-
+ 
   const navRight = current < questions.length-1
     ? `<button class="btn-next" id="nextBtn">Next →</button>`
     : `<button class="btn-submit-exam" id="submitExamBtn">Submit Exam</button>`;
-
+ 
   return `
     <div>
       <div class="topbar">
@@ -663,23 +663,23 @@ function renderExam() {
         </div>
         <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:#22c55e"></div></div>
       </div>
-
+ 
       <div class="exam-wrap">
         <div class="section-badge" style="background:${sc.bg}">
           <div class="section-dot" style="background:${sc.accent}"></div>
           <span class="section-label" style="color:${sc.accent}">${q.section}</span>
         </div>
-
+ 
         <div class="q-header">
           <span class="q-label">QUESTION</span>
           <span class="q-number">${current+1}</span>
           ${typeBadge}
           <span class="q-points">${q.points} pt</span>
         </div>
-
+ 
         <div class="q-stem">${q.stem}</div>
         ${questionBody}
-
+ 
         <div class="nav-bar">
           <button class="btn-prev" id="prevBtn" ${current===0?"disabled":""}>← Previous</button>
           <div class="dots">${dots}</div>
@@ -688,7 +688,7 @@ function renderExam() {
       </div>
     </div>`;
 }
-
+ 
 // ── EVENT BINDING ────────────────────────────────────
 function attachEvents() {
   // INTRO
@@ -708,7 +708,7 @@ function attachEvents() {
     beginBtn.classList.toggle("active", !!studentName);
     beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
   }
-
+ 
   // EXAM — MC / Best2
   document.querySelectorAll(".option-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -725,7 +725,7 @@ function attachEvents() {
       render();
     });
   });
-
+ 
   // EXAM — Matching drag & drop
   let draggingEl = null;
   document.querySelectorAll(".def-chip").forEach(chip=>{
@@ -739,7 +739,7 @@ function attachEvents() {
     });
     chip.addEventListener("dragend", ()=>{ chip.classList.remove("dragging"); draggingEl = null; });
   });
-
+ 
   // Drop on term rows
   document.querySelectorAll(".term-row").forEach(row=>{
     row.addEventListener("dragover", e=>{ e.preventDefault(); row.classList.add("dragover"); });
@@ -758,7 +758,7 @@ function attachEvents() {
       render();
     });
   });
-
+ 
   // Drop on bank (return)
   const bank = document.getElementById("defBank");
   if (bank) {
@@ -775,41 +775,41 @@ function attachEvents() {
       }
     });
   }
-
+ 
   // NAV
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
   const submitExamBtn = document.getElementById("submitExamBtn");
   const submitTopBtn  = document.getElementById("submitTopBtn");
-
+ 
   if (prevBtn) prevBtn.addEventListener("click", ()=>{ if(current>0){ current--; render(); }});
   if (nextBtn) nextBtn.addEventListener("click", ()=>{ if(current<questions.length-1){ current++; render(); }});
   if (submitExamBtn) submitExamBtn.addEventListener("click", finishExam);
   if (submitTopBtn)  submitTopBtn.addEventListener("click",  finishExam);
-
+ 
   // Dot nav
   document.querySelectorAll(".dot").forEach(dot=>{
     dot.addEventListener("click", ()=>{ current=parseInt(dot.dataset.dot); render(); });
   });
-
+ 
   // Update timer display immediately
   updateTimerUI();
 }
-
+ 
 function beginExam() {
   initShuffles();
   phase = "exam";
   render();
   startTimer();
 }
-
+ 
 // ── BOOT ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", ()=>{
   document.getElementById("root").innerHTML = "";
   render();
 });
 </script>
-
+ 
 <div id="root"></div>
 </body>
 </html>
