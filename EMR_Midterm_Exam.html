@@ -7,7 +7,7 @@
 <style>
   /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
   /* See SETUP_INSTRUCTIONS.txt for how to get this */
-
+ 
   :root {
     --bg: #0d1117;
     --surface: #111827;
@@ -19,16 +19,16 @@
     --red: #ef4444;
     --amber: #f59e0b;
   }
-
+ 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   body {
     font-family: Georgia, serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
   }
-
+ 
   /* ── INTRO ── */
   .intro-wrap {
     min-height: 100vh;
@@ -64,7 +64,7 @@
     cursor: pointer; box-shadow: 0 8px 32px rgba(21,101,192,0.5);
   }
   .btn-begin.active:hover { transform: translateY(-2px); }
-
+ 
   /* ── TOP BAR ── */
   .topbar {
     position: sticky; top: 0; z-index: 100;
@@ -93,7 +93,7 @@
     padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
     white-space: nowrap; font-family: Georgia, serif;
   }
-
+ 
   /* ── EXAM BODY ── */
   .exam-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
   .section-badge {
@@ -132,7 +132,7 @@
   }
   .option-btn.best2 .option-indicator { border-radius: 6px; }
   .option-text { padding-top: 2px; line-height: 1.6; }
-
+ 
   /* ── MATCHING ── */
   .match-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
   .match-instructions strong { color: #38bdf8; }
@@ -167,7 +167,7 @@
   .term-row.assigned .term-drop { background: #0a1f14; }
   .term-placeholder { color: #374151; font-size: 13px; font-style: italic; }
   .term-placeholder.active { color: #38bdf8; }
-
+ 
   /* ── NAV ── */
   .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #1e2a3a; }
   .btn-prev, .btn-next, .btn-submit-exam {
@@ -182,7 +182,7 @@
   .dot { height: 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s; background: #1e2a3a; }
   .dot.answered { background: #374151; }
   .dot.current { background: #2196F3; }
-
+ 
   /* ── RESULTS ── */
   .results-wrap { min-height: 100vh; padding: 40px 20px; font-family: Georgia, serif; }
   .results-inner { max-width: 780px; margin: 0 auto; }
@@ -208,13 +208,13 @@
   .submit-status { text-align: center; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; }
   .submit-status.success { background: #0a2a14; border: 1px solid #166534; color: #86efac; }
   .submit-status.error { background: #2d0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
-
+ 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
-
+ 
 <script>
 // ══════════════════════════════════════════════════════
 // CONFIGURATION — update this URL after deploying your
@@ -228,7 +228,7 @@ const FB_CONFIG = {
 const EXAM_LABEL      = "Midterm Exam";
 const TOTAL_TIME      = 50 * 60; // 50 minutes
 const LETTERS         = ["A","B","C","D","E"];
-
+ 
 // ── QUESTION DATA ────────────────────────────────────
 const questions = [
   {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes the 'standard of care' as it applies to an EMR?",options:["The care a physician would provide in the same situation","The care a reasonable, similarly trained EMR would provide in the same or similar circumstances","Any treatment that prevents patient death","The minimum treatment listed in state protocols"],correct:[1],points:1},
@@ -280,9 +280,10 @@ const questions = [
   {section:"Ventilation & Breathing Assessment",type:"mc",stem:"A patient presents with wheezing, prolonged expiration, and is sitting upright using accessory muscles to breathe. History includes asthma. The MOST appropriate initial intervention is:",options:["Administer oxygen and assist with the patient's prescribed bronchodilator inhaler if available","Place the patient supine and apply a non-rebreather mask","Perform immediate positive pressure ventilation with BVM","Withhold oxygen to avoid suppressing their respiratory drive"],correct:[0],points:1},
   {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"An impaled object is found embedded in a patient's thigh with moderate bleeding around it. The MOST appropriate management is:",options:["Remove the object and apply direct pressure immediately","Stabilize the object in place, control bleeding around it without removing it, and transport","Remove the object only if it is interfering with airway management","Apply a tourniquet proximal to the object and remove it during transport"],correct:[1],points:1},
   {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following is a contraindication to using an AED?",options:["The patient is lying on a wet surface and cannot be moved","The patient is a child under 8 years old","The patient has a pacemaker implanted","There are no contraindications; always apply the AED to a pulseless patient"],correct:[0],points:1},
-  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR who witnesses a coworker falsifying a patient care report should:",options:["Assume it was a minor error and take no action","Report the incident through the appropriate chain of command or ethics reporting process","Correct the coworker's report without notifying a supervisor","Refuse all future calls with that coworker"],correct:[1],points:1},
+  {section:"Communications & Documentation",type:"mc",stem:"When transmitting a radio report to the receiving hospital for an incoming patient, which of the following is the MOST appropriate format?",options:["Provide a 10-minute detailed narrative of the patient's full medical history","State the receiving unit, your unit ID, patient age and sex, chief complaint, assessment findings, interventions, and ETA","Describe only the chief complaint and estimated arrival time","Wait until arrival at the hospital to provide any verbal report"],correct:[1],points:1},
+  
 ];
-
+ 
 const SECTION_COLORS = {
   "EMS Systems, EMR Role & Medical/Legal":      {bg:"#0f3d5c", accent:"#2196F3"},
   "Anatomy, Physiology & Medical Terminology":  {bg:"#1b4332", accent:"#4CAF50"},
@@ -292,12 +293,12 @@ const SECTION_COLORS = {
   "Circulation, Bleeding Control & Shock":      {bg:"#3d1515", accent:"#F44336"},
   "Cardiac Emergencies, CPR & AED":             {bg:"#2a1a00", accent:"#FF9800"},
 };
-
+ 
 // ── STATE ────────────────────────────────────────────
 // Pre-fill student name from portal URL param
 const _urlParams = new URLSearchParams(window.location.search);
 const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
-
+ 
 let phase        = "intro";
 let studentName  = _portalStudent || "";
 let current      = 0;
@@ -308,7 +309,7 @@ let timeLeft     = TOTAL_TIME;
 let timerInterval= null;
 let dragData     = null;    // {def, fromTermIdx}
 let startTime    = null;
-
+ 
 // ── SHUFFLE ──────────────────────────────────────────
 function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
 function initShuffles() {
@@ -316,7 +317,7 @@ function initShuffles() {
     if (q.type === "matching") shuffledDefs[i] = shuffle(q.pairs.map(p=>p.def));
   });
 }
-
+ 
 // ── SCORING ──────────────────────────────────────────
 function scoreQuestion(q, ans) {
   if (!ans) return false;
@@ -330,13 +331,13 @@ function calcScore() {
   questions.forEach((q,i)=>{ total+=q.points; if(scoreQuestion(q,answers[i])) score+=q.points; });
   return {score,total};
 }
-
+ 
 // ── SAVE MATCHING ANS ────────────────────────────────
 function saveMatchingAnswers(qIdx) {
   const q = questions[qIdx];
   answers[qIdx] = q.pairs.map((_,ti)=>matchSels[`${qIdx}-${ti}`]||null);
 }
-
+ 
 // ── TIMER ────────────────────────────────────────────
 function startTimer() {
   startTime = Date.now();
@@ -354,7 +355,7 @@ function updateTimerUI() {
   document.querySelectorAll(".timer-dot").forEach(el=>{ el.style.background=color; el.classList.toggle("pulse",timeLeft<60); });
   document.querySelectorAll(".timer-bar-fill").forEach(el=>{ el.style.width=`${(timeLeft/TOTAL_TIME)*100}%`; el.style.background=color; });
 }
-
+ 
 // ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
 // Uses GET with ?payload= because Apps Script cross-origin POST is blocked
 // by CORS preflight. GET requests follow the redirect and reach doGet().
@@ -392,7 +393,7 @@ async function submitToFirebase(subData) {
     return { success: false, error: e.toString() };
   }
 }
-
+ 
 // ── FINISH EXAM ──────────────────────────────────────
 async function finishExam() {
   clearInterval(timerInterval);
@@ -400,7 +401,7 @@ async function finishExam() {
   const pct = Math.round((score/total)*100);
   const timeUsed = TOTAL_TIME - timeLeft;
   const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
-
+ 
   const subData = {
     examLabel: EXAM_LABEL,
     name: studentName,
@@ -408,10 +409,10 @@ async function finishExam() {
     questionResults,
     submittedAt: new Date().toISOString(),
   };
-
+ 
   phase = "submitting";
   render();
-
+ 
   const result = await submitToFirebase(subData);
   phase = "results";
   window._submitResult = result;
@@ -419,7 +420,7 @@ async function finishExam() {
   window._questionResults = questionResults;
   render();
 }
-
+ 
 // ── RENDER ───────────────────────────────────────────
 function render() {
   const root = document.getElementById("root");
@@ -429,7 +430,7 @@ function render() {
   else                          root.innerHTML = renderExam();
   attachEvents();
 }
-
+ 
 function renderIntro() {
   return `
     <div class="intro-wrap">
@@ -451,7 +452,7 @@ function renderIntro() {
       </div>
     </div>`;
 }
-
+ 
 function renderSubmitting() {
   return `
     <div style="min-height:100vh;background:#0d1117;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;">
@@ -459,20 +460,20 @@ function renderSubmitting() {
       <div class="submitting-text">Submitting your exam…</div>
     </div>`;
 }
-
+ 
 function renderResults() {
   const {score,total,pct} = window._examScore;
   const passed = pct >= 70;
   const qr = window._questionResults;
   const sr = window._submitResult;
-
+ 
   let statusHtml = "";
   if (sr && !sr.noUrl) {
     statusHtml = sr.success
       ? `<div class="submit-status success">✓ Your results have been submitted to your instructor.</div>`
       : `<div class="submit-status error">⚠ Could not reach the server. Please notify your instructor. Your score: ${pct}% (${score}/${total})</div>`;
   }
-
+ 
   const reviewRows = questions.map((q,i)=>{
     const correct = qr[i];
     let correctAns = "";
@@ -490,7 +491,7 @@ function renderResults() {
         <div class="result-pts" style="color:${correct?"#81c784":"#ef9a9a"}">${correct?"+"+q.points:"0"}</div>
       </div>`;
   }).join("");
-
+ 
   return `
     <div class="results-wrap" style="background:${passed?"linear-gradient(135deg,#0d2818,#1b4332,#0d2818)":"linear-gradient(135deg,#2d0a0a,#4a1010,#2d0a0a)"}">
       <div class="results-inner">
@@ -509,13 +510,13 @@ function renderResults() {
       </div>
     </div>`;
 }
-
+ 
 function renderExam() {
   const q = questions[current];
   const sc = SECTION_COLORS[q.section] || {bg:"#1a1a2e",accent:"#2196F3"};
   const progress = ((current+1)/questions.length)*100;
   const ans = answers[current] || [];
-
+ 
   let questionBody = "";
   if (q.type==="mc" || q.type==="best2") {
     const hint = q.type==="best2"
@@ -528,15 +529,15 @@ function renderExam() {
       </button>`;
     }).join("");
     questionBody = `<div class="options-list">${hint}${opts}</div>`;
-
+ 
   } else if (q.type==="matching") {
     const defs = shuffledDefs[current] || q.pairs.map(p=>p.def);
     const usedDefs = new Set(Object.entries(matchSels).filter(([k])=>k.startsWith(current+"-")).map(([,v])=>v));
     const bankDefs = defs.filter(d=>!usedDefs.has(d));
-
+ 
     const bankChips = bankDefs.map(def=>`<div class="def-chip" draggable="true" data-def="${encodeURIComponent(def)}">${def}</div>`).join("") ||
       `<div class="def-bank-empty">All definitions assigned</div>`;
-
+ 
     const termRows = q.pairs.map((pair,ti)=>{
       const assigned = matchSels[`${current}-${ti}`];
       return `
@@ -549,7 +550,7 @@ function renderExam() {
           </div>
         </div>`;
     }).join("");
-
+ 
     questionBody = `
       <div class="match-instructions"><strong>Drag</strong> a definition from the bank and <strong>drop</strong> it onto the matching term. Drag a placed definition back to the bank to unassign it.</div>
       <div class="bank-label">Definition Bank</div>
@@ -557,18 +558,18 @@ function renderExam() {
       <div class="terms-label">Terms — Drop definitions here</div>
       <div class="term-rows">${termRows}</div>`;
   }
-
+ 
   const typeBadge = q.type==="best2"
     ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
-
+ 
   const dots = questions.map((_,i)=>
     `<div class="dot ${i===current?"current":answers[i]?"answered":""}" style="width:${i===current?20:10}px" data-dot="${i}"></div>`
   ).join("");
-
+ 
   const navRight = current < questions.length-1
     ? `<button class="btn-next" id="nextBtn">Next →</button>`
     : `<button class="btn-submit-exam" id="submitExamBtn">Submit Exam</button>`;
-
+ 
   return `
     <div>
       <div class="topbar">
@@ -585,23 +586,23 @@ function renderExam() {
         </div>
         <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:#22c55e"></div></div>
       </div>
-
+ 
       <div class="exam-wrap">
         <div class="section-badge" style="background:${sc.bg}">
           <div class="section-dot" style="background:${sc.accent}"></div>
           <span class="section-label" style="color:${sc.accent}">${q.section}</span>
         </div>
-
+ 
         <div class="q-header">
           <span class="q-label">QUESTION</span>
           <span class="q-number">${current+1}</span>
           ${typeBadge}
           <span class="q-points">${q.points} pt</span>
         </div>
-
+ 
         <div class="q-stem">${q.stem}</div>
         ${questionBody}
-
+ 
         <div class="nav-bar">
           <button class="btn-prev" id="prevBtn" ${current===0?"disabled":""}>← Previous</button>
           <div class="dots">${dots}</div>
@@ -610,7 +611,7 @@ function renderExam() {
       </div>
     </div>`;
 }
-
+ 
 // ── EVENT BINDING ────────────────────────────────────
 function attachEvents() {
   // INTRO
@@ -630,7 +631,7 @@ function attachEvents() {
     beginBtn.classList.toggle("active", !!studentName);
     beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
   }
-
+ 
   // EXAM — MC / Best2
   document.querySelectorAll(".option-btn").forEach(btn=>{
     btn.addEventListener("click", ()=>{
@@ -647,7 +648,7 @@ function attachEvents() {
       render();
     });
   });
-
+ 
   // EXAM — Matching drag & drop
   let draggingEl = null;
   document.querySelectorAll(".def-chip").forEach(chip=>{
@@ -661,7 +662,7 @@ function attachEvents() {
     });
     chip.addEventListener("dragend", ()=>{ chip.classList.remove("dragging"); draggingEl = null; });
   });
-
+ 
   // Drop on term rows
   document.querySelectorAll(".term-row").forEach(row=>{
     row.addEventListener("dragover", e=>{ e.preventDefault(); row.classList.add("dragover"); });
@@ -680,7 +681,7 @@ function attachEvents() {
       render();
     });
   });
-
+ 
   // Drop on bank (return)
   const bank = document.getElementById("defBank");
   if (bank) {
@@ -697,41 +698,41 @@ function attachEvents() {
       }
     });
   }
-
+ 
   // NAV
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
   const submitExamBtn = document.getElementById("submitExamBtn");
   const submitTopBtn  = document.getElementById("submitTopBtn");
-
+ 
   if (prevBtn) prevBtn.addEventListener("click", ()=>{ if(current>0){ current--; render(); }});
   if (nextBtn) nextBtn.addEventListener("click", ()=>{ if(current<questions.length-1){ current++; render(); }});
   if (submitExamBtn) submitExamBtn.addEventListener("click", finishExam);
   if (submitTopBtn)  submitTopBtn.addEventListener("click",  finishExam);
-
+ 
   // Dot nav
   document.querySelectorAll(".dot").forEach(dot=>{
     dot.addEventListener("click", ()=>{ current=parseInt(dot.dataset.dot); render(); });
   });
-
+ 
   // Update timer display immediately
   updateTimerUI();
 }
-
+ 
 function beginExam() {
   initShuffles();
   phase = "exam";
   render();
   startTimer();
 }
-
+ 
 // ── BOOT ─────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", ()=>{
   document.getElementById("root").innerHTML = "";
   render();
 });
 </script>
-
+ 
 <div id="root"></div>
 </body>
 </html>
