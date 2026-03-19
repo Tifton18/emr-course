@@ -226,7 +226,6 @@ const FB_CONFIG = {
   projectId:"class-attendance-72cd9",
 };
 const EXAM_LABEL      = "Midterm Exam";
-const EXAM_CATEGORY   = "midterm";
 const TOTAL_TIME      = 50 * 60; // 50 minutes
 const LETTERS         = ["A","B","C","D","E"];
  
@@ -403,11 +402,12 @@ async function finishExam() {
   const timeUsed = TOTAL_TIME - timeLeft;
   const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
  
+  const answersData = questionResults;
   const subData = {
     examLabel: EXAM_LABEL,
     name: studentName,
     score, total, pct, timeUsed,
-    questionResults,
+    answersData,
     submittedAt: new Date().toISOString(),
   };
  
