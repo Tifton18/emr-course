@@ -1111,17 +1111,31 @@ async function confirmResetSelected(studentName) {
   document.getElementById('examResetModal').remove();
   setSyncStatus('syncing', 'Deleting…');
   let deleted = 0;
+  let failed = 0;
   for (const doc of toDelete) {
     try {
-      const delResp = await fetch(`https://firestore.googleapis.com/v1/${doc.docName}?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`, {method:'DELETE'});
-      if (delResp.ok) deleted++;
-    } catch(e) { console.error('Delete error:', e); }
+      const deleteUrl = `https://firestore.googleapis.com/v1/${doc.docName}?key=AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw`;
+      console.log('Attempting DELETE:', deleteUrl);
+      const delResp = await fetch(deleteUrl, {method:'DELETE'});
+      const respText = await delResp.text();
+      console.log('DELETE response:', delResp.status, respText);
+      if (delResp.ok) {
+        deleted++;
+      } else {
+        failed++;
+        console.error('Delete failed:', delResp.status, respText);
+      }
+    } catch(e) { failed++; console.error('Delete error:', e); }
   }
   await loadExamResults();
   await loadPortalContent();
   renderSummary();
-  setSyncStatus('saved', `✓ Deleted ${deleted} submission${deleted!==1?'s':''} for ${studentName}`);
-  setTimeout(()=>setSyncStatus('',''), 3000);
+  if (failed > 0) {
+    setSyncStatus('error', `✗ ${failed} deletion(s) failed — check console`);
+  } else {
+    setSyncStatus('saved', `✓ Deleted ${deleted} submission${deleted!==1?'s':''} for ${studentName}`);
+  }
+  setTimeout(()=>setSyncStatus('',''), 4000);
 }
  
 function removeStudent(id){if(!confirm('Remove this student?'))return;data.students=data.students.filter(s=>s.id!==id);delete data.scores[String(id)];scheduleSave();renderAttendance();}
