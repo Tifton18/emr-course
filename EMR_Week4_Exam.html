@@ -398,41 +398,53 @@ async function submitToFirebase(subData) {
 // ── FINISH EXAM ──────────────────────────────────────
 async function finishExam() {
   clearInterval(timerInterval);
-  const {score,total} = calcScore();
-  const pct = Math.round((score/total)*100);
-  const timeUsed = TOTAL_TIME - timeLeft;
-  const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
- 
-  const answersData = questions.map((q, i) => {
-    const given = answers[i] !== undefined ? answers[i] : null;
-    const correct = q.correct !== undefined ? q.correct
-                  : q.order   !== undefined ? q.order
-                  : q.pairs   !== undefined ? q.pairs.map(p => p.def)
-                  : null;
-    return { given, correct };
-  });
-  const subData = {
-    examLabel: EXAM_LABEL,
-    name: studentName,
-    score, total, pct, timeUsed,
-    answersData,
-    submittedAt: new Date().toISOString(),
-  };
- 
-  phase = "submitting";
-  render();
- 
   try {
-    const result = await submitToFirebase(subData);
-    window._submitResult = result;
+    const {score,total} = calcScore();
+    const pct = Math.round((score/total)*100);
+    const timeUsed = TOTAL_TIME - timeLeft;
+    const questionResults = questions.map((q,i) => {
+      try { return scoreQuestion(q, answers[i]); } catch(e) { return false; }
+    });
+ 
+    const answersData = questions.map((q, i) => {
+      const given = answers[i] !== undefined ? answers[i] : null;
+      const correct = q.correct !== undefined ? q.correct
+                    : q.order   !== undefined ? q.order
+                    : q.pairs   !== undefined ? q.pairs.map(p => p.def)
+                    : null;
+      return { given, correct };
+    });
+    const subData = {
+      examLabel: EXAM_LABEL,
+      name: studentName,
+      score, total, pct, timeUsed,
+      answersData,
+      submittedAt: new Date().toISOString(),
+    };
+ 
+    phase = "submitting";
+    render();
+ 
+    try {
+      const result = await submitToFirebase(subData);
+      window._submitResult = result;
+    } catch(e) {
+      console.error('submitToFirebase error:', e);
+      window._submitResult = { success: false, error: e.toString() };
+    }
+    phase = "results";
+    window._examScore = {score,total,pct};
+    window._questionResults = questionResults;
+    render();
   } catch(e) {
-    console.error('finishExam error:', e);
-    window._submitResult = { success: false, error: e.toString() };
+    console.error('finishExam fatal error:', e);
+    // Force to results even if something went wrong
+    phase = "results";
+    window._examScore = window._examScore || {score:0,total:questions.length,pct:0};
+    window._questionResults = window._questionResults || questions.map(()=>false);
+    window._submitResult = { success: false, error: 'Exam error: ' + e.toString() };
+    render();
   }
-  phase = "results";
-  window._examScore = {score,total,pct};
-  window._questionResults = questionResults;
-  render();
 }
  
 // ── RENDER ───────────────────────────────────────────
@@ -453,7 +465,7 @@ function renderIntro() {
         <div class="intro-title">Week 3</div>
         <div class="intro-sub">Examination</div>
         <div class="info-grid">
-          ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Medical Emergencies I & II · Trauma Assessment · Burns · Musculoskeletal & Spinal Trauma · Head & Chest Trauma"]]
+          ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Ch. 11–17 · Medical Emergencies · Trauma · Burns · Musculoskeletal & Spinal · OB/Peds/Geriatrics"]]
             .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
         </div>
         <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
