@@ -1505,8 +1505,10 @@ const qStats = expandedQuestions.map((q, qi) => {
         ? sub.answersData.find(a => String(a.qid) === String(q.id))
         : sub.answersData?.[q._origQi ?? qi];
       if (!ansEntry) return;
-      answered++;
       const given = ansEntry.given;
+      // Skip unanswered questions (given=null means student didn't answer)
+      if (given === null || given === undefined) return;
+      answered++;
       // If the answer entry has correct stored (practice exams), use it directly
       let isCorrect = false;
       // Track option distribution for MC/best2
