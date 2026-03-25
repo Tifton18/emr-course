@@ -342,15 +342,14 @@ function initShuffles() {
  
 // ── SCORING ──────────────────────────────────────────
 function scoreQuestion(q, ans) {
-  if (!ans) return false;
-  if (q.type === "mc")      return ans[0] === q.correct[0];
-  if (q.type === "best2")   return ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (ans === undefined || ans === null) return false;
+  if (q.type === "mc")      return Array.isArray(ans) && ans[0] === q.correct[0];
+  if (q.type === "best2")   return Array.isArray(ans) && ans.length===2 && ans.every(a=>q.correct.includes(a));
   if (q.type === "build") {
-    const order = answers[i] || [...Array(q.items.length).keys()];
-    const correct = q.order;
-    return order.length === correct.length && order.every((v,j) => v === correct[j]);
+    const order = Array.isArray(ans) ? ans : [...Array(q.items.length).keys()];
+    return order.length === q.order.length && order.every((v,j) => v === q.order[j]);
   }
-  if (q.type === "matching") return q.pairs.every((p,ti)=>ans[ti]===p.def);
+  if (q.type === "matching") return Array.isArray(ans) && q.pairs.every((p,ti)=>ans[ti]===p.def);
   return false;
 }
 function calcScore() {
@@ -391,7 +390,7 @@ async function submitToFirebase(subData) {
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults`;
-    const answersStr = JSON.stringify(subData.answersData);
+    const answersStr = JSON.stringify(subData.answersData, (k,v) => v === undefined ? null : v);
     const body = {
       fields: {
         examLabel:  {stringValue: subData.examLabel},
@@ -429,7 +428,14 @@ async function finishExam() {
   const timeUsed = TOTAL_TIME - timeLeft;
   const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
  
-  const answersData = answers;
+  const answersData = questions.map((q, i) => {
+    const given = answers[i] !== undefined ? answers[i] : null;
+    const correct = q.correct !== undefined ? q.correct
+                  : q.order   !== undefined ? q.order
+                  : q.pairs   !== undefined ? q.pairs.map(p => p.def)
+                  : null;
+    return { given, correct };
+  });
   const subData = {
     examLabel: EXAM_LABEL,
     name: studentName,
@@ -506,8 +512,10 @@ function renderResults() {
     const correct = qr[i];
     let correctAns = "";
     if (!correct) {
-      if (q.type==="mc") correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
-      else if (q.type==="best2") correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+      if (q.type==="mc" && q.options) correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
+      else if (q.type==="best2" && q.options) correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+      else if (q.type==="matching") correctAns = "See correct matches in the review above";
+      else if (q.type==="build") correctAns = "See correct order in the review above";
     }
     return `
       <div class="result-row">
