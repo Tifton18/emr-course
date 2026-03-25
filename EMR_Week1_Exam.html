@@ -211,6 +211,27 @@
  
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  .build-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 12px; font-style: italic; }
+  .build-list { display: flex; flex-direction: column; gap: 8px; }
+  .build-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #1a2332; border: 1px solid #2d3748; border-radius: 8px;
+    padding: 12px 14px; cursor: grab; user-select: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .build-item:hover { border-color: #2196F3; box-shadow: 0 0 0 1px #2196F3; }
+  .build-item.dragging { opacity: 0.4; }
+  .build-item.dragover { border-color: #22c55e; background: #0f2a1a; }
+  .build-handle { color: #475569; font-size: 18px; flex-shrink: 0; }
+  .build-num { 
+    background: #2196F3; color: white; border-radius: 50%;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .build-text { color: #e2e8f0; font-size: 14px; line-height: 1.5; flex: 1; }
+  .q-badge-build { background: #15803d22; color: #86efac; border: 1px solid #15803d44; }
+ 
 </style>
 </head>
 <body>
@@ -252,11 +273,11 @@ const questions = [
   {section:"Airway Management",type:"mc",stem:"Which airway maneuver is PREFERRED for a patient with a suspected spinal injury?",options:["Head-tilt/chin-lift","Jaw-thrust maneuver","Neck hyperextension","Nasal airway insertion without additional maneuver"],correct:[1],points:1},
   {section:"Airway Management",type:"mc",stem:"You are sizing an oropharyngeal airway (OPA) for an adult patient. The CORRECT method for sizing is:",options:["Measure from the center of the mouth to the earlobe","Measure from the corner of the mouth to the earlobe on the same side","Select a size based on the patient's height and weight","Choose the largest size that can be inserted without resistance"],correct:[1],points:1},
   {section:"Airway Management",type:"mc",stem:"During ventilation of an unresponsive adult patient with a BVM, you notice the chest is not rising with each squeeze. Which action should you perform FIRST?",options:["Immediately insert a nasopharyngeal airway","Reposition the head and ensure a proper mask seal before attempting ventilation again","Increase ventilation rate to compensate for inadequate tidal volume","Switch to mouth-to-mask ventilation"],correct:[1],points:1},
-  {section:"Airway Management",type:"matching",stem:"Match each airway adjunct or device with its correct description.",pairs:[{term:"Oropharyngeal Airway (OPA)",def:"Rigid curved device inserted through the mouth; used only in unconscious patients without a gag reflex"},{term:"Nasopharyngeal Airway (NPA)",def:"Soft rubber adjunct inserted through the nostril; tolerated in semi-conscious patients; lubricated prior to insertion"},{term:"Bag-Valve Mask (BVM)",def:"Manual ventilation device; self-inflating bag with one-way valve and mask; can deliver near 100% oxygen with supplemental O\u2082"},{term:"Non-Rebreather Mask (NRB)",def:"Delivers 60\u2013100% oxygen; contains a one-way valve and reservoir bag; used for spontaneously breathing patients with severe hypoxia"},{term:"Nasal Cannula",def:"Delivers 24\u201344% oxygen via two prongs; used for patients with mild to moderate hypoxia who are breathing adequately"}],points:1},
-  {section:"Airway Management",type:"mc",stem:"A contraindication to inserting a nasopharyngeal airway (NPA) includes:",options:["An unconscious patient with a gag reflex","Suspected mid-face or basilar skull fracture","A patient who is actively seizing","Inability to open the patient's mouth"],correct:[1],points:1},
-  {section:"Airway Management",type:"mc",stem:"You are providing supplemental oxygen to a patient with a history of COPD who is showing signs of respiratory distress with an SpO\u2082 of 88%. Which oxygen delivery approach is MOST appropriate?",options:["Withhold oxygen entirely since COPD patients may lose their hypoxic drive","Administer high-flow oxygen via non-rebreather mask, targeting SpO\u2082 of 94\u201398%, and monitor closely for changes in respiratory effort","Apply a nasal cannula at 1 LPM and reassess in 15 minutes","Delay oxygen therapy until arrival at the hospital to avoid interfering with blood gas interpretation"],correct:[1],points:1},
-  {section:"Airway Management",type:"best2",stem:"You respond to a 3-year-old child who is choking and is conscious but unable to cry or cough effectively. Which TWO actions are MOST appropriate?",options:["Perform 5 back blows followed by 5 chest thrusts and repeat until the object is expelled or the child becomes unconscious","Perform abdominal thrusts (Heimlich maneuver) exactly as you would for an adult","If the child becomes unconscious, begin CPR and look in the mouth before each breath for a visible object","Perform a blind finger sweep of the airway regardless of whether an object is visible","Administer high-flow oxygen and monitor; do not intervene until the child stops coughing"],correct:[0,2],points:1},
-  {section:"Airway Management",type:"mc",stem:"After inserting an OPA and beginning BVM ventilation on an unresponsive adult, you notice the patient's abdomen is rising instead of the chest and you hear gurgling sounds. The MOST likely explanation and BEST immediate action is:",options:["The OPA is correctly placed; the gurgling is normal airway secretion noise \u2014 continue ventilation","Gastric distention from improper technique; reposition the airway, ensure proper mask seal and ventilation technique, and prepare to suction if vomiting occurs","The OPA is too large; remove it and attempt ventilation without an adjunct","This is expected with BVM use; increase the rate of ventilation to overcome gastric inflation"],correct:[1],points:1},
+  {section:"Airway Management",type:"build",stem:"A patient is found unresponsive and not breathing. Place the following airway management steps in the CORRECT order from first to last.",items:["Perform head-tilt chin-lift or jaw-thrust to open the airway","Assess for breathing — look, listen, feel","Take BSI precautions and ensure scene safety","Insert an OPA and begin BVM ventilations with supplemental oxygen","Suction the airway if secretions are visible"],order:[2,1,0,3,4],explain:"BSI/scene safety first, then assess breathing, open airway, suction if needed, then OPA and BVM ventilation. BSI precedes all patient contact.",points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"An adult patient is breathing at a rate of 6 breaths per minute with very shallow chest rise. The MOST appropriate intervention is:",options:["Apply a nasal cannula and monitor closely","Assist ventilations with a BVM at 10 to 12 breaths per minute","Encourage the patient to breathe more deeply","Position the patient upright and reassess in 2 minutes"],correct:[1],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"Which of the following breath sounds is MOST consistent with lower airway bronchospasm such as asthma?",options:["Stridor","Crackles (rales)","Wheezing","Gurgling"],correct:[2],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"Tripod positioning — leaning forward with hands on the knees — is MOST associated with:",options:["Abdominal pain requiring a comfortable position","Significant respiratory distress; the patient is using accessory muscles to maximize airway diameter","Hypotension causing the patient to lean forward","Spinal injury preventing an upright posture"],correct:[1],points:1},
+  {section:"Ventilation & Breathing Assessment",type:"matching",stem:"Match each abnormal breathing pattern with its description.",pairs:[{term:"Kussmaul respirations",def:"Deep, rapid, labored breathing associated with metabolic acidosis such as diabetic ketoacidosis"},{term:"Cheyne-Stokes respirations",def:"Cyclic pattern of increasing then decreasing depth followed by apnea; seen in brain injury or heart failure"},{term:"Agonal respirations",def:"Slow, irregular gasping breaths occurring near death that are not adequate breathing"},{term:"Stridor",def:"High-pitched inspiratory sound indicating upper airway obstruction"},{term:"Wheezing",def:"Continuous musical sound on expiration indicating lower airway narrowing from bronchospasm"}],points:1}
 ];
  
 const SECTION_COLORS = {
@@ -264,6 +285,8 @@ const SECTION_COLORS = {
   "Anatomy, Physiology & Medical Terminology":  {bg:"#1b4332", accent:"#4CAF50"},
   "Lifting, Moving & Patient Positioning":      {bg:"#4a1942", accent:"#9C27B0"},
   "Airway Management":                          {bg:"#7c2d12", accent:"#FF5722"},
+  "Ventilation & Breathing Assessment":         {bg:"#1a2f4a", accent:"#00BCD4"},
+  "Communications & Documentation":             {bg:"#1a1a3d", accent:"#9C27B0"},
 };
  
 // ── STATE ────────────────────────────────────────────
@@ -295,6 +318,11 @@ function scoreQuestion(q, ans) {
   if (!ans) return false;
   if (q.type === "mc")      return ans[0] === q.correct[0];
   if (q.type === "best2")   return ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "build") {
+    const order = answers[i] || [...Array(q.items.length).keys()];
+    const correct = q.order;
+    return order.length === correct.length && order.every((v,j) => v === correct[j]);
+  }
   if (q.type === "matching") return q.pairs.every((p,ti)=>ans[ti]===p.def);
   return false;
 }
@@ -412,7 +440,7 @@ function renderIntro() {
         <div class="intro-title">Week 1</div>
         <div class="intro-sub">Examination</div>
         <div class="info-grid">
-          ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management"]]
+          ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Ch. 1–7: EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management · Ventilation & Breathing Assessment"]]
             .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
         </div>
         <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
@@ -530,9 +558,23 @@ function renderExam() {
       <div class="def-bank" id="defBank">${bankChips}</div>
       <div class="terms-label">Terms — Drop definitions here</div>
       <div class="term-rows">${termRows}</div>`;
+ 
+  } else if (q.type==="build") {
+    const currentOrder = answers[current] || [...Array(q.items.length).keys()];
+    const listItems = currentOrder.map((itemIdx, pos) => `
+      <div class="build-item" data-pos="${pos}" data-item-idx="${itemIdx}" draggable="true">
+        <div class="build-handle">⠿</div>
+        <div class="build-num">${pos+1}</div>
+        <div class="build-text">${q.items[itemIdx]}</div>
+      </div>`).join("");
+    questionBody = `
+      <div class="build-instructions"><strong>Drag</strong> the steps into the correct order — first action at the top, last at the bottom.</div>
+      <div class="build-list" id="buildList">${listItems}</div>`;
   }
  
-  const typeBadge = q.type==="best2"
+  const typeBadge = q.type==="build"
+    ? `<span class="q-badge q-badge-build">ORDER STEPS</span>`
+    : q.type==="best2"
     ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
  
   const dots = questions.map((_,i)=>
