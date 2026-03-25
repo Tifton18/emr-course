@@ -1371,12 +1371,12 @@ function buildAnswerBreakdown(q) {
       const isCorrect = q.type === 'mc'
         ? i === q.correctIdx
         : (q.correctSet && q.correctSet.includes(i));
-      const barColor = isCorrect ? '#4ade80' : (count > 0 ? '#f87171' : '#e2e8f0');
+      const barColor = count > 0 ? (isCorrect ? '#4ade80' : '#f87171') : '#e2e8f0';
       const textWeight = isCorrect ? '700' : '400';
-      const icon = isCorrect ? '✓' : (count > 0 ? '✗' : '');
+      const icon = count > 0 ? (isCorrect ? '✓' : '✗') : (isCorrect ? '★' : '');
       html += `
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-          <div style="width:16px;font-size:11px;font-weight:700;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};text-align:center;">${icon}</div>
+          <div style="width:16px;font-size:11px;font-weight:700;color:${count>0?(isCorrect?'#16a34a':'#dc2626'):(isCorrect?'#94a3b8':'#cbd5e1')};text-align:center;">${icon}</div>
           <div style="width:16px;font-size:11px;color:#6b82a0;text-align:right;">${String.fromCharCode(65+i)}.</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:12px;color:#1e3a5f;font-weight:${textWeight};margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${opt}</div>
@@ -1384,7 +1384,7 @@ function buildAnswerBreakdown(q) {
               <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width 0.3s;"></div>
             </div>
           </div>
-          <div style="width:44px;text-align:right;font-size:11px;color:${isCorrect?'#16a34a':count>0?'#dc2626':'#93adc8'};font-weight:${count>0?'600':'400'};">${count > 0 ? count + ' (' + pct + '%)' : '—'}</div>
+          <div style="width:44px;text-align:right;font-size:11px;color:${count>0?(isCorrect?'#16a34a':'#dc2626'):(isCorrect?'#94a3b8':'#cbd5e1')};font-weight:${count>0?'600':'400'};">${count > 0 ? count + ' (' + pct + '%)' : '—'}</div>
         </div>`;
     });
  
@@ -1601,9 +1601,10 @@ const qStats = expandedQuestions.map((q, qi) => {
       lastSection = q.section;
       html += `<div class="analysis-section-header">${q.section}</div>`;
     }
-    const pc = q.pct !== null ? q.pct : 0;
-    const barColor = pc >= 80 ? '#4ade80' : pc >= 70 ? '#86efac' : pc >= 60 ? '#fbbf24' : '#f87171';
-    const textColor = pc >= 70 ? '#16a34a' : '#dc2626';
+    const noData = q.pct === null;
+    const pc = noData ? 0 : q.pct;
+    const barColor = noData ? '#e2e8f0' : pc >= 80 ? '#4ade80' : pc >= 70 ? '#86efac' : pc >= 60 ? '#fbbf24' : '#f87171';
+    const textColor = noData ? '#94a3b8' : pc >= 70 ? '#16a34a' : '#dc2626';
     html += `
       <div class="analysis-q-row${q.flagged ? ' flagged' : ''}">
         <div style="display:flex;align-items:flex-start;gap:12px;">
@@ -1615,10 +1616,10 @@ const qStats = expandedQuestions.map((q, qi) => {
                 <div class="analysis-stat-bar">
                   <div class="analysis-stat-fill-correct" style="width:${pc}%;background:${barColor}"></div>
                 </div>
-                <span style="font-size:13px;font-weight:700;color:${textColor};white-space:nowrap;">${q.pct !== null ? q.pct+'%' : '—'} correct</span>
+                <span style="font-size:13px;font-weight:700;color:${textColor};white-space:nowrap;">${q.pct !== null ? q.pct+'%' : 'No data'} ${q.pct !== null ? 'correct' : ''}</span>
               </div>
               <div style="display:flex;gap:16px;font-size:12px;color:#6b82a0;white-space:nowrap;">
-                <span>✓ ${q.correct} / ${q.answered}</span>
+                <span>${q.answered > 0 ? "✓ " + q.correct + " / " + q.answered + " answered" : "No submissions yet"}</span>
                 <span style="text-transform:uppercase;letter-spacing:1px;">${q.type}</span>
                 ${q.flagged ? '<span style="color:#dc2626;font-weight:700;">⚠ Review</span>' : ''}
               </div>
