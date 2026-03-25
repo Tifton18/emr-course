@@ -1284,6 +1284,7 @@ async function fetchExamQuestions(examLabel) {
   if (!def) return null;
   const fileMap = {
     'Week 1 Exam':    'EMR_Week1_Exam.html',
+    'Week 3 Exam':    'EMR_Week4_Exam.html',
     'Week 4 Exam':    'EMR_Week4_Exam.html',
     'Midterm Exam':   'EMR_Midterm_Exam.html',
     'Final Exam':     'EMR_Final_Exam.html',
@@ -1502,7 +1503,7 @@ const qStats = expandedQuestions.map((q, qi) => {
  
       let ansEntry = Array.isArray(sub.answersData)
         ? sub.answersData.find(a => String(a.qid) === String(q.id))
-        : sub.answersData?.[qi];
+        : sub.answersData?.[q._origQi ?? qi];
       if (!ansEntry) return;
       answered++;
       const given = ansEntry.given;
@@ -1515,8 +1516,11 @@ const qStats = expandedQuestions.map((q, qi) => {
       }
       if (ansEntry.correct !== undefined) {
         if (Array.isArray(given) && Array.isArray(ansEntry.correct)) {
-          const gs = new Set(given), cs = new Set(ansEntry.correct);
+          const gs = new Set(given.map(String)), cs = new Set(ansEntry.correct.map(String));
           isCorrect = gs.size === cs.size && [...cs].every(x => gs.has(x));
+        } else if (Array.isArray(given) && !Array.isArray(ansEntry.correct)) {
+          // given is array, correct is scalar — compare first element
+          isCorrect = String(given[0]) === String(ansEntry.correct);
         } else {
           isCorrect = String(given) === String(ansEntry.correct);
         }
@@ -1524,7 +1528,7 @@ const qStats = expandedQuestions.map((q, qi) => {
         // Fall back to deriving from question def (main exams)
         if (q.type === 'mc') {
           const correctIdx = q.correct ? q.correct[0] : q.answer;
-          isCorrect = Array.isArray(given) ? given[0] === correctIdx : given === correctIdx;
+          isCorrect = Array.isArray(given) ? String(given[0]) === String(correctIdx) : String(given) === String(correctIdx);
         } else if (q.type === 'best2') {
           const correctSet = new Set(q.correct || q.answers || []);
           const givenSet = new Set(Array.isArray(given) ? given : []);
@@ -1656,9 +1660,9 @@ async function loadPortalContent() {
   // Seed default EMR exams if none saved yet
   if (portalContent.emr.exams.length === 0) {
     portalContent.emr.exams = [
-      { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management', active:true },
-      { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'📝', weight:'30% (Midterm)',      topics:'All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED', active:true },
-      { id:'week4',   name:'Week 4 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies', active:true },
+      { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management · Ventilation & Breathing Assessment', active:true },
+      { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'📝', weight:'30% (Midterm)',      topics:'Ch. 1–9: EMS Systems · Anatomy · Lifting & Moving · Airway · Ventilation · Patient Assessment · Circulation & Shock · Cardiac Emergencies & CPR', active:true },
+      { id:'week4',   name:'Week 4 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'Medical Emergencies I & II · Trauma & Burns · Musculoskeletal & Spinal · OB/Peds/Geriatrics · Environmental Emergencies · MCI & EMS Operations', active:true },
       { id:'final',   name:'Final Exam',    file:'EMR_Final_Exam.html',   questions:'120', time:'120 min', passing:'70%', category:'final',   color:'#f87171', icon:'🎓', weight:'40% (Final)',        topics:'Comprehensive — all course topics', active:true },
     ];
   }
