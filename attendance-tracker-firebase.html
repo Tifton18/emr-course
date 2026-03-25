@@ -620,7 +620,8 @@ async function loadExamResults(){
       if(!row.document){ console.log('Row '+rowIdx+' has no document, skipping. Full row:', JSON.stringify(row)); return; }
       const f=row.document.fields||{};
       const name=(f.name?.stringValue||f.studentName?.stringValue||'').toLowerCase().trim();
-      const label=(f.examLabel?.stringValue||f.label?.stringValue||'').trim();
+      let label=(f.examLabel?.stringValue||f.label?.stringValue||'').trim();
+      if (label === 'Week 4 Exam') label = 'Week 3 Exam'; // legacy label alias
       const pct=parseInt(f.pct?.integerValue||f.pct?.doubleValue||f.pct?.stringValue||0);
       const score=parseInt(f.score?.integerValue||f.score?.doubleValue||f.score?.stringValue||0);
       const total=parseInt(f.total?.integerValue||f.total?.doubleValue||f.total?.stringValue||0);
@@ -637,7 +638,7 @@ async function loadExamResults(){
       const existing=examResults[name][def.assignId];
          const answersRaw = f.answersData?.stringValue;
       const answersData = answersRaw ? (() => { try { return JSON.parse(answersRaw); } catch(e) { return null; } })() : null;
-      if(!existing||pct>existing.pct){
+      if(!existing||isNaN(existing.pct)||pct>existing.pct){
         examResults[name][def.assignId]={pct,score,total,submittedAt,category:def.category,examLabel:label,answersData};
       } else if(answersData && !existing.answersData) {
         // Keep higher score but add answersData if it was missing
@@ -1285,7 +1286,6 @@ async function fetchExamQuestions(examLabel) {
   const fileMap = {
     'Week 1 Exam':    'EMR_Week1_Exam.html',
     'Week 3 Exam':    'EMR_Week4_Exam.html',
-    'Week 4 Exam':    'EMR_Week4_Exam.html',
     'Midterm Exam':   'EMR_Midterm_Exam.html',
     'Final Exam':     'EMR_Final_Exam.html',
     'Practice Exam 1':'EMR_Practice_Exam_1.html',
@@ -1673,7 +1673,7 @@ async function loadPortalContent() {
     portalContent.emr.exams = [
       { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management · Ventilation & Breathing Assessment', active:true },
       { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'📝', weight:'30% (Midterm)',      topics:'Ch. 1–9: EMS Systems · Anatomy · Lifting & Moving · Airway · Ventilation · Patient Assessment · Circulation & Shock · Cardiac Emergencies & CPR', active:true },
-      { id:'week4',   name:'Week 4 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'Medical Emergencies I & II · Trauma & Burns · Musculoskeletal & Spinal · OB/Peds/Geriatrics · Environmental Emergencies · MCI & EMS Operations', active:true },
+      { id:'week3',   name:'Week 3 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'Medical Emergencies I & II · Trauma & Burns · Musculoskeletal & Spinal · OB/Peds/Geriatrics', active:true },
       { id:'final',   name:'Final Exam',    file:'EMR_Final_Exam.html',   questions:'120', time:'120 min', passing:'70%', category:'final',   color:'#f87171', icon:'🎓', weight:'40% (Final)',        topics:'Comprehensive — all course topics', active:true },
     ];
   }
