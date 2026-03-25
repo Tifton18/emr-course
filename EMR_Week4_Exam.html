@@ -278,10 +278,10 @@ const questions = [
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient fell from a ladder and has a suspected spinal injury. He is currently ambulatory and says his neck hurts. The MOST appropriate action is:",options:["Allow him to continue walking since he has no neurological deficits","Have him sit in the ambulance and reassess","Manually stabilize the spine and assess for criteria that may clear spinal precautions in the field","Ask him to gently move his neck to assess range of motion"],correct:[2],points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient with a head injury is becoming increasingly combative, has a widening pulse pressure (rising systolic, falling diastolic), and a slowing heart rate. These findings MOST suggest:",options:["Hypovolemic shock from internal bleeding","Increasing intracranial pressure \u2014 this is Cushing's triad","An anxiety response to pain and fear","Neurogenic shock from spinal cord involvement"],correct:[1],points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"best2",stem:"Which TWO of the following are correct prehospital principles when managing a suspected open pneumothorax (sucking chest wound)?",options:["Apply a vented (three-sided) chest seal or occlusive dressing taped on three sides","Pack the wound tightly with gauze and apply firm pressure","Monitor for signs of tension pneumothorax after sealing the wound","Apply the dressing only during exhalation to trap air inside","Remove the dressing every 5 minutes to allow air to escape"],correct:[0,2],points:1},
-  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"You arrive on scene to find a 28-year-old female in active labor. The baby's head is crowning. Which of the following is the MOST appropriate initial action?",options:["Instruct the mother to hold the baby in until you reach the hospital","Transport immediately without delay","Apply gentle pressure to the baby's head while instructing the mother to pant","Prepare for an imminent field delivery, open the OB kit, and support the head as it emerges"],answer:3,explain:"When crowning is present, delivery is imminent and cannot be safely delayed. The EMR should prepare for field delivery, applying gentle pressure to guide — not prevent — the birth."},
-  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A newborn delivered in the field is limp, blue, and not breathing. After drying, warming, and repositioning the airway, the infant still has no spontaneous respirations. What is the MOST appropriate next intervention?",options:["Begin chest compressions immediately","Administer blow-by oxygen only","Initiate positive pressure ventilation at 40–60 breaths per minute","Suction vigorously for 30 seconds"],answer:2,explain:"If a newborn does not breathe after initial stimulation (drying, warming, repositioning), positive pressure ventilation (PPV) is initiated at 40–60 breaths per minute with a properly sized BVM."},
-  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"When assessing a 4-year-old patient in respiratory distress, which finding from the Pediatric Assessment Triangle (PAT) MOST indicates the need for immediate intervention?",options:["Mild nasal flaring with a pink appearance","Crying loudly and actively resisting assessment","Tripod positioning, retractions, and an altered level of consciousness","Respiratory rate of 28 with clear lung sounds"],answer:2,explain:"Tripod positioning with retractions indicates significant work of breathing, and altered mental status suggests the child is tiring and may decompensate. This combination requires immediate airway intervention."},
-  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"An 82-year-old female fell from standing height and is complaining of hip pain. She takes warfarin, lisinopril, and metformin. Which consideration is MOST important when assessing this patient?",options:["Her age means spinal immobilization is not needed","Anticoagulant use increases her risk of significant internal hemorrhage","Vital signs will reliably indicate the severity of her injury","She is unlikely to have a fracture from a low-energy fall"],answer:1,explain:"Geriatric patients on anticoagulants like warfarin have increased risk of significant hemorrhage — even from low-energy mechanisms. EMRs must account for polypharmacy, decreased physiologic reserve, and atypical presentations."}
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"You arrive on scene to find a 28-year-old female in active labor. The baby's head is crowning. Which of the following is the MOST appropriate initial action?",options:["Instruct the mother to hold the baby in until you reach the hospital","Transport immediately without delay","Apply gentle pressure to the baby's head while instructing the mother to pant","Prepare for an imminent field delivery, open the OB kit, and support the head as it emerges"],correct:[3],explain:"When crowning is present, delivery is imminent and cannot be safely delayed. The EMR should prepare for field delivery, applying gentle pressure to guide — not prevent — the birth."},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A newborn delivered in the field is limp, blue, and not breathing. After drying, warming, and repositioning the airway, the infant still has no spontaneous respirations. What is the MOST appropriate next intervention?",options:["Begin chest compressions immediately","Administer blow-by oxygen only","Initiate positive pressure ventilation at 40–60 breaths per minute","Suction vigorously for 30 seconds"],correct:[2],explain:"If a newborn does not breathe after initial stimulation (drying, warming, repositioning), positive pressure ventilation (PPV) is initiated at 40–60 breaths per minute with a properly sized BVM."},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"When assessing a 4-year-old patient in respiratory distress, which finding from the Pediatric Assessment Triangle (PAT) MOST indicates the need for immediate intervention?",options:["Mild nasal flaring with a pink appearance","Crying loudly and actively resisting assessment","Tripod positioning, retractions, and an altered level of consciousness","Respiratory rate of 28 with clear lung sounds"],correct:[2],explain:"Tripod positioning with retractions indicates significant work of breathing, and altered mental status suggests the child is tiring and may decompensate. This combination requires immediate airway intervention."},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"An 82-year-old female fell from standing height and is complaining of hip pain. She takes warfarin, lisinopril, and metformin. Which consideration is MOST important when assessing this patient?",options:["Her age means spinal immobilization is not needed","Anticoagulant use increases her risk of significant internal hemorrhage","Vital signs will reliably indicate the severity of her injury","She is unlikely to have a fracture from a low-energy fall"],correct:[1],explain:"Geriatric patients on anticoagulants like warfarin have increased risk of significant hemorrhage — even from low-energy mechanisms. EMRs must account for polypharmacy, decreased physiologic reserve, and atypical presentations."}
 ];
  
 const SECTION_COLORS = {
@@ -318,7 +318,7 @@ function initShuffles() {
 // ── SCORING ──────────────────────────────────────────
 function scoreQuestion(q, ans) {
   if (ans === undefined || ans === null) return false;
-  if (q.type === "mc")      return Array.isArray(ans) && ans[0] === q.correct[0];
+  if (q.type === "mc")      { const ci = q.correct ? q.correct[0] : q.answer; return Array.isArray(ans) && String(ans[0]) === String(ci); }
   if (q.type === "best2")   return Array.isArray(ans) && ans.length===2 && ans.every(a=>q.correct.includes(a));
   if (q.type === "build") {
     const order = Array.isArray(ans) ? ans : [...Array(q.items.length).keys()];
@@ -371,10 +371,10 @@ async function submitToFirebase(subData) {
         examLabel:  {stringValue: subData.examLabel},
         category:   {stringValue: EXAM_CATEGORY},
         name:       {stringValue: subData.name},
-        score:      {integerValue: subData.score},
-        total:      {integerValue: subData.total},
-        pct:        {integerValue: subData.pct},
-        timeUsed:   {integerValue: subData.timeUsed},
+        score:      {integerValue: String(isNaN(subData.score)   ? 0 : subData.score)},
+        total:      {integerValue: String(isNaN(subData.total)   ? 0 : subData.total)},
+        pct:        {integerValue: String(isNaN(subData.pct)     ? 0 : subData.pct)},
+        timeUsed:   {integerValue: String(isNaN(subData.timeUsed)? 0 : subData.timeUsed)},
         submittedAt:{stringValue: subData.submittedAt},
         answersData:{stringValue: answersStr},
       }
@@ -504,8 +504,9 @@ function renderResults() {
     const correct = qr[i];
     let correctAns = "";
     if (!correct) {
-      if (q.type==="mc" && q.options) correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
-      else if (q.type==="best2" && q.options) correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+      const qCorrect = q.correct || (q.answer !== undefined ? [q.answer] : null);
+      if (q.type==="mc" && q.options && qCorrect) correctAns = `Correct: ${LETTERS[qCorrect[0]]}. ${q.options[qCorrect[0]]}`;
+      else if (q.type==="best2" && q.options && qCorrect) correctAns = `Correct: ${qCorrect.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
       else if (q.type==="matching") correctAns = "See correct matches in the review above";
       else if (q.type==="build") correctAns = "See correct order in the review above";
     }
