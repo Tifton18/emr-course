@@ -418,9 +418,14 @@ async function finishExam() {
   phase = "submitting";
   render();
  
-  const result = await submitToFirebase(subData);
+  try {
+    const result = await submitToFirebase(subData);
+    window._submitResult = result;
+  } catch(e) {
+    console.error('finishExam error:', e);
+    window._submitResult = { success: false, error: e.toString() };
+  }
   phase = "results";
-  window._submitResult = result;
   window._examScore = {score,total,pct};
   window._questionResults = questionResults;
   render();
@@ -566,6 +571,20 @@ function renderExam() {
       <div class="term-rows">${termRows}</div>`;
   }
  
+  } else if (q.type==="build") {
+    const order = Array.isArray(answers[current]) ? answers[current] : [...Array(q.items.length).keys()];
+    const items = order.map(origIdx => ({origIdx, text: q.items[origIdx]}));
+    const buildItems = items.map((item, pos) => {
+      return `<div class="build-item" draggable="true" data-orig-idx="${item.origIdx}" data-pos="${pos}">
+        <div class="build-handle">⠿</div>
+        <div class="build-num">${pos+1}</div>
+        <div class="build-text">${item.text}</div>
+      </div>`;
+    }).join('');
+    questionBody = `
+      <div class="build-instructions">Drag the steps into the correct order — first step at the top.</div>
+      <div class="build-list" id="buildList">${buildItems}</div>`;
+ 
   const typeBadge = q.type==="build"
     ? `<span class="q-badge q-badge-build">ORDER STEPS</span>`
     : q.type==="best2"
@@ -691,7 +710,40 @@ function attachEvents() {
     });
   });
  
-  // Drop on bank (return)
+  // Build question drag-and-drop reordering
+  const buildList = document.getElementById('buildList');
+  if (buildList) {
+    let dragSrcPos = null;
+    buildList.querySelectorAll('.build-item').forEach(item => {
+      item.addEventListener('dragstart', e => {
+        dragSrcPos = parseInt(item.dataset.pos);
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', () => item.classList.remove('dragging'));
+      item.addEventListener('dragover', e => { e.preventDefault(); item.classList.add('dragover'); });
+      item.addEventListener('dragleave', () => item.classList.remove('dragover'));
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        item.classList.remove('dragover');
+        const dropPos = parseInt(item.dataset.pos);
+        if (dragSrcPos === null || dragSrcPos === dropPos) return;
+        // Get current order array
+        const order = Array.isArray(answers[current])
+          ? [...answers[current]]
+          : [...Array(questions[current].items.length).keys()];
+        // Swap
+        const tmp = order[dragSrcPos];
+        order[dragSrcPos] = order[dropPos];
+        order[dropPos] = tmp;
+        answers[current] = order;
+        dragSrcPos = null;
+        render();
+      });
+    });
+  }
+ 
+    // Drop on bank (return)
   const bank = document.getElementById("defBank");
   if (bank) {
     bank.addEventListener("dragover", e=>{ e.preventDefault(); bank.classList.add("dragover"); });
