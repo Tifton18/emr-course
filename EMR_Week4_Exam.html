@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMR Week 4 Exam</title>
+<title>EMR Week 3 Exam</title>
 <style>
   /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
   /* See SETUP_INSTRUCTIONS.txt for how to get this */
@@ -211,6 +211,27 @@
  
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  .build-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 12px; font-style: italic; }
+  .build-list { display: flex; flex-direction: column; gap: 8px; }
+  .build-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #1a2332; border: 1px solid #2d3748; border-radius: 8px;
+    padding: 12px 14px; cursor: grab; user-select: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .build-item:hover { border-color: #2196F3; box-shadow: 0 0 0 1px #2196F3; }
+  .build-item.dragging { opacity: 0.4; }
+  .build-item.dragover { border-color: #22c55e; background: #0f2a1a; }
+  .build-handle { color: #475569; font-size: 18px; flex-shrink: 0; }
+  .build-num { 
+    background: #2196F3; color: white; border-radius: 50%;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .build-text { color: #e2e8f0; font-size: 14px; line-height: 1.5; flex: 1; }
+  .q-badge-build { background: #15803d22; color: #86efac; border: 1px solid #15803d44; }
+ 
 </style>
 </head>
 <body>
@@ -225,9 +246,9 @@ const FB_CONFIG = {
   authDomain:"class-attendance-72cd9.firebaseapp.com",
   projectId:"class-attendance-72cd9",
 };
-const EXAM_LABEL      = "Week 4 Exam";
+const EXAM_LABEL      = "Week 3 Exam";
 const EXAM_CATEGORY   = "module";
-const TOTAL_TIME      = 24 * 60; // 24 minutes
+const TOTAL_TIME      = 25 * 60; // 25 minutes
 const LETTERS         = ["A","B","C","D","E"];
  
 // ── QUESTION DATA ────────────────────────────────────
@@ -238,25 +259,25 @@ const questions = [
   {section:"Medical Emergencies I",type:"mc",stem:"A patient is in the postictal phase following a generalized tonic-clonic seizure. Which presentation would you MOST expect?",options:["Agitation, hypertension, and active muscle contractions","Unresponsiveness or deep confusion, fatigue, and slow recovery of consciousness","Focal one-sided weakness and slurred speech only","Fever above 104 degrees and neck stiffness"],correct:[1],points:1},
   {section:"Medical Emergencies I",type:"best2",stem:"A patient presents with sudden facial droop on the right side, left arm weakness, and difficulty speaking. Which TWO actions are MOST appropriate?",options:["Perform the Cincinnati Stroke Scale assessment","Administer aspirin immediately","Note the time of symptom onset and transport rapidly to a stroke center","Apply a tourniquet to the left arm to assess motor response","Have the patient walk to test gait and balance"],correct:[0,2],points:1},
   {section:"Medical Emergencies I",type:"mc",stem:"Which of the following is a contraindication to administering oral glucose to a diabetic patient?",options:["Blood glucose above 80 mg/dL","The patient is unable to swallow or is unconscious","A known allergy to insulin","The patient has previously taken oral glucose within the last hour"],correct:[1],points:1},
-  {section:"Medical Emergencies I",type:"matching",stem:"Match each medical emergency with its key assessment finding or defining feature.",pairs:[{term:"Hypoglycemia",def:"Diaphoresis, trembling, altered mental status in a diabetic patient who has not eaten"},{term:"Ischemic stroke",def:"Sudden focal neurological deficits caused by a blocked cerebral artery; time-sensitive transport"},{term:"Tonic-clonic seizure",def:"Rhythmic full-body muscle contractions followed by a postictal period of confusion and fatigue"},{term:"Hyperglycemia",def:"Gradual onset of altered mental status, fruity breath, Kussmaul respirations, and dehydration in a diabetic"},{term:"Transient ischemic attack",def:"Stroke-like symptoms that resolve completely within 24 hours; a warning sign of impending stroke"}],points:1},
   {section:"Medical Emergencies II",type:"mc",stem:"A patient presents with sudden onset hives, facial swelling, wheezing, and hypotension after eating at a restaurant. The MOST appropriate initial intervention is:",options:["Administer high-flow oxygen only and transport","Assist with the patient's epinephrine auto-injector and call for ALS backup","Administer oral diphenhydramine and monitor","Position supine and apply a cold compress to the face"],correct:[1],points:1},
   {section:"Medical Emergencies II",type:"mc",stem:"Which of the following presentations is MOST consistent with a patient experiencing an acute asthma attack?",options:["Bilateral crackles, productive pink frothy sputum, and hypertension","Expiratory wheezing, prolonged expiration, accessory muscle use, and decreased SpO2","Inspiratory stridor, drooling, and tripod positioning in a child with fever","Sudden onset pleuritic chest pain with absent breath sounds on one side"],correct:[1],points:1},
   {section:"Medical Emergencies II",type:"mc",stem:"You respond to a patient who ingested an unknown quantity of pills. The patient is drowsy with slow, shallow respirations, pinpoint pupils, and bradycardia. Which toxidrome is MOST consistent with this presentation?",options:["Sympathomimetic toxidrome (stimulant overdose)","Anticholinergic toxidrome","Opioid toxidrome","Cholinergic toxidrome (organophosphate poisoning)"],correct:[2],points:1},
   {section:"Medical Emergencies II",type:"mc",stem:"A patient with a behavioral emergency is becoming increasingly agitated and threatening. Which of the following is the MOST important initial action?",options:["Physically restrain the patient before they can harm themselves or others","Ensure scene safety and position yourself near an exit while attempting verbal de-escalation","Administer a sedative from your kit to calm the patient","Leave the scene and wait for law enforcement before returning"],correct:[1],points:1},
   {section:"Medical Emergencies II",type:"best2",stem:"Which TWO findings are MOST associated with anaphylaxis rather than a mild allergic reaction?",options:["Urticaria (hives) limited to the forearm","Hypotension and signs of shock","Audible wheezing with decreased SpO2","Localized redness and itching at a bee sting site","Runny nose and watery eyes after pollen exposure"],correct:[1,2],points:1},
-  {section:"Medical Emergencies II",type:"matching",stem:"Match each toxidrome with its classic presentation.",pairs:[{term:"Opioid toxidrome",def:"Pinpoint pupils, decreased respirations, decreased level of consciousness, bradycardia"},{term:"Sympathomimetic toxidrome",def:"Dilated pupils, tachycardia, hypertension, hyperthermia, agitation"},{term:"Cholinergic toxidrome",def:"SLUDGE: salivation, lacrimation, urination, defecation, GI distress, emesis; bradycardia"},{term:"Anticholinergic toxidrome",def:"Dry skin, dilated pupils, urinary retention, tachycardia, hyperthermia, confusion"},{term:"Sedative-hypnotic toxidrome",def:"Drowsiness, slurred speech, ataxia, normal or mildly decreased respirations"}],points:1},
   {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"A patient was an unrestrained driver in a high-speed frontal collision. Based on kinematics, which injury pattern should the EMR MOST anticipate?",options:["Isolated head injury only","Multi-system trauma including head, chest, abdomen, and lower extremity injuries from dashboard and steering wheel contact","Posterior spinal compression fractures only","Bilateral ankle fractures from bracing against the footwell"],correct:[1],points:1},
   {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"You are assessing a burn patient. The patient has full-thickness burns covering the entire right arm and the anterior chest. Using the Rule of Nines, what percentage of body surface area (BSA) is burned?",options:["18%","27%","36%","45%"],correct:[1],points:1},
   {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"Which of the following BEST describes the appearance of a full-thickness (third-degree) burn?",options:["Red, moist, and extremely painful with blisters","Leathery, waxy, or charred appearance; may be white or brown; painless due to nerve destruction","Superficial redness and pain without blistering","Mottled red and white with intact skin surface"],correct:[1],points:1},
   {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"An evisceration (exposed abdominal organs) is discovered during patient assessment. The MOST appropriate management is:",options:["Gently replace the organs into the abdominal cavity and apply a pressure dressing","Cover the organs with a moist sterile dressing and do not attempt to replace them","Apply dry gauze and an occlusive dressing with firm pressure","Leave the wound uncovered to prevent contamination of the sterile organs"],correct:[1],points:1},
-  {section:"Trauma Assessment, Soft Tissue & Burns",type:"best2",stem:"Which TWO of the following are correct principles of burn management in the prehospital setting?",options:["Stop the burning process by removing clothing and jewelry from the burned area","Apply ice directly to the burn to reduce pain and tissue damage","Cover the burn with a dry sterile dressing or burn sheet","Rupture large blisters to prevent infection","Immerse the burned area in cold water for at least 30 minutes"],correct:[0,2],points:1},
+  {section:"Trauma Assessment, Soft Tissue & Burns",type:"build",stem:"You arrive at a motor vehicle collision with a patient who has significant external bleeding and an open femur fracture. Place the following treatment priorities in the CORRECT order.",items:["Apply a traction splint to the femur fracture","Control life-threatening hemorrhage with a tourniquet","Perform scene size-up and BSI precautions","Assess airway and breathing — manage life threats","Perform rapid head-to-toe trauma assessment"],order:[2,3,1,4,0],explain:"Scene safety/BSI → airway & breathing → hemorrhage control → trauma assessment → splinting. Bleeding control takes priority over fracture stabilization.",points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"Which of the following findings is MOST indicative of a closed femur fracture requiring immediate intervention?",options:["Mild tenderness over the mid-thigh with full range of motion","Severe deformity, swelling, and potential blood loss of 1 to 2 liters into the thigh compartment","Crepitus only with active movement","Ecchymosis without pain or deformity"],correct:[1],points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"When assessing circulation, sensation, and movement (CSM) distal to a fracture, which finding would MOST concern you?",options:["Mild pain with palpation at the fracture site","Absent distal pulse, numbness, and inability to move fingers or toes","Capillary refill of 2 seconds","Moderate swelling without deformity"],correct:[1],points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient fell from a ladder and has a suspected spinal injury. He is currently ambulatory and says his neck hurts. The MOST appropriate action is:",options:["Allow him to continue walking since he has no neurological deficits","Have him sit in the ambulance and reassess","Manually stabilize the spine and assess for criteria that may clear spinal precautions in the field","Ask him to gently move his neck to assess range of motion"],correct:[2],points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient with a head injury is becoming increasingly combative, has a widening pulse pressure (rising systolic, falling diastolic), and a slowing heart rate. These findings MOST suggest:",options:["Hypovolemic shock from internal bleeding","Increasing intracranial pressure \u2014 this is Cushing's triad","An anxiety response to pain and fear","Neurogenic shock from spinal cord involvement"],correct:[1],points:1},
   {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"best2",stem:"Which TWO of the following are correct prehospital principles when managing a suspected open pneumothorax (sucking chest wound)?",options:["Apply a vented (three-sided) chest seal or occlusive dressing taped on three sides","Pack the wound tightly with gauze and apply firm pressure","Monitor for signs of tension pneumothorax after sealing the wound","Apply the dressing only during exhalation to trap air inside","Remove the dressing every 5 minutes to allow air to escape"],correct:[0,2],points:1},
-  {section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"matching",stem:"Match each injury type with its key clinical finding or management principle.",pairs:[{term:"Flail chest",def:"Segment of chest wall moves paradoxically (inward on inhalation) due to multiple consecutive rib fractures"},{term:"Open pneumothorax",def:"Air enters the pleural space through a chest wall wound; treated with a vented chest seal"},{term:"Tension pneumothorax",def:"Air accumulates under pressure collapsing the lung; tracheal deviation, absent breath sounds, hypotension"},{term:"Spinal precautions",def:"Manual in-line stabilization maintained whenever mechanism or symptoms suggest possible spinal injury"},{term:"Cushing's triad",def:"Hypertension with widening pulse pressure, bradycardia, and irregular respirations indicating rising ICP"}],points:1},
-  {section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"When applying the Rule of Nines to calculate burn BSA in an adult, which of the following values is CORRECT?",options:["Each arm = 18%, each leg = 9%, head = 9%","Head and neck = 9%, each arm = 9%, chest = 18%, abdomen = 18%, each leg = 18%, genitalia = 1%","Head = 18%, each arm = 9%, each leg = 9%, trunk = 36%","Each leg = 9%, torso = 36%, head = 18%"],correct:[1],points:1},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"You arrive on scene to find a 28-year-old female in active labor. The baby's head is crowning. Which of the following is the MOST appropriate initial action?",options:["Instruct the mother to hold the baby in until you reach the hospital","Transport immediately without delay","Apply gentle pressure to the baby's head while instructing the mother to pant","Prepare for an imminent field delivery, open the OB kit, and support the head as it emerges"],answer:3,explain:"When crowning is present, delivery is imminent and cannot be safely delayed. The EMR should prepare for field delivery, applying gentle pressure to guide — not prevent — the birth."},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A newborn delivered in the field is limp, blue, and not breathing. After drying, warming, and repositioning the airway, the infant still has no spontaneous respirations. What is the MOST appropriate next intervention?",options:["Begin chest compressions immediately","Administer blow-by oxygen only","Initiate positive pressure ventilation at 40–60 breaths per minute","Suction vigorously for 30 seconds"],answer:2,explain:"If a newborn does not breathe after initial stimulation (drying, warming, repositioning), positive pressure ventilation (PPV) is initiated at 40–60 breaths per minute with a properly sized BVM."},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"When assessing a 4-year-old patient in respiratory distress, which finding from the Pediatric Assessment Triangle (PAT) MOST indicates the need for immediate intervention?",options:["Mild nasal flaring with a pink appearance","Crying loudly and actively resisting assessment","Tripod positioning, retractions, and an altered level of consciousness","Respiratory rate of 28 with clear lung sounds"],answer:2,explain:"Tripod positioning with retractions indicates significant work of breathing, and altered mental status suggests the child is tiring and may decompensate. This combination requires immediate airway intervention."},
+  {section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"An 82-year-old female fell from standing height and is complaining of hip pain. She takes warfarin, lisinopril, and metformin. Which consideration is MOST important when assessing this patient?",options:["Her age means spinal immobilization is not needed","Anticoagulant use increases her risk of significant internal hemorrhage","Vital signs will reliably indicate the severity of her injury","She is unlikely to have a fracture from a low-energy fall"],answer:1,explain:"Geriatric patients on anticoagulants like warfarin have increased risk of significant hemorrhage — even from low-energy mechanisms. EMRs must account for polypharmacy, decreased physiologic reserve, and atypical presentations."}
 ];
  
 const SECTION_COLORS = {
@@ -295,6 +316,11 @@ function scoreQuestion(q, ans) {
   if (!ans) return false;
   if (q.type === "mc")      return ans[0] === q.correct[0];
   if (q.type === "best2")   return ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "build") {
+    const order = answers[i] || [...Array(q.items.length).keys()];
+    const correct = q.order;
+    return order.length === correct.length && order.every((v,j) => v === correct[j]);
+  }
   if (q.type === "matching") return q.pairs.every((p,ti)=>ans[ti]===p.def);
   return false;
 }
@@ -408,8 +434,8 @@ function renderIntro() {
   return `
     <div class="intro-wrap">
       <div class="intro-card">
-        <div class="intro-eyebrow">Georgia OEMST · NHTSA 2021 · Week 4</div>
-        <div class="intro-title">Week 4</div>
+        <div class="intro-eyebrow">Georgia OEMST · NHTSA 2021 · Week 3</div>
+        <div class="intro-title">Week 3</div>
         <div class="intro-sub">Examination</div>
         <div class="info-grid">
           ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Medical Emergencies I & II · Trauma Assessment · Burns · Musculoskeletal & Spinal Trauma · Head & Chest Trauma"]]
@@ -532,7 +558,9 @@ function renderExam() {
       <div class="term-rows">${termRows}</div>`;
   }
  
-  const typeBadge = q.type==="best2"
+  const typeBadge = q.type==="build"
+    ? `<span class="q-badge q-badge-build">ORDER STEPS</span>`
+    : q.type==="best2"
     ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
  
   const dots = questions.map((_,i)=>
