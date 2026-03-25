@@ -1516,8 +1516,15 @@ const qStats = expandedQuestions.map((q, qi) => {
       }
       if (ansEntry.correct !== undefined) {
         if (Array.isArray(given) && Array.isArray(ansEntry.correct)) {
-          const gs = new Set(given.map(String)), cs = new Set(ansEntry.correct.map(String));
-          isCorrect = gs.size === cs.size && [...cs].every(x => gs.has(x));
+          if (q.type === 'build') {
+            // Build questions: order matters — compare element by element
+            isCorrect = given.length === ansEntry.correct.length &&
+              given.every((v, j) => String(v) === String(ansEntry.correct[j]));
+          } else {
+            // mc/best2/matching: use Set for unordered comparison
+            const gs = new Set(given.map(String)), cs = new Set(ansEntry.correct.map(String));
+            isCorrect = gs.size === cs.size && [...cs].every(x => gs.has(x));
+          }
         } else if (Array.isArray(given) && !Array.isArray(ansEntry.correct)) {
           // given is array, correct is scalar — compare first element
           isCorrect = String(given[0]) === String(ansEntry.correct);
@@ -1533,6 +1540,10 @@ const qStats = expandedQuestions.map((q, qi) => {
           const correctSet = new Set(q.correct || q.answers || []);
           const givenSet = new Set(Array.isArray(given) ? given : []);
           isCorrect = correctSet.size === givenSet.size && [...correctSet].every(x => givenSet.has(x));
+        } else if (q.type === 'build') {
+          isCorrect = Array.isArray(given) && Array.isArray(q.order) &&
+            given.length === q.order.length &&
+            given.every((v, j) => String(v) === String(q.order[j]));
         } else if (q.type === 'matching') {
           isCorrect = Array.isArray(given) && q.pairs.every((p, pi) => given[pi] === p.def);
         }
