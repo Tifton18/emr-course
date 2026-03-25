@@ -211,6 +211,27 @@
  
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  .build-instructions { color: #94a3b8; font-size: 13px; margin-bottom: 12px; font-style: italic; }
+  .build-list { display: flex; flex-direction: column; gap: 8px; }
+  .build-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #1a2332; border: 1px solid #2d3748; border-radius: 8px;
+    padding: 12px 14px; cursor: grab; user-select: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .build-item:hover { border-color: #2196F3; box-shadow: 0 0 0 1px #2196F3; }
+  .build-item.dragging { opacity: 0.4; }
+  .build-item.dragover { border-color: #22c55e; background: #0f2a1a; }
+  .build-handle { color: #475569; font-size: 18px; flex-shrink: 0; }
+  .build-num { 
+    background: #2196F3; color: white; border-radius: 50%;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .build-text { color: #e2e8f0; font-size: 14px; line-height: 1.5; flex: 1; }
+  .q-badge-build { background: #15803d22; color: #86efac; border: 1px solid #15803d44; }
+ 
 </style>
 </head>
 <body>
@@ -269,7 +290,7 @@ const questions = [
   {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"Which of the following BEST describes the pathophysiology of distributive shock?",options:["Massive blood loss reduces preload and cardiac output","The heart muscle fails to pump effectively despite adequate volume","Massive vasodilation causes blood to pool peripherally, reducing effective circulating volume","An obstruction prevents blood from returning to or leaving the heart"],correct:[2],points:1},
   {section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"A patient in decompensated hemorrhagic shock will MOST likely present with:",options:["Normal blood pressure, mild tachycardia, pale cool skin","Hypertension, bradycardia, and bounding pulses","Hypotension, tachycardia, absent radial pulses, altered mental status, and mottled skin","Bradycardia, warm skin, and hypertension from sympathetic compensation"],correct:[2],points:1},
   {section:"Circulation, Bleeding Control & Shock",type:"best2",stem:"Which TWO of the following are appropriate prehospital interventions for a patient in hemorrhagic shock?",options:["Prevent heat loss by covering the patient with a blanket","Administer oral fluids to rapidly replace lost volume","Control all external bleeding sources","Elevate the patient's head to improve cerebral perfusion","Delay transport until blood pressure normalizes"],correct:[0,2],points:1},
-  {section:"Circulation, Bleeding Control & Shock",type:"matching",stem:"Match each type of shock with its primary underlying cause.",pairs:[{term:"Hypovolemic shock",def:"Loss of blood or fluid volume depletes preload and reduces cardiac output"},{term:"Cardiogenic shock",def:"The heart fails to pump effectively, reducing output despite adequate circulating volume"},{term:"Neurogenic shock",def:"Spinal cord injury disrupts sympathetic tone causing vasodilation and relative bradycardia"},{term:"Anaphylactic shock",def:"Massive histamine release causes severe vasodilation, bronchospasm, and airway edema"},{term:"Obstructive shock",def:"A physical barrier such as tension pneumothorax or tamponade prevents adequate cardiac output"}],points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"build",stem:"A patient has life-threatening hemorrhage from a gunshot wound to the thigh. Place the tourniquet application steps in the CORRECT sequence.",items:["Mark the time of application on the tourniquet","Position tourniquet 2–3 inches proximal to the wound","Tighten windlass until bleeding stops and distal pulse is absent","Take BSI precautions and identify life-threatening bleeding","Lock and secure the windlass — do not loosen"],order:[3,1,2,4,0],explain:"BSI/identify bleeding → position tourniquet → tighten until bleeding stops and distal pulse absent → lock windlass → mark T-time. Documentation of T-time is last but essential.",points:1},
   {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following is the MOST common symptom of acute myocardial infarction (AMI) in adults?",options:["Sharp stabbing chest pain that worsens with deep inspiration","Pressure or squeezing chest discomfort that may radiate to the left arm or jaw","Sudden fever and productive cough","Pleuritic chest pain relieved by leaning forward"],correct:[1],points:1},
   {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"When performing high-quality CPR on an adult, compressions should be delivered at a rate of:",options:["60 to 80 compressions per minute","100 to 120 compressions per minute","120 to 140 compressions per minute","As fast as physically possible"],correct:[1],points:1},
   {section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Full chest recoil between compressions during CPR is important because:",options:["It prevents the rescuer from fatiguing","It allows the heart to refill with blood, maximizing stroke volume on the next compression","It reduces the risk of rib fractures","It allows time for the patient's brain to receive oxygenated blood"],correct:[1],points:1},
@@ -324,6 +345,11 @@ function scoreQuestion(q, ans) {
   if (!ans) return false;
   if (q.type === "mc")      return ans[0] === q.correct[0];
   if (q.type === "best2")   return ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "build") {
+    const order = answers[i] || [...Array(q.items.length).keys()];
+    const correct = q.order;
+    return order.length === correct.length && order.every((v,j) => v === correct[j]);
+  }
   if (q.type === "matching") return q.pairs.every((p,ti)=>ans[ti]===p.def);
   return false;
 }
@@ -441,7 +467,7 @@ function renderIntro() {
         <div class="intro-title">Midterm</div>
         <div class="intro-sub">Examination</div>
         <div class="info-grid">
-          ${[["Questions","50"],["Total Points","50"],["Time Allowed","50 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management"]]
+          ${[["Questions","50"],["Total Points","50"],["Time Allowed","50 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Ch. 1–9: EMS Systems · Anatomy · Lifting & Moving · Airway · Ventilation · Patient Assessment · Circulation & Shock · Cardiac Emergencies & CPR"]]
             .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
         </div>
         <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
@@ -559,9 +585,23 @@ function renderExam() {
       <div class="def-bank" id="defBank">${bankChips}</div>
       <div class="terms-label">Terms — Drop definitions here</div>
       <div class="term-rows">${termRows}</div>`;
+ 
+  } else if (q.type==="build") {
+    const currentOrder = answers[current] || [...Array(q.items.length).keys()];
+    const listItems = currentOrder.map((itemIdx, pos) => `
+      <div class="build-item" data-pos="${pos}" data-item-idx="${itemIdx}" draggable="true">
+        <div class="build-handle">⠿</div>
+        <div class="build-num">${pos+1}</div>
+        <div class="build-text">${q.items[itemIdx]}</div>
+      </div>`).join("");
+    questionBody = `
+      <div class="build-instructions"><strong>Drag</strong> the steps into the correct order — first action at the top, last at the bottom.</div>
+      <div class="build-list" id="buildList">${listItems}</div>`;
   }
  
-  const typeBadge = q.type==="best2"
+  const typeBadge = q.type==="build"
+    ? `<span class="q-badge q-badge-build">ORDER STEPS</span>`
+    : q.type==="best2"
     ? `<span class="q-badge" style="background:#7c3aed22;color:#a78bfa;border:1px solid #7c3aed44">SELECT 2</span>` : "";
  
   const dots = questions.map((_,i)=>
