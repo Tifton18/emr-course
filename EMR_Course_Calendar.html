@@ -7,7 +7,7 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: system-ui, -apple-system, sans-serif; background: #f1f5f9; color: #1e293b; }
-
+ 
   /* ── Header ── */
   .page-header {
     background: linear-gradient(135deg, #1F3864 0%, #2d5a8e 100%);
@@ -21,10 +21,10 @@
   .pill { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25);
     border-radius: 20px; padding: 4px 14px; font-size: 12px; }
   .pill strong { color: #fbbf24; }
-
+ 
   /* ── Main ── */
   .main { max-width: 1100px; margin: 0 auto; padding: 28px 24px 48px; }
-
+ 
   /* ── Week block ── */
   .week-block { margin-bottom: 36px; }
   .week-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -33,7 +33,7 @@
   .week-dates { font-size: 13px; color: #64748b; font-weight: 500; }
   .week-note { font-size: 11px; color: #ef4444; font-weight: 600;
     background: #fef2f2; border: 1px solid #fecaca; border-radius: 4px; padding: 2px 8px; }
-
+ 
   /* ── Day card ── */
   .day-card {
     background: white; border-radius: 10px; margin-bottom: 10px;
@@ -41,14 +41,14 @@
     transition: transform .15s, box-shadow .15s;
   }
   .day-card:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.12); }
-
+ 
   .card-inner {
     display: grid;
     grid-template-columns: 240px 1fr;
     align-items: start;
     min-height: 0;
   }
-
+ 
   /* Left column — day info */
   .card-left {
     padding: 14px 16px 14px 18px;
@@ -62,19 +62,19 @@
   .card-chapters { font-size: 10.5px; font-weight: 600; color: #475569; margin-bottom: 7px; }
   .badge { display: inline-block; border-radius: 4px; padding: 2px 8px;
     font-size: 9.5px; font-weight: 800; letter-spacing: .07em; }
-
+ 
   /* Right column — hourly schedule */
   .card-right { padding: 10px 16px 10px 14px; }
-
+ 
   .sched-block-list { display: flex; flex-direction: column; gap: 3px; }
-
+ 
   .sched-row {
     display: flex; align-items: baseline; gap: 6px;
     font-size: 11px; line-height: 1.35; padding: 1px 0;
   }
   .lunch-row .sched-label { background: #fef9c3 !important; color: #92400e !important; }
   .truck-row .sched-label { background: #dbeafe !important; color: #1e40af !important; }
-
+ 
   .sched-time {
     font-family: 'Courier New', monospace; font-size: 10px;
     color: #94a3b8; min-width: 80px; flex-shrink: 0;
@@ -84,7 +84,7 @@
     padding: 1px 7px; border-radius: 3px; white-space: nowrap; flex-shrink: 0;
   }
   .sched-desc { font-size: 10.5px; color: #475569; line-height: 1.4; }
-
+ 
   /* ── Summary bar ── */
   .summary-bar {
     max-width: 1100px; margin: 0 auto 28px; padding: 0 24px;
@@ -99,7 +99,7 @@
     text-transform: uppercase; color: #94a3b8; margin-bottom: 3px; }
   .summary-value { font-size: 14px; font-weight: 700; color: #0f172a; }
   .summary-sub { font-size: 10.5px; color: #64748b; margin-top: 1px; }
-
+ 
   @media (max-width: 768px) {
     .card-inner { grid-template-columns: 1fr; }
     .card-left { border-right: none; border-bottom: 1px solid #f1f5f9; }
@@ -107,7 +107,7 @@
 </style>
 </head>
 <body>
-
+ 
 <div class="page-header">
   <div class="header-eyebrow">Georgia OEMST · NHTSA 2021 National EMS Education Standards</div>
   <div class="header-title">EMR Initial Education — Tifton Fire Department</div>
@@ -116,33 +116,35 @@
     <div class="pill"><strong>Start:</strong> Mon, April 27</div>
     <div class="pill"><strong>End:</strong> Wed, May 28</div>
     <div class="pill"><strong>CPR Cert:</strong> Thu, Apr 30</div>
+    <div class="pill"><strong>Week 1 Exam:</strong> Thu, Apr 30</div>
+    <div class="pill"><strong>Week 3 Exam:</strong> Wed, May 13</div>
     <div class="pill"><strong>Midterm:</strong> Thu, May 7</div>
     <div class="pill"><strong>Final Exam:</strong> Wed, May 20</div>
     <div class="pill"><strong>NREMT Testing:</strong> May 26–28</div>
     <div class="pill"><strong>Memorial Day:</strong> May 25 — No class</div>
   </div>
 </div>
-
+ 
 <div class="summary-bar">
   <div class="summary-card" style="--accent:#1d4ed8">
     <div class="summary-label">Week 1</div>
     <div class="summary-value">Apr 27 – 30</div>
-    <div class="summary-sub">EMS Foundations + CPR Cert</div>
+    <div class="summary-sub">EMS Foundations + CPR Cert + Week 1 Exam</div>
   </div>
   <div class="summary-card" style="--accent:#0e7490">
     <div class="summary-label">Week 2</div>
     <div class="summary-value">May 4 – 7</div>
-    <div class="summary-sub">Assessment + Midterm Thu</div>
+    <div class="summary-sub">Assessment + Cardiac + Midterm Thu</div>
   </div>
   <div class="summary-card" style="--accent:#7c3aed">
     <div class="summary-label">Week 3</div>
     <div class="summary-value">May 11 – 14</div>
-    <div class="summary-sub">Emergencies + Week 3 Exam Thu</div>
+    <div class="summary-sub">Emergencies + Week 3 Exam Wed</div>
   </div>
   <div class="summary-card" style="--accent:#b91c1c">
     <div class="summary-label">Week 4</div>
     <div class="summary-value">May 18 – 21</div>
-    <div class="summary-sub">Ch. 18–20 · Review · Final Wed</div>
+    <div class="summary-sub">Ch. 18–20 · Review Tue · Final Wed</div>
   </div>
   <div class="summary-card" style="--accent:#1e1b4b">
     <div class="summary-label">Week 5 — NREMT</div>
@@ -150,17 +152,17 @@
     <div class="summary-sub">Mon–Wed (Memorial Day May 25)</div>
   </div>
 </div>
-
+ 
 <div class="main">
-
-
+ 
+ 
   <div class="week-block">
     <div class="week-header">
       <span class="week-tag" style="background:#1d4ed8">Week 1</span>
       <span class="week-dates">April 27 – 30, 2026</span>
       
     </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -183,7 +185,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -204,7 +206,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -225,59 +227,58 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
         <div class="card-date" style="color:#1d4ed8">Thu · Apr 30</div>
-        <div class="card-title">AHA BLS CPR/AED Certification + Cardiac Emergencies (Ch. 10)</div>
-        <div class="card-chapters">AHA BLS · Ch. 10</div>
-        <span class="badge" style="background:#fef3c7;color:#92400e">CPR CERT + EXAM</span>
+        <div class="card-title">AHA BLS CPR/AED Certification + Week 1 Exam</div>
+        <div class="card-chapters">AHA BLS · Ch. 1–7 Exam</div>
+        <span class="badge" style="background:#fee2e2;color:#7f1d1d">CPR CERT + EXAM</span>
       </div>
       <div class="card-right">
         <div class="sched-block-list">
 <div class="sched-row truck-row"><span class="sched-time">8:00–9:00</span><span class="sched-label" style="background:#dbeafe;color:#1e40af">Truck Checks</span><span class="sched-desc"></span></div>
 <div class="sched-row"><span class="sched-time">9:00–11:30</span><span class="sched-label" style="background:#e0f2fe;color:#0369a1">AHA BLS</span><span class="sched-desc">Adult/child/infant CPR, AED operation, 2-rescuer technique, FBAO management</span></div>
 <div class="sched-row lunch-row"><span class="sched-time">11:30–12:00</span><span class="sched-label" style="background:#fef9c3;color:#92400e">Lunch</span></div>
-<div class="sched-row"><span class="sched-time">12:00–2:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">AHA Testing</span><span class="sched-desc">AHA BLS skills testing — adult 1-rescuer CPR, infant CPR, child CPR, 2-rescuer with AED (0.5 hr additional station time); written exam; BLS Provider card issuance</span></div>
-<div class="sched-row"><span class="sched-time">2:30–3:30</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Review</span><span class="sched-desc">Week 1 content review — Ch. 1–7 high-yield Q&A</span></div>
-<div class="sched-row"><span class="sched-time">3:30–4:30</span><span class="sched-label" style="background:#fff7ed;color:#c2410c">Week 1 Exam</span><span class="sched-desc">Written exam covering Ch. 1–7 (25 questions)</span></div>
-<div class="sched-row"><span class="sched-time">4:30–5:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Debrief</span><span class="sched-desc">Exam review, discuss answers — EMS Systems & Week 2 preview (lecture credit: EMS Systems, 0.5 hr)</span></div>
+<div class="sched-row"><span class="sched-time">12:00–2:00</span><span class="sched-label" style="background:#dcfce7;color:#15803d">AHA Testing</span><span class="sched-desc">AHA BLS skills testing — adult 1-rescuer CPR, infant CPR, child CPR, 2-rescuer with AED; written exam; BLS Provider card issuance</span></div>
+<div class="sched-row"><span class="sched-time">2:00–3:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Review</span><span class="sched-desc">Week 1 content review — Ch. 1–7 high-yield Q&A, identify weak areas before exam</span></div>
+<div class="sched-row"><span class="sched-time">3:00–4:00</span><span class="sched-label" style="background:#fff7ed;color:#c2410c">Week 1 Exam</span><span class="sched-desc">Written exam covering Ch. 1–7 (25 questions)</span></div>
+<div class="sched-row"><span class="sched-time">4:00–5:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Debrief</span><span class="sched-desc">Exam review — discuss correct answers, preview Week 2 Patient Assessment & Midterm scope</span></div>
         </div>
       </div>
     </div>
   </div>
   </div>
-
+ 
   <div class="week-block">
     <div class="week-header">
       <span class="week-tag" style="background:#0e7490">Week 2</span>
       <span class="week-dates">May 4 – 7, 2026</span>
       
     </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
         <div class="card-date" style="color:#0e7490">Mon · May 4</div>
-        <div class="card-title">Week 1 Exam + Patient Assessment & Vital Signs</div>
-        <div class="card-chapters">Ch. 1–7 Exam · Ch. 8–9</div>
+        <div class="card-title">Patient Assessment & Vital Signs</div>
+        <div class="card-chapters">Ch. 8–9</div>
         
       </div>
       <div class="card-right">
         <div class="sched-block-list">
-<div class="sched-row truck-row"><span class="sched-time">8:00–8:30</span><span class="sched-label" style="background:#dbeafe;color:#1e40af">Truck Checks</span><span class="sched-desc"></span></div>
-<div class="sched-row"><span class="sched-time">8:30–10:00</span><span class="sched-label" style="background:#fff7ed;color:#c2410c">Week 1 Exam</span><span class="sched-desc">Written exam covering Ch. 1–7 (25 questions)</span></div>
-<div class="sched-row"><span class="sched-time">10:00–11:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Debrief</span><span class="sched-desc">Exam review — discuss correct answers, identify weak areas by topic, open Q&A</span></div>
+<div class="sched-row truck-row"><span class="sched-time">8:00–9:00</span><span class="sched-label" style="background:#dbeafe;color:#1e40af">Truck Checks</span><span class="sched-desc"></span></div>
+<div class="sched-row"><span class="sched-time">9:00–11:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Ch. 8 — Scene size-up, primary survey (XABCDE), general impression, transport priority, SAMPLE history, secondary assessment</span></div>
 <div class="sched-row lunch-row"><span class="sched-time">11:00–12:00</span><span class="sched-label" style="background:#fef9c3;color:#92400e">Lunch</span></div>
-<div class="sched-row"><span class="sched-time">12:00–2:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Ch. 8 — Scene size-up, XABCDE primary survey, general impression, transport priority, SAMPLE history, secondary assessment</span></div>
-<div class="sched-row"><span class="sched-time">2:00–3:30</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Ch. 9 — Vital signs: pulse, respirations, blood pressure, SpO2, BGL, skin signs, pupil assessment</span></div>
-<div class="sched-row"><span class="sched-time">3:30–5:00</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Patient assessment stations, vital signs practice — Skill Sheets 7 & 8 introduced</span></div>
+<div class="sched-row"><span class="sched-time">12:00–2:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Ch. 9 — Vital signs: pulse, respirations, blood pressure, SpO2, BGL, skin signs, pupil assessment</span></div>
+<div class="sched-row"><span class="sched-time">2:00–4:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Patient assessment stations using WS-4 framework. Vital signs skills practice. Skill Sheets 7 & 8 introduced.</span></div>
+<div class="sched-row"><span class="sched-time">4:30–5:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Review</span><span class="sched-desc">WS-4 completion, assessment Q&A, preview Day 6 hemorrhage control</span></div>
         </div>
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -298,7 +299,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -319,7 +320,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -341,14 +342,14 @@
     </div>
   </div>
   </div>
-
+ 
   <div class="week-block">
     <div class="week-header">
       <span class="week-tag" style="background:#7c3aed">Week 3</span>
       <span class="week-dates">May 11 – 14, 2026</span>
       
     </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -368,7 +369,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -390,13 +391,14 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
         <div class="card-date" style="color:#7c3aed">Wed · May 13</div>
-        <div class="card-title">Musculoskeletal & Spinal Emergencies</div>
-        <div class="card-chapters">Ch. 15–16</div>
+        <div class="card-title">Musculoskeletal & Spinal Emergencies + Week 3 Exam</div>
+        <div class="card-chapters">Ch. 15–16 · Ch. 11–16 Exam</div>
+        <span class="badge" style="background:#fef3c7;color:#92400e">EXAM PM</span>
         
       </div>
       <div class="card-right">
@@ -405,48 +407,48 @@
 <div class="sched-row"><span class="sched-time">9:00–11:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Fracture types, CSM assessment, splinting principles, traction splint, pelvic fractures</span></div>
 <div class="sched-row lunch-row"><span class="sched-time">11:00–12:00</span><span class="sched-label" style="background:#fef9c3;color:#92400e">Lunch</span></div>
 <div class="sched-row"><span class="sched-time">12:00–2:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Spinal anatomy, MOI for spinal injury, manual stabilization, c-collar, log roll, immobilization technique</span></div>
-<div class="sched-row"><span class="sched-time">2:00–5:00</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Splinting circuit, traction splint demo, spinal immobilization — Skill Sheets 16 & 17 sign-off</span></div>
+<div class="sched-row"><span class="sched-time">1:30–3:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Splinting circuit, traction splint demo, spinal immobilization — Skill Sheets 16 & 17 sign-off</span></div>
+<div class="sched-row"><span class="sched-time">3:30–4:15</span><span class="sched-label" style="background:#fff7ed;color:#c2410c">Week 3 Exam</span><span class="sched-desc">Written exam covering Ch. 11–16 (25 questions)</span></div>
+<div class="sched-row"><span class="sched-time">4:15–5:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Review</span><span class="sched-desc">Exam debrief — review answers, preview Ch. 17 full day tomorrow</span></div>
         </div>
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
         <div class="card-date" style="color:#7c3aed">Thu · May 14</div>
         <div class="card-title">OB/Peds, Geriatrics & Special Populations — Full Day</div>
         <div class="card-chapters">Ch. 17</div>
-        <span class="badge" style="background:#fee2e2;color:#7f1d1d">EXAM DAY</span>
       </div>
       <div class="card-right">
         <div class="sched-block-list">
 <div class="sched-row truck-row"><span class="sched-time">8:00–9:00</span><span class="sched-label" style="background:#dbeafe;color:#1e40af">Truck Checks</span><span class="sched-desc"></span></div>
 <div class="sched-row"><span class="sched-time">9:00–11:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Normal delivery, OB emergencies, APGAR; pediatric assessment differences; geriatric considerations</span></div>
 <div class="sched-row lunch-row"><span class="sched-time">11:00–12:00</span><span class="sched-label" style="background:#fef9c3;color:#92400e">Lunch</span></div>
-<div class="sched-row"><span class="sched-time">12:00–1:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">OB delivery simulation — Skill Sheet 13A sign-off; newborn assessment practice</span></div>
-<div class="sched-row"><span class="sched-time">1:30–2:30</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Review</span><span class="sched-desc">Ch. 11–17 rapid review — high-yield Q&A, exam prep</span></div>
-<div class="sched-row"><span class="sched-time">2:30–3:30</span><span class="sched-label" style="background:#fff7ed;color:#c2410c">Week 3 Exam</span><span class="sched-desc">Written exam covering Ch. 11–17 (25 questions)</span></div>
-<div class="sched-row"><span class="sched-time">3:30–4:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Debrief</span><span class="sched-desc">Exam review — Medical Emergencies debrief & Week 4 preview (lecture credit: Medical Overview, 0.5 hr)</span></div>
+<div class="sched-row"><span class="sched-time">12:00–1:30</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Pediatric assessment: anatomical differences, PAT, respiratory distress recognition. Geriatrics: common presentations, medication interactions, fall assessment.</span></div>
+<div class="sched-row"><span class="sched-time">1:30–3:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Normal delivery simulation — Skill Sheet 13A sign-off (full 2 hrs). Every student leads. Newborn assessment + PAT station.</span></div>
+<div class="sched-row"><span class="sched-time">3:30–4:30</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Debrief</span><span class="sched-desc">Ch. 17 debrief — Q&A, remind students Ch. 17 is on Final Exam only. Preview Week 4 Ch. 18–20.</span></div>
         </div>
       </div>
     </div>
   </div>
   </div>
-
+ 
   <div class="week-block">
     <div class="week-header">
       <span class="week-tag" style="background:#b91c1c">Week 4</span>
       <span class="week-dates">May 18 – 21, 2026</span>
       
     </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
         <div class="card-date" style="color:#b91c1c">Mon · May 18</div>
-        <div class="card-title">Environmental, MCI & EMS Operations + Week 3 Exam</div>
-        <div class="card-chapters">Ch. 18–20 · Ch. 11–16 Exam</div>
+        <div class="card-title">Environmental Emergencies, MCI & EMS Operations</div>
+        <div class="card-chapters">Ch. 18–20</div>
         
       </div>
       <div class="card-right">
@@ -455,15 +457,14 @@
 <div class="sched-row"><span class="sched-time">9:00–11:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Heat/cold emergencies, near-drowning, lightning, bites & stings</span></div>
 <div class="sched-row lunch-row"><span class="sched-time">11:00–12:00</span><span class="sched-label" style="background:#fef9c3;color:#92400e">Lunch</span></div>
 <div class="sched-row"><span class="sched-time">12:00–1:00</span><span class="sched-label" style="background:#ecfeff;color:#0e7490">Didactic</span><span class="sched-desc">Ch. 20 — EMS operations: vehicle safety, scene safety, hazmat awareness, air medical considerations, CBRN/WMD overview</span></div>
-<div class="sched-row"><span class="sched-time">1:00–2:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">MCI tabletop — 10 patients, START + JumpSTART. ICS role drill. Skill Sheet 15A sign-off.</span></div>
-<div class="sched-row"><span class="sched-time">2:30–3:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Heat stroke management simulation — Skill Sheet 14A sign-off</span></div>
-<div class="sched-row"><span class="sched-time">3:30–4:15</span><span class="sched-label" style="background:#fff7ed;color:#c2410c">Week 3 Exam</span><span class="sched-desc">Written exam covering Ch. 11–16 (25 questions)</span></div>
-<div class="sched-row"><span class="sched-time">4:15–5:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Review</span><span class="sched-desc">Exam debrief — review answers, address misconceptions, EMS Operations & Final Exam topic preview</span></div>
+<div class="sched-row"><span class="sched-time">1:00–3:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">MCI tabletop — all 10 patients, START + JumpSTART. ICS role drill. Skill Sheet 15A sign-off.</span></div>
+<div class="sched-row"><span class="sched-time">3:30–4:30</span><span class="sched-label" style="background:#dcfce7;color:#15803d">Lab / Skills</span><span class="sched-desc">Heat stroke management simulation — Skill Sheet 14A sign-off</span></div>
+<div class="sched-row"><span class="sched-time">4:30–5:00</span><span class="sched-label" style="background:#f0fdfa;color:#0f766e">Debrief</span><span class="sched-desc">Skill sheet status check — Final Exam topic preview</span></div>
         </div>
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -484,7 +485,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -503,7 +504,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -526,14 +527,14 @@
     </div>
   </div>
   </div>
-
+ 
   <div class="week-block">
     <div class="week-header">
       <span class="week-tag" style="background:#1e1b4b">Week 5</span>
       <span class="week-dates">May 26 – 28, 2026</span>
       <span class="week-note">⚠ Memorial Day May 25 — No class · Mon–Wed only</span>
     </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -549,7 +550,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -565,7 +566,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="day-card">
     <div class="card-inner">
       <div class="card-left">
@@ -582,7 +583,7 @@
     </div>
   </div>
   </div>
-
+ 
 </div>
 </body>
 </html>
