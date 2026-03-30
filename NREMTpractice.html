@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR NREMT Adaptive Practice — Tifton Fire Department</title>
+<style>
+  :root {
+    --navy:#1A2F5E; --red:#7B0D1E; --gold:#D4A017; --teal:#0E7490;
+    --green:#15803D; --purp:#7C3AED; --org:#C2410C;
+    --mgry:#64748B; --lgry:#F1F5F9; --white:#FFFFFF; --dktxt:#0F172A;
+    --border:#E2E8F0;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#F8FAFC; color:var(--dktxt); min-height:100vh; }
+
+  /* ── Header */
+  .header { background:var(--navy); color:white; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; }
+  .header h1 { font-size:1.1rem; font-weight:700; }
+  .header p  { font-size:0.75rem; color:#94A3B8; margin-top:2px; }
+  .timer-badge { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:8px; padding:8px 16px; text-align:center; }
+  .timer-badge .time { font-size:1.6rem; font-weight:700; font-family:monospace; letter-spacing:2px; }
+  .timer-badge .tlabel { font-size:0.65rem; color:#94A3B8; text-transform:uppercase; }
+
+  /* ── Progress */
+  .progress-bar { background:var(--navy); padding:8px 24px 12px; }
+  .progress-track { background:rgba(255,255,255,0.15); border-radius:99px; height:6px; }
+  .progress-fill { background:var(--gold); border-radius:99px; height:6px; transition:width 0.4s; }
+  .progress-label { display:flex; justify-content:space-between; margin-top:4px; font-size:0.7rem; color:#94A3B8; }
+
+  /* ── Main layout */
+  .main { max-width:820px; margin:0 auto; padding:24px 16px; }
+
+  /* ── Question card */
+  .q-card { background:white; border-radius:12px; border:1px solid var(--border); padding:28px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .q-meta { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:0.7rem; font-weight:600; }
+  .badge-cat { background:#EEF2FF; color:var(--purp); }
+  .badge-diff { background:#FEF3C7; color:#92400E; }
+  .q-num  { font-size:0.75rem; color:var(--mgry); font-weight:500; margin-left:auto; }
+  .q-text { font-size:1.05rem; font-weight:500; line-height:1.55; margin-bottom:20px; }
+  .options { display:flex; flex-direction:column; gap:10px; }
+  .opt { display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border-radius:8px;
+         border:2px solid var(--border); cursor:pointer; transition:all 0.15s; background:var(--lgry); }
+  .opt:hover:not(.locked) { border-color:#94A3B8; background:#F1F5F9; }
+  .opt.selected { border-color:var(--navy); background:#EEF2FF; }
+  .opt.correct  { border-color:var(--green); background:#F0FDF4; }
+  .opt.wrong    { border-color:#DC2626; background:#FEF2F2; }
+  .opt-letter { width:26px; height:26px; border-radius:50%; border:2px solid var(--mgry); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; flex-shrink:0; margin-top:1px; color:var(--mgry); }
+  .opt.correct .opt-letter  { background:var(--green); border-color:var(--green); color:white; }
+  .opt.wrong   .opt-letter  { background:#DC2626; border-color:#DC2626; color:white; }
+  .opt.selected:not(.correct):not(.wrong) .opt-letter { background:var(--navy); border-color:var(--navy); color:white; }
+  .opt-text { font-size:0.95rem; line-height:1.45; }
+
+  /* ── Rationale */
+  .rationale { margin-top:16px; padding:14px 16px; border-radius:8px; border-left:4px solid; display:none; }
+  .rationale.correct { border-color:var(--green); background:#F0FDF4; }
+  .rationale.wrong   { border-color:#DC2626; background:#FEF2F2; }
+  .rationale-title { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .rationale.correct .rationale-title { color:var(--green); }
+  .rationale.wrong   .rationale-title { color:#DC2626; }
+  .rationale-text { font-size:0.88rem; line-height:1.5; }
+
+  /* ── Controls */
+  .controls { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
+  .btn { padding:10px 22px; border-radius:8px; font-size:0.9rem; font-weight:600; cursor:pointer; border:none; transition:all 0.15s; }
+  .btn-primary { background:var(--navy); color:white; }
+  .btn-primary:hover { background:#243D70; }
+  .btn-secondary { background:var(--lgry); color:var(--dktxt); border:1px solid var(--border); }
+  .btn-secondary:hover { background:var(--border); }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* ── Screens */
+  .screen { display:none; }
+  .screen.active { display:block; }
+
+  /* ── Start screen */
+  .start-card { background:white; border-radius:16px; border:1px solid var(--border); padding:40px 36px; max-width:600px; margin:40px auto; text-align:center; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+  .start-card h2 { font-size:1.6rem; color:var(--navy); margin-bottom:8px; }
+  .start-card p  { color:var(--mgry); font-size:0.95rem; margin-bottom:24px; line-height:1.6; }
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:24px 0; }
+  .info-item { background:var(--lgry); border-radius:8px; padding:14px; text-align:left; }
+  .info-item .label { font-size:0.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--mgry); font-weight:600; }
+  .info-item .value { font-size:1.1rem; font-weight:700; color:var(--navy); margin-top:2px; }
+  .start-btn { background:var(--navy); color:white; border:none; padding:14px 36px; border-radius:10px; font-size:1rem; font-weight:700; cursor:pointer; width:100%; margin-top:8px; }
+  .start-btn:hover { background:#243D70; }
+
+  /* ── Results screen */
+  .results-card { background:white; border-radius:16px; border:1px solid var(--border); padding:36px; max-width:680px; margin:40px auto; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+  .score-circle { width:130px; height:130px; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 20px; border:6px solid; }
+  .score-circle .pct { font-size:2.2rem; font-weight:800; }
+  .score-circle .slabel { font-size:0.7rem; text-transform:uppercase; letter-spacing:.05em; }
+  .pass { border-color:var(--green); color:var(--green); }
+  .borderline { border-color:var(--gold); color:#92400E; }
+  .fail { border-color:#DC2626; color:#DC2626; }
+  .results-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0; }
+  .res-item { background:var(--lgry); border-radius:8px; padding:12px; text-align:center; }
+  .res-item .rval { font-size:1.4rem; font-weight:800; color:var(--navy); }
+  .res-item .rlabel { font-size:0.7rem; color:var(--mgry); text-transform:uppercase; letter-spacing:.04em; }
+  .missed-list { margin-top:20px; }
+  .missed-list h3 { font-size:0.85rem; font-weight:700; color:var(--red); margin-bottom:10px; }
+  .missed-item { background:#FEF2F2; border:1px solid #FECACA; border-radius:8px; padding:12px; margin-bottom:8px; font-size:0.85rem; }
+  .missed-q { font-weight:600; margin-bottom:4px; }
+  .missed-a { color:var(--green); font-size:0.82rem; }
+  .results-actions { display:flex; gap:10px; margin-top:24px; }
+  .results-actions .btn { flex:1; }
+
+  .cat-breakdown { margin-top:20px; }
+  .cat-breakdown h3 { font-size:0.85rem; font-weight:700; color:var(--navy); margin-bottom:10px; }
+  .cat-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; font-size:0.82rem; }
+  .cat-name { width:180px; color:var(--dktxt); }
+  .cat-bar-bg { flex:1; height:8px; background:var(--lgry); border-radius:99px; }
+  .cat-bar-fill { height:8px; border-radius:99px; background:var(--teal); }
+  .cat-pct { width:36px; text-align:right; color:var(--mgry); font-weight:600; }
+</style>
+</head>
+<body>
+
+<!-- ── START SCREEN ── -->
+<div id="startScreen" class="screen active">
+  <div class="header">
+    <div><h1>EMR NREMT Adaptive Practice</h1><p>Tifton Fire Department · Georgia OEMST 2026</p></div>
+  </div>
+  <div class="main">
+    <div class="start-card">
+      <h2>NREMT Cognitive Practice Exam</h2>
+      <p>Timed adaptive-style exam covering all EMR content areas. Answer each question, receive immediate rationale, and get a full category breakdown at the end.</p>
+      <div class="info-grid">
+        <div class="info-item"><div class="label">Questions</div><div class="value">70</div></div>
+        <div class="info-item"><div class="label">Time Limit</div><div class="value">90 min</div></div>
+        <div class="info-item"><div class="label">Passing Score</div><div class="value">~70%</div></div>
+        <div class="info-item"><div class="label">Format</div><div class="value">4-option MCQ</div></div>
+      </div>
+      <p style="font-size:0.82rem;color:var(--mgry);margin-top:0;margin-bottom:16px;">Questions are drawn from all NREMT EMR content areas: Airway, Cardiology, Medical, OB/Peds, Trauma, EMS Operations, and more. Rationale is shown after each answer.</p>
+      <button class="start-btn" onclick="startExam()">Begin Practice Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EXAM SCREEN ── -->
+<div id="examScreen" class="screen">
+  <div class="header">
+    <div><h1>EMR NREMT Adaptive Practice</h1><p>Tifton Fire Department · Georgia OEMST 2026</p></div>
+    <div class="timer-badge">
+      <div class="time" id="timerDisplay">90:00</div>
+      <div class="tlabel">Time Remaining</div>
+    </div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label"><span id="progressLabel">Question 1 of 70</span><span id="scoreLabel">Score: 0 / 0</span></div>
+  </div>
+  <div class="main">
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="badge badge-cat" id="qCategory"></span>
+        <span class="badge badge-diff" id="qDiff"></span>
+        <span class="q-num" id="qNum"></span>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsContainer"></div>
+      <div class="rationale" id="rationaleBox">
+        <div class="rationale-title" id="rationaleTitle"></div>
+        <div class="rationale-text" id="rationaleText"></div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn btn-secondary" id="prevBtn" onclick="navigate(-1)" disabled>← Previous</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="navigate(1)" disabled>Next →</button>
+      <button class="btn btn-primary" id="finishBtn" onclick="finishExam()" style="display:none;background:var(--green)">Finish Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESULTS SCREEN ── -->
+<div id="resultsScreen" class="screen">
+  <div class="header">
+    <div><h1>EMR NREMT Adaptive Practice — Results</h1><p>Tifton Fire Department · Georgia OEMST 2026</p></div>
+  </div>
+  <div class="main">
+    <div class="results-card">
+      <div class="score-circle" id="scoreCircle">
+        <div class="pct" id="scorePct"></div>
+        <div class="slabel" id="scoreVerdict"></div>
+      </div>
+      <div class="results-grid">
+        <div class="res-item"><div class="rval" id="resCorrect"></div><div class="rlabel">Correct</div></div>
+        <div class="res-item"><div class="rval" id="resWrong"></div><div class="rlabel">Incorrect</div></div>
+        <div class="res-item"><div class="rval" id="resTime"></div><div class="rlabel">Time Used</div></div>
+      </div>
+      <div class="cat-breakdown">
+        <h3>Performance by Category</h3>
+        <div id="catBreakdown"></div>
+      </div>
+      <div class="missed-list">
+        <h3>&#9888; Missed Questions — Review These</h3>
+        <div id="missedList"></div>
+      </div>
+      <div class="results-actions">
+        <button class="btn btn-secondary" onclick="restartExam()">Retake Exam</button>
+        <button class="btn btn-primary" onclick="window.print()">Print Results</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  // AIRWAY (12 questions)
+  {cat:"Airway",diff:"Moderate",q:"A 45-year-old male is found unresponsive with a weak gag reflex. Which airway adjunct is MOST appropriate?",opts:["Nasopharyngeal airway (NPA)","Oropharyngeal airway (OPA)","Supraglottic airway device","Endotracheal tube"],ans:0,rat:"The NPA is indicated when a patient has a gag reflex or when OPA insertion is contraindicated. The OPA is contraindicated with an intact gag reflex as it may cause vomiting and aspiration."},
+  {cat:"Airway",diff:"Basic",q:"You are ventilating an apneic adult with a bag-valve mask. What is the correct ventilation rate?",opts:["One breath every 2–3 seconds","One breath every 5–6 seconds","One breath every 8–10 seconds","Two breaths every 15 compressions"],ans:1,rat:"The correct adult BVM rate is 10–12 breaths per minute, or one breath every 5–6 seconds. Each breath should be delivered over 1 second with just enough volume to produce visible chest rise."},
+  {cat:"Airway",diff:"Moderate",q:"When suctioning an adult patient's airway, what is the maximum recommended duration for each suction attempt?",opts:["5 seconds","10 seconds","15 seconds","30 seconds"],ans:2,rat:"Adult suctioning should not exceed 15 seconds per attempt. Prolonged suctioning removes oxygen and can cause hypoxia or vagal stimulation leading to bradycardia. Hyper-oxygenate before and after suctioning."},
+  {cat:"Airway",diff:"Basic",q:"Which oxygen delivery device provides the HIGHEST concentration of oxygen?",opts:["Nasal cannula at 6 LPM","Simple face mask at 8 LPM","Non-rebreather mask at 15 LPM","Venturi mask at 4 LPM"],ans:2,rat:"A non-rebreather mask at 10–15 LPM delivers approximately 90–95% FiO2 when properly fitted with the reservoir bag inflated. The nasal cannula delivers 24–44%, simple mask 35–60%."},
+  {cat:"Airway",diff:"Advanced",q:"A trauma patient is unresponsive. You suspect cervical spine injury. What is the MOST appropriate airway maneuver?",opts:["Head-tilt/chin-lift","Jaw-thrust maneuver","Neck extension","Cricoid pressure"],ans:1,rat:"The jaw-thrust maneuver opens the airway by displacing the mandible anteriorly without requiring cervical spine extension, making it the preferred technique when spinal injury is suspected."},
+  {cat:"Airway",diff:"Moderate",q:"A patient has gurgling respirations and decreased LOC. After opening the airway, your next action is to:",opts:["Insert an OPA","Apply a non-rebreather mask","Suction the airway","Begin BVM ventilation"],ans:2,rat:"Gurgling indicates fluid in the upper airway that must be cleared before other interventions. Suctioning takes priority — you cannot effectively ventilate through a fluid-obstructed airway."},
+  {cat:"Airway",diff:"Basic",q:"What is the correct flow rate for a nasal cannula?",opts:["1–6 LPM","6–10 LPM","10–15 LPM","15–20 LPM"],ans:0,rat:"Nasal cannula flow is 1–6 LPM, delivering approximately 24–44% FiO2. Flows above 6 LPM do not significantly increase FiO2 and cause mucosal drying and discomfort."},
+  {cat:"Airway",diff:"Moderate",q:"You size an OPA by measuring from the corner of the mouth to the:",opts:["Tip of the nose","Center of the forehead","Earlobe","Angle of the jaw"],ans:2,rat:"OPA size is measured from the corner of the mouth to the earlobe, OR from the center of the mouth to the angle of the jaw. Both methods approximate the correct airway length."},
+  {cat:"Airway",diff:"Advanced",q:"During BVM ventilation, you notice resistance with each breath and the chest is not rising. What is your FIRST action?",opts:["Increase ventilation rate","Reposition the airway","Switch to a non-rebreather mask","Increase squeeze force on the bag"],ans:1,rat:"Resistance and poor chest rise typically indicate airway obstruction or poor positioning. Reposition the airway first (re-establish head-tilt/chin-lift or jaw-thrust, re-seat the mask). Only escalate if repositioning fails."},
+  {cat:"Airway",diff:"Moderate",q:"A pediatric patient requires oxygen. The child is breathing adequately. Which device should you use?",opts:["Non-rebreather mask at 15 LPM","Blow-by oxygen technique or pediatric NRB","BVM with oxygen","Simple mask at 10 LPM"],ans:1,rat:"For a breathing pediatric patient, blow-by oxygen or a properly sized pediatric NRB is preferred. Forcing a tight-fitting mask on a distressed child can worsen anxiety and work of breathing. BVM is reserved for inadequate breathing."},
+  {cat:"Airway",diff:"Basic",q:"The narrowest part of a child's airway (as opposed to an adult) is located at the:",opts:["Glottis","Cricoid ring","Trachea","Carina"],ans:1,rat:"In children, the airway is narrowest at the cricoid ring (subglottic), unlike adults where it is narrowest at the glottis. This makes even small amounts of edema significant in pediatric airway compromise."},
+  {cat:"Airway",diff:"Advanced",q:"A patient with COPD is in moderate respiratory distress. Which oxygen delivery approach is MOST appropriate?",opts:["Withhold oxygen — it causes respiratory depression","Apply NRB at 15 LPM immediately","Start with 2 LPM via nasal cannula and titrate to SpO2 88–92%","Blow-by oxygen only"],ans:2,rat:"COPD patients may rely on hypoxic drive, though this is often overstated. Target SpO2 of 88–92% — titrate O2 to achieve this without over-oxygenating. Never withhold O2 from a truly hypoxic patient, but avoid driving SpO2 to 100%."},
+
+  // CARDIOLOGY (12 questions)
+  {cat:"Cardiology",diff:"Basic",q:"What is the correct chest compression rate for adult CPR?",opts:["60–80 compressions per minute","80–100 compressions per minute","100–120 compressions per minute","120–140 compressions per minute"],ans:2,rat:"The AHA 2020 Guidelines specify 100–120 compressions per minute for adult CPR. Rates below 100 are insufficient for adequate cardiac output; rates above 120 allow inadequate filling time and reduce effectiveness."},
+  {cat:"Cardiology",diff:"Moderate",q:"During 2-rescuer CPR, what is the correct compression-to-ventilation ratio for an adult patient WITHOUT an advanced airway?",opts:["15:2","30:2","5:1","Continuous compressions at 100/min"],ans:1,rat:"30:2 is the standard ratio for adult CPR without an advanced airway, whether single or 2-rescuer. Once an advanced airway is in place, switch to continuous compressions at 100–120/min with one breath every 6 seconds."},
+  {cat:"Cardiology",diff:"Moderate",q:"After attaching an AED, the device advises 'no shock.' What do you do?",opts:["Remove the AED pads and resume CPR","Reposition the pads and re-analyze","Immediately resume CPR for 2 minutes","Declare the patient deceased"],ans:2,rat:"When the AED advises no shock (non-shockable rhythm — PEA or asystole), immediately resume CPR for 2 minutes before the next rhythm check. The AED only treats shockable rhythms (VF and pulseless VT); CPR remains the treatment for non-shockable arrest."},
+  {cat:"Cardiology",diff:"Advanced",q:"You achieve ROSC in a cardiac arrest patient. Their breathing is agonal. What is your next action?",opts:["Place in recovery position","Begin BVM ventilation at 10 breaths/min","Apply a NRB and monitor","Perform a secondary assessment"],ans:1,rat:"Agonal respirations are not effective ventilation. After ROSC, support airway and ventilation with BVM at 10 breaths/min. This prevents hypoxia (which can cause re-arrest) while avoiding hyperventilation (which causes cerebral vasoconstriction)."},
+  {cat:"Cardiology",diff:"Moderate",q:"A patient is found pulseless and apneic. A bystander says the patient was complaining of chest pressure before collapsing. Your FIRST action is to:",opts:["Obtain a 12-lead ECG","Begin high-quality CPR","Attach the AED","Call for ALS backup"],ans:1,rat:"For a pulseless, apneic patient, begin CPR immediately. While CPR is ongoing, attaching the AED is the next priority. Starting CPR first ensures perfusion while the AED is prepared — these actions happen simultaneously with 2 rescuers."},
+  {cat:"Cardiology",diff:"Basic",q:"What is the CRITICAL difference between angina and an acute myocardial infarction (AMI)?",opts:["Angina affects the left side of the chest; AMI affects the right","Angina is relieved by rest or nitroglycerin; AMI is not","Angina causes EKG changes; AMI does not","Angina is more painful than AMI"],ans:1,rat:"Angina is transient myocardial ischemia that resolves with rest or nitroglycerin, typically within 3–5 minutes, with no permanent damage. AMI involves prolonged ischemia causing irreversible myocardial cell death and is not relieved by rest or nitro."},
+  {cat:"Cardiology",diff:"Moderate",q:"Which finding is MOST consistent with cardiogenic shock?",opts:["Warm, flushed skin with hypotension","Distended neck veins, pulmonary edema, hypotension","Dry mucous membranes and tachycardia","Fever and altered mental status"],ans:1,rat:"Cardiogenic shock results from pump failure. The failing heart cannot eject blood forward, causing backpressure into the lungs (pulmonary edema, crackles) and reduced forward flow (hypotension). JVD results from right-sided backup. Skin may be pale and cool."},
+  {cat:"Cardiology",diff:"Advanced",q:"A patient in cardiac arrest has received 3 shocks with no ROSC. Which reversible cause should you consider?",opts:["Hypertension","Tension pneumothorax","Hypercalcemia","Leukocytosis"],ans:1,rat:"The Hs and Ts are the reversible causes of cardiac arrest. Tension pneumothorax (a T) is one of the most correctable causes and can be identified by absent breath sounds, tracheal deviation, and distended neck veins. Treatment at the EMR level is recognition and rapid transport."},
+  {cat:"Cardiology",diff:"Basic",q:"Where should AED pads be placed on an adult patient?",opts:["Both pads on the left side of the chest","Right of sternum below clavicle; left lateral chest below left nipple","Both pads on the anterior chest","Right of sternum above clavicle; left below the armpit"],ans:1,rat:"Standard AED pad placement: right pad on right upper chest (right sternal border, below clavicle); left pad on left lateral chest wall, below and to the left of the left nipple. This positions the pads to maximize current flow through the myocardium."},
+  {cat:"Cardiology",diff:"Moderate",q:"How long should CPR be performed between AED rhythm checks?",opts:["30 seconds","1 minute","2 minutes","5 minutes"],ans:2,rat:"The AHA guidelines recommend 2-minute cycles of CPR between rhythm checks. This allows adequate time for CPR to perfuse the myocardium before re-analysis and prevents excessive interruptions to compressions."},
+  {cat:"Cardiology",diff:"Moderate",q:"A patient presents with crushing chest pain, diaphoresis, and nausea. Vitals: P 104, R 18, BP 88/60. What is your priority action?",opts:["Administer aspirin","Apply cardiac monitor","Initiate high-flow oxygen and prepare for transport","Obtain a detailed SAMPLE history"],ans:2,rat:"This patient is in cardiogenic shock (hypotension with classic AMI presentation). High-flow O2 and rapid transport are the priority. Aspirin administration is appropriate but secondary to treating the hemodynamic instability. ALS intercept should be requested."},
+  {cat:"Cardiology",diff:"Advanced",q:"During 2-rescuer CPR, when should the compressor role be switched?",opts:["Every 5 minutes","Every 2 minutes (at rhythm check)","When the compressor feels tired","Only when ALS arrives"],ans:1,rat:"Compressors fatigue rapidly — CPR quality degrades within 1–2 minutes even when rescuers feel they are maintaining rate and depth. Switching at every 2-minute rhythm check is the AHA recommendation to maintain consistent compression quality."},
+
+  // MEDICAL EMERGENCIES (12 questions)
+  {cat:"Medical",diff:"Basic",q:"A patient is found unresponsive. Using AEIOU-TIPS, which letter represents a diabetic emergency?",opts:["A — Alcohol","E — Epilepsy","I — Insulin","O — Overdose"],ans:2,rat:"I in AEIOU-TIPS stands for Insulin, representing diabetic emergencies (hypoglycemia or hyperglycemia). Altered mental status from hypoglycemia is a common and correctable cause of unresponsiveness in EMR practice."},
+  {cat:"Medical",diff:"Moderate",q:"A patient with known diabetes is found confused, diaphoretic, and pale. Blood glucose is 44 mg/dL. What is your treatment?",opts:["Administer oral glucose if the patient can swallow","Apply a NRB and transport immediately","Administer naloxone","Position supine and monitor"],ans:0,rat:"BGL of 44 = hypoglycemia. Oral glucose is appropriate if the patient is conscious, alert enough to swallow, and can protect their airway. Oral glucose is contraindicated if the patient cannot swallow safely — position and transport in that case."},
+  {cat:"Medical",diff:"Moderate",q:"A patient presents with one-sided facial droop, arm weakness, and slurred speech after waking up. What is the most critical piece of information to obtain?",opts:["Current medications","Last known well time","Medical history","Allergies"],ans:1,rat:"Last known well time is the most critical information for stroke — it determines eligibility for thrombolytic therapy (tPA must be given within 3–4.5 hours of symptom onset). Document and communicate this time immediately."},
+  {cat:"Medical",diff:"Advanced",q:"A patient was stung by a bee and now has urticaria, angioedema, and a blood pressure of 80/50. Respirations are labored with audible wheezing. What is your IMMEDIATE treatment?",opts:["Apply oxygen via NRB and monitor","Administer epinephrine via EpiPen IM to the anterolateral thigh","Position upright and transport","Administer oral diphenhydramine"],ans:1,rat:"This is anaphylactic shock — a life-threatening allergic reaction. Epinephrine (EpiPen 0.3 mg IM) is the first-line treatment. It reverses bronchospasm, vasodilation, and angioedema. O2 and positioning follow after epinephrine. Antihistamines alone do not treat anaphylaxis."},
+  {cat:"Medical",diff:"Moderate",q:"You respond to a possible overdose. The patient is unresponsive with pinpoint pupils and 4 respirations per minute. Which intervention is MOST appropriate for an EMR?",opts:["Administer oral glucose","Begin BVM ventilation and administer naloxone IN","Administer epinephrine IM","Apply a NRB mask"],ans:1,rat:"This is opioid toxicity — pinpoint pupils + bradypnea + decreased LOC = classic opioid toxidrome. BVM ventilation addresses the immediate hypoxia threat. Naloxone via IN autoinjector is within EMR scope and reverses opioid effects. These are done simultaneously."},
+  {cat:"Medical",diff:"Basic",q:"What are the three components of the Cincinnati Stroke Scale?",opts:["Pupils, pulse, respirations","Facial droop, arm drift, speech abnormality","Level of consciousness, motor response, verbal response","Blood pressure, blood glucose, pulse oximetry"],ans:1,rat:"The Cincinnati Stroke Scale assesses three findings: facial droop (one side droops on smile), arm drift (one arm pronates/drifts with eyes closed), and speech abnormality (slurred, wrong words, or absent). Any single positive finding is grounds for stroke alert."},
+  {cat:"Medical",diff:"Advanced",q:"A patient with a known seizure disorder had a 3-minute generalized tonic-clonic seizure that has now stopped. He is postictal with SpO2 89%. Your treatment includes:",opts:["Restrain the patient and apply an OPA","Position laterally, apply oxygen, and transport","Administer oral glucose for possible hypoglycemia","Insert an NPA and perform bag-mask ventilation"],ans:1,rat:"Post-seizure management: ensure scene safety, position laterally (recovery position to protect airway and facilitate drainage), apply O2. Check BGL — hypoglycemia can cause or worsen seizures. Transport for evaluation. NPA may be used if airway support is needed, but full BVM is rarely required for a breathing postictal patient."},
+  {cat:"Medical",diff:"Moderate",q:"A conscious patient ingested an unknown substance. Which question is MOST important to ask?",opts:["What is your pain level?","What substance, how much, and how long ago?","Do you have any allergies?","Have you eaten today?"],ans:1,rat:"For poisoning, the substance, amount, and time of ingestion determine severity and guide treatment. This information is also critical for the receiving facility and Poison Control. All other questions are secondary."},
+  {cat:"Medical",diff:"Basic",q:"Which finding best distinguishes hypoglycemia from hyperglycemia on physical exam?",opts:["Fruity breath","Warm, dry skin","Cool, clammy, diaphoretic skin","Kussmaul respirations"],ans:2,rat:"Hypoglycemia causes rapid catecholamine release (sympathetic surge) → diaphoresis, pallor, cool clammy skin, tachycardia. Hyperglycemia causes dehydration → warm, dry skin, Kussmaul respirations, fruity breath. These are rough guides — always obtain BGL."},
+  {cat:"Medical",diff:"Advanced",q:"You administer naloxone to an opioid overdose patient. After 5 minutes, the patient becomes responsive and agitated. He is now refusing further care. What is your concern?",opts:["The naloxone was given incorrectly","The patient may re-narcotize as naloxone wears off before the opioid","The patient is experiencing a hypertensive emergency","The patient is allergic to naloxone"],ans:1,rat:"Naloxone duration is 30–90 minutes — shorter than most opioids. Re-narcotization is a significant risk. Even a now-alert patient refusing care may deteriorate again after the naloxone wears off. Document the refusal thoroughly and encourage transport strongly."},
+  {cat:"Medical",diff:"Moderate",q:"A patient with a behavioral emergency is becoming increasingly agitated and threatening. Scene safety is deteriorating. What is your FIRST action?",opts:["Attempt to restrain the patient","Continue your assessment from a safe distance","Retreat and call law enforcement","Administer a calming medication"],ans:2,rat:"Scene safety is the first priority. If a behavioral emergency patient becomes threatening or violent, retreat to safety and call law enforcement. Do not attempt restraint without police present and adequate personnel. Re-enter only when the scene is secured."},
+  {cat:"Medical",diff:"Moderate",q:"Which toxidrome is characterized by SLUDGE — Salivation, Lacrimation, Urination, Defecation, GI distress, Emesis?",opts:["Sympathomimetic","Opioid","Cholinergic (organophosphate)","Anticholinergic"],ans:2,rat:"SLUDGE describes cholinergic toxicity from organophosphate poisoning (pesticides, nerve agents). The parasympathetic nervous system is overstimulated. Management includes removing from exposure and supportive care — atropine and pralidoxime are definitive ALS treatments."},
+
+  // TRAUMA (10 questions)
+  {cat:"Trauma",diff:"Basic",q:"Using the Rule of Nines, what percentage of body surface area is represented by one entire arm?",opts:["4.5%","9%","18%","13.5%"],ans:1,rat:"Each entire arm = 9% BSA in the Rule of Nines (adult). The head = 9%, each leg = 18%, anterior trunk = 18%, posterior trunk = 18%, genitalia = 1%."},
+  {cat:"Trauma",diff:"Moderate",q:"A patient has an impaled knife in the left flank. What is the appropriate management?",opts:["Remove the knife and apply direct pressure","Stabilize the knife in place with bulky dressings","Apply a pressure dressing over the knife","Leave the knife and transport without intervention"],ans:1,rat:"Impaled objects should NEVER be removed in the field — removal can cause rapid, uncontrolled hemorrhage. Stabilize the object in place using bulky dressings built up around it. Control surrounding bleeding with direct pressure. Rapid transport."},
+  {cat:"Trauma",diff:"Moderate",q:"What does DCAP-BTLS stand for?",opts:["Deformities, Contusions, Abrasions, Punctures; Burns, Tenderness, Lacerations, Swelling","Dermis, Circulation, Abdomen, Perfusion; Bleeding, Tissue, Laceration, Shock","Deformities, Compressions, Avulsions, Perforations; Burns, Torso, Limbs, Skull","Depth, Contour, Area, Position; Bruising, Trauma, Laceration, Swelling"],ans:0,rat:"DCAP-BTLS is the acronym for the rapid trauma assessment: Deformities, Contusions, Abrasions, Punctures/Penetrations — Burns, Tenderness, Lacerations, Swelling. Applied head-to-toe in the secondary survey to identify injuries."},
+  {cat:"Trauma",diff:"Advanced",q:"A trauma patient has a mechanism of injury involving a high-speed MVA. She is conscious and complaining of abdominal pain. Vitals: P 124, R 22, BP 90/60. What do you suspect and what is your priority?",opts:["Pelvic fracture — apply a pelvic binder","Intra-abdominal hemorrhage — rapid transport","Pneumothorax — position of comfort","Spinal injury — full immobilization before transport"],ans:1,rat:"Tachycardia + hypotension + abdominal pain after high-speed MVA = intra-abdominal hemorrhage (solid organ injury — liver, spleen) until proven otherwise. The EMR cannot treat this definitively — rapid transport is the priority. Intra-abdominal bleeding is not externally compressible."},
+  {cat:"Trauma",diff:"Basic",q:"You must apply a splint to a forearm fracture. Which joints must be immobilized?",opts:["Only the wrist","Only the elbow","Both the wrist and elbow","The shoulder only"],ans:2,rat:"Splinting principle: immobilize the joint ABOVE and BELOW the fracture. For a forearm fracture, this means immobilizing both the wrist (below) and the elbow (above) to prevent rotation and movement at the fracture site."},
+  {cat:"Trauma",diff:"Moderate",q:"A patient has a burn to both legs (entire) and the anterior trunk. Using the Rule of Nines, what is the total BSA burned?",opts:["27%","36%","45%","54%"],ans:2,rat:"Each entire leg = 18% (bilateral = 36%). Anterior trunk = 9% (abdomen) + 9% (chest) = 18%. Total = 36% + 18% = 54%. Wait — anterior trunk only = 18%, not full trunk. Both legs (36%) + anterior trunk (18%) = 54%. Correct."},
+  {cat:"Trauma",diff:"Moderate",q:"A patient has an angulated tibial fracture with intact CSM. You attempt to splint in position found but cannot. What is your next action?",opts:["Force the limb straight","Gently realign toward anatomical position and re-assess CSM","Splint as-is regardless of angle","Transport without splinting"],ans:1,rat:"Splint in position found as the first choice. If this is impossible (extremely angulated, cannot pad adequately), gently move toward anatomical position with steady traction. Reassess CSM immediately after any manipulation. Document all CSM findings."},
+  {cat:"Trauma",diff:"Advanced",q:"A patient sustained a penetrating stab wound to the right anterior chest. He is hypotensive with absent right breath sounds and distended neck veins. You suspect:",opts:["Right-sided tension pneumothorax","Cardiac tamponade","Hemothorax","Pneumonia"],ans:0,rat:"The triad of absent breath sounds on one side + distended neck veins + hypotension after penetrating chest trauma = tension pneumothorax. In tension pneumo, air accumulates under pressure, collapsing the affected lung and shifting the mediastinum. Treatment: rapid transport; needle decompression is an ALS skill."},
+  {cat:"Trauma",diff:"Basic",q:"When should a tourniquet be used for hemorrhage control?",opts:["For all bleeding wounds regardless of location","For extremity wounds when direct pressure fails to control life-threatening bleeding","Only after wound packing has been attempted","Only by ALS providers"],ans:1,rat:"Tourniquets are indicated for extremity hemorrhage that is life-threatening and not controlled by direct pressure. Apply proximal to the wound. They cannot be used for truncal, junctional (groin/axilla), or neck wounds — those require wound packing or junctional devices."},
+  {cat:"Trauma",diff:"Moderate",q:"A patient fell from a 20-foot roof and is found supine, unconscious. After ensuring scene safety, your FIRST action is:",opts:["Assess blood glucose","Establish manual in-line cervical stabilization while opening the airway","Apply a cervical collar","Perform a rapid trauma assessment"],ans:1,rat:"With a significant MOI and altered LOC, assume spinal injury. Simultaneously establish manual in-line cervical stabilization AND open the airway with jaw-thrust. Airway is always the immediate priority — spinal precautions are applied concurrently, not instead of airway management."},
+
+  // OB / PEDS / GERIATRICS (6 questions)
+  {cat:"OB/Peds/Geri",diff:"Moderate",q:"A woman in active labor tells you she feels the urge to push and that the baby is coming. What is your FIRST action?",opts:["Transport immediately without examination","Assess for crowning","Call for ALS backup and wait","Position the patient on her left side"],ans:1,rat:"Assess for crowning first — if the baby is crowning, delivery is imminent and transport is not possible. If not crowning and no complications, transport is preferred. You cannot make a delivery decision without checking."},
+  {cat:"OB/Peds/Geri",diff:"Basic",q:"After delivery, what is the correct order of cord clamping?",opts:["One clamp 2 inches from baby, second 4 inches from baby, cut between","One clamp 4 inches from baby, second 2 inches further, cut between","Tie cord with string only, no clamps","Cut cord immediately without clamping"],ans:1,rat:"Apply first clamp 4 inches from baby's navel, second clamp 2 inches beyond the first. Cut between the two clamps. This order ensures the clamp nearest the baby is placed first, preventing blood loss from the baby's side."},
+  {cat:"OB/Peds/Geri",diff:"Advanced",q:"A newborn is delivered and is limp, cyanotic, and not breathing after drying and stimulation. What is your NEXT action?",opts:["Begin chest compressions","Begin BVM ventilation","Administer oxygen via blow-by","Check blood glucose"],ans:1,rat:"For a non-breathing newborn after stimulation, begin positive pressure ventilation (PPV) with BVM at 40–60 breaths/min using room air or low-flow O2. Chest compressions are initiated if HR remains <60 despite adequate ventilation — ventilation always precedes compressions in neonates."},
+  {cat:"OB/Peds/Geri",diff:"Moderate",q:"Which finding on the Pediatric Assessment Triangle (PAT) would MOST suggest a child is in respiratory failure?",opts:["Consolable crying","Normal skin color with slow capillary refill","Absent eye contact, head bobbing, and cyanosis","Alert and interactive with mild tachypnea"],ans:2,rat:"Absent eye contact (severely decreased LOC), head bobbing (extreme use of accessory muscles), and cyanosis together suggest respiratory failure — the child can no longer compensate. This requires immediate airway intervention."},
+  {cat:"OB/Peds/Geri",diff:"Moderate",q:"An elderly patient fell and cannot explain what happened. She is on warfarin. What is the most significant concern?",opts:["She may have a fractured hip","She may have an intracranial bleed that will expand","She may have a urinary tract infection","She may be dehydrated"],ans:1,rat:"Warfarin (anticoagulation) + head trauma = high risk of intracranial hemorrhage that can expand slowly and be initially subtle. A patient who appears stable can deteriorate hours later. Even a minor mechanism is high priority in an anticoagulated patient with head trauma."},
+  {cat:"OB/Peds/Geri",diff:"Advanced",q:"A geriatric patient presents in shock. His heart rate is 78 — which is MOST concerning about this finding?",opts:["The rate is too low to be shock","Geriatric patients' heart rates are unreliable","He may be on a beta-blocker that blunts the tachycardic response to shock","His pacemaker is preventing tachycardia"],ans:2,rat:"Beta-blockers (metoprolol, atenolol) blunt the normal tachycardic response to shock. A geriatric patient on beta-blockers may present in significant shock with a 'normal' or even low heart rate — the absence of tachycardia does not rule out shock. Always consider medications in your assessment."},
+
+  // EMS OPERATIONS / LEGAL (8 questions)
+  {cat:"EMS Operations",diff:"Basic",q:"A competent adult patient refuses care and transport after a motor vehicle accident. What must you do?",opts:["Transport the patient against their will for their safety","Respect the refusal, document thoroughly, and have the patient sign a refusal form","Contact medical direction and transport under implied consent","Leave without documentation"],ans:1,rat:"Competent adults have the right to refuse care. Ensure the patient understands the risks, obtain a signed refusal form, document the interaction thoroughly (mental status, risks explained, offer to return), and advise the patient to call 911 if conditions change."},
+  {cat:"EMS Operations",diff:"Moderate",q:"Which of the following BEST defines negligence in EMS?",opts:["Providing care without consent","Failing to transport a patient","Breach of duty of care that causes harm to the patient","Using equipment without proper training"],ans:2,rat:"Negligence requires four elements: (1) Duty to act, (2) Breach of that duty, (3) Causation — the breach caused the harm, (4) Damages — actual harm resulted. All four elements must be proven."},
+  {cat:"EMS Operations",diff:"Basic",q:"When does an EMR have a duty to act?",opts:["Only when on-duty and in uniform","Only for life-threatening emergencies","Whenever dispatched or on-duty, based on local protocol and state law","Only when ALS is unavailable"],ans:2,rat:"Duty to act is typically established when you are on duty and dispatched to a call. Many states also have Good Samaritan laws for off-duty response, but the primary duty is when on duty. Local protocols and state law define the specific circumstances."},
+  {cat:"EMS Operations",diff:"Moderate",q:"A patient is unconscious and cannot consent to treatment. Under what legal principle can you provide care?",opts:["Expressed consent","Implied consent","Informed consent","Involuntary consent"],ans:1,rat:"Implied consent assumes that an unconscious or incapacitated patient would consent to lifesaving care if they were able. This allows EMRs to treat patients who cannot provide expressed consent."},
+  {cat:"EMS Operations",diff:"Advanced",q:"You arrive on scene before law enforcement at a domestic violence call. The scene appears unsafe. What is the correct action?",opts:["Enter cautiously and treat the patient quickly","Stage at a safe distance and wait for law enforcement to secure the scene","Enter with your partner for safety in numbers","Call dispatch and ask if the scene is safe"],ans:1,rat:"Scene safety is the first priority — always. If a scene is unsafe, do NOT enter. Stage at a safe distance and wait for law enforcement to secure the scene. No patient's life is worth risking your own in an unsafe environment."},
+  {cat:"EMS Operations",diff:"Moderate",q:"Which statement BEST describes medical direction in EMS?",opts:["Medical direction is optional in most states","Medical direction is physician oversight of EMR practice and protocols","Medical direction applies only to ALS providers","Medical direction is provided by hospital administrators"],ans:1,rat:"Medical direction is physician oversight of EMS system operations, protocols, and individual patient care. EMRs operate under a medical director's license when performing medical interventions. Both online (direct physician contact) and offline (protocols) medical direction exist."},
+  {cat:"EMS Operations",diff:"Basic",q:"What does HIPAA protect?",opts:["Only hospital medical records","Patient health information (PHI) in any form","Only electronic records","Law enforcement records about patients"],ans:1,rat:"HIPAA (Health Insurance Portability and Accountability Act) protects all patient health information (PHI) in any form — paper, electronic, verbal. In EMS, this means not disclosing patient information to unauthorized parties, including media, bystanders, or uninvolved personnel."},
+  {cat:"EMS Operations",diff:"Moderate",q:"You are at a scene when a valid DNR order is presented. The patient is not breathing and has no pulse. What should you do?",opts:["Begin CPR regardless — DNR orders are not valid in the field","Confirm the DNR is valid and do not initiate resuscitation","Begin CPR and contact medical direction simultaneously","Transport without interventions and let the hospital decide"],ans:1,rat:"A valid DNR/POLST order must be honored in the field. Verify validity (physician signature, patient identification). If the DNR is valid and the patient is in cardiac arrest, withhold resuscitation per the order. Contact medical direction if uncertain."},
+
+  // ENVIRONMENTAL / MCI (5 questions)
+  {cat:"Environmental/MCI",diff:"Moderate",q:"A patient presents with hot, dry skin, altered mental status, and a temperature of 105°F after exercising in the heat. What condition do you suspect and what is the treatment priority?",opts:["Heat exhaustion — rehydrate orally and rest","Heat stroke — aggressive cooling is the immediate priority","Heat cramps — stretch and hydrate","Hyperthermia — apply ice packs to the chest"],ans:1,rat:"Altered mental status + hot skin + elevated temperature = heat STROKE (not exhaustion). Treatment priority is aggressive cooling: remove clothing, ice packs to neck/axillae/groin, wet sheets + fan. Cool first, then transport — temperature will continue to rise in the truck without active cooling."},
+  {cat:"Environmental/MCI",diff:"Basic",q:"Using START triage, a patient is breathing at 28 breaths/min, has a radial pulse, and follows commands. What tag color?",opts:["Red — Immediate","Yellow — Delayed","Green — Minor","Black — Deceased/Expectant"],ans:1,rat:"RPM: Respirations ≤30 ✓, Pulse present ✓, Mental status — can follow commands ✓. All three criteria met for Delayed (Yellow). RR >30 or absent pulse or inability to follow commands would have made this Red."},
+  {cat:"Environmental/MCI",diff:"Advanced",q:"A patient has been in a closed garage with a running car engine. He is confused, and SpO2 reads 99% on the pulse oximeter. What is wrong with this picture?",opts:["The SpO2 reading confirms the patient is not hypoxic","Pulse oximetry cannot distinguish COHb from OxHb — the reading is unreliable","The patient is hyperventilating, causing the high SpO2","CO poisoning causes high SpO2"],ans:1,rat:"Standard pulse oximetry measures light absorption and cannot differentiate carboxyhemoglobin (CO-bound) from oxyhemoglobin. CO poisoning shows falsely normal or high SpO2. Confirmed CO toxicity requires co-oximetry. Treat all suspected CO exposure with high-flow O2 regardless of SpO2."},
+  {cat:"Environmental/MCI",diff:"Moderate",q:"At an MCI, you are assigned to the Treatment Group. Your role is to:",opts:["Perform triage and tag patients as they arrive","Provide treatment to already-triaged patients awaiting transport","Coordinate transport to hospitals","Command all medical operations"],ans:1,rat:"The Treatment Group provides care to patients who have already been triaged and tagged. Triage and Treatment are separate functions in ICS — you should not be performing triage if assigned to treatment. Follow your assigned role."},
+  {cat:"Environmental/MCI",diff:"Basic",q:"In the JumpSTART algorithm, what modification is made for pediatric patients who are not breathing after the airway is opened?",opts:["Tag immediately as Black","Give 5 rescue breaths before tagging Black","Begin CPR","Tag as Red immediately"],ans:1,rat:"JumpSTART modification: children have a higher incidence of respiratory primary arrest (vs cardiac arrest in adults). Give 5 rescue breaths — if breathing resumes, tag Red (Immediate). If still apneic after 5 breaths, tag Black. This gives pediatric patients an additional chance at rescue."},
+
+  // ASSESSMENT (5 questions)
+  {cat:"Assessment",diff:"Basic",q:"What does the 'X' stand for in the XABCDE primary survey?",opts:["X-ray findings","Exsanguinating hemorrhage","Extra resources needed","External examination"],ans:1,rat:"X = Exsanguinating (life-threatening) hemorrhage. Control of massive external bleeding has been moved to the very beginning of the primary survey because hemorrhage is the most preventable cause of trauma death. This comes BEFORE airway in tactical and military-influenced civilian trauma care."},
+  {cat:"Assessment",diff:"Moderate",q:"You assess a patient and find: RR 28, cool/clammy skin, HR 118, BP 92/68, GCS 14. What is your transport priority and why?",opts:["Low priority — vitals are only slightly abnormal","High priority — signs of compensated/decompensating shock","Moderate priority — patient is conscious and talking","Low priority — the patient has a normal GCS"],ans:1,rat:"Tachycardia + hypotension + cool clammy skin + tachypnea = shock until proven otherwise. GCS 14 indicates altered LOC. This patient is decompensating — high priority transport with O2 and hemorrhage control. Conscious and talking does not mean stable."},
+  {cat:"Assessment",diff:"Moderate",q:"When should a reassessment be performed on a stable patient?",opts:["Every 5 minutes","Every 15 minutes","Every 30 minutes","Only if condition changes"],ans:1,rat:"Stable patients should be reassessed every 15 minutes. Unstable or critical patients should be reassessed every 5 minutes. Reassessment includes repeating vital signs, re-checking interventions, and monitoring for changes in condition."},
+  {cat:"Assessment",diff:"Advanced",q:"A patient has a radial pulse rate of 52 and is on metoprolol. He is conscious with BP of 100/70. He complains of dizziness. What is your concern?",opts:["Normal finding for an athlete","Bradycardia possibly worsened by beta-blocker — monitor closely and transport","Hypertensive emergency","Normal elderly vital signs"],ans:1,rat:"Symptomatic bradycardia (HR 52 + dizziness + BP at low end of normal) in a patient on a beta-blocker (which suppresses HR) is clinically significant. The beta-blocker may be preventing adequate rate response. Transport for evaluation — pacing may be needed if the patient deteriorates."},
+  {cat:"Assessment",diff:"Basic",q:"What does the 'P' in SAMPLE stand for?",opts:["Pain level","Pertinent past medical history","Pulse oximetry","Primary complaint"],ans:1,rat:"P = Pertinent past medical history. This includes prior hospitalizations, surgeries, chronic medical conditions, and anything relevant to the current complaint. 'Pertinent' is key — focus on history that could affect the current presentation."},
+];
+
+// State
+let currentQ=0, answered=[], timeLeft=90*60, timerInterval=null, examStartTime=null, started=false;
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+const shuffledQs=shuffle([...QUESTIONS]);
+
+function startExam(){
+  document.getElementById('startScreen').classList.remove('active');
+  document.getElementById('examScreen').classList.add('active');
+  examStartTime=Date.now();
+  timerInterval=setInterval(tickTimer,1000);
+  answered=new Array(shuffledQs.length).fill(null);
+  renderQuestion();
+}
+
+function tickTimer(){
+  timeLeft--;
+  if(timeLeft<=0){clearInterval(timerInterval);finishExam();return;}
+  const m=Math.floor(timeLeft/60),s=timeLeft%60;
+  document.getElementById('timerDisplay').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(timeLeft<=300) document.getElementById('timerDisplay').style.color='#DC2626';
+}
+
+function renderQuestion(){
+  const q=shuffledQs[currentQ];
+  document.getElementById('qCategory').textContent=q.cat;
+  document.getElementById('qDiff').textContent=q.diff;
+  document.getElementById('qNum').textContent=`Q ${currentQ+1} of ${shuffledQs.length}`;
+  document.getElementById('qText').textContent=q.q;
+  const opts=document.getElementById('optionsContainer');
+  opts.innerHTML='';
+  q.opts.forEach((opt,i)=>{
+    const letters=['A','B','C','D'];
+    const div=document.createElement('div');
+    div.className='opt'+(answered[currentQ]!==null?' locked':'');
+    if(answered[currentQ]!==null){
+      if(i===q.ans) div.classList.add('correct');
+      else if(i===answered[currentQ]) div.classList.add('wrong');
+    }
+    div.innerHTML=`<div class="opt-letter">${letters[i]}</div><div class="opt-text">${opt}</div>`;
+    if(answered[currentQ]===null) div.onclick=()=>selectAnswer(i);
+    opts.appendChild(div);
+  });
+  const rat=document.getElementById('rationaleBox');
+  if(answered[currentQ]!==null){
+    rat.style.display='block';
+    rat.className='rationale '+(answered[currentQ]===q.ans?'correct':'wrong');
+    document.getElementById('rationaleTitle').textContent=answered[currentQ]===q.ans?'Correct!':'Incorrect';
+    document.getElementById('rationaleText').textContent=q.rat;
+  } else {rat.style.display='none';}
+  const prog=(currentQ+1)/shuffledQs.length*100;
+  document.getElementById('progressFill').style.width=prog+'%';
+  document.getElementById('progressLabel').textContent=`Question ${currentQ+1} of ${shuffledQs.length}`;
+  const correct=answered.filter((a,i)=>a===shuffledQs[i].ans).length;
+  const attempted=answered.filter(a=>a!==null).length;
+  document.getElementById('scoreLabel').textContent=`Score: ${correct} / ${attempted}`;
+  document.getElementById('prevBtn').disabled=currentQ===0;
+  const isLast=currentQ===shuffledQs.length-1;
+  document.getElementById('nextBtn').style.display=isLast?'none':'inline-block';
+  document.getElementById('finishBtn').style.display=isLast?'inline-block':'none';
+  document.getElementById('nextBtn').disabled=answered[currentQ]===null;
+  document.getElementById('finishBtn').disabled=answered[currentQ]===null;
+}
+
+function selectAnswer(idx){
+  answered[currentQ]=idx;
+  renderQuestion();
+}
+
+function navigate(dir){
+  currentQ+=dir;
+  if(currentQ<0)currentQ=0;
+  if(currentQ>=shuffledQs.length)currentQ=shuffledQs.length-1;
+  renderQuestion();
+}
+
+function finishExam(){
+  clearInterval(timerInterval);
+  document.getElementById('examScreen').classList.remove('active');
+  document.getElementById('resultsScreen').classList.add('active');
+  const totalQ=shuffledQs.length;
+  const correct=answered.filter((a,i)=>a!==null&&a===shuffledQs[i].ans).length;
+  const attempted=answered.filter(a=>a!==null).length;
+  const pct=Math.round(correct/totalQ*100);
+  const circle=document.getElementById('scoreCircle');
+  const verdict=document.getElementById('scoreVerdict');
+  document.getElementById('scorePct').textContent=pct+'%';
+  if(pct>=75){circle.className='score-circle pass';verdict.textContent='PASS';}
+  else if(pct>=65){circle.className='score-circle borderline';verdict.textContent='BORDERLINE';}
+  else{circle.className='score-circle fail';verdict.textContent='REVIEW NEEDED';}
+  document.getElementById('resCorrect').textContent=correct;
+  document.getElementById('resWrong').textContent=totalQ-correct;
+  const elapsed=Math.floor((Date.now()-examStartTime)/1000);
+  const em=Math.floor(elapsed/60),es=elapsed%60;
+  document.getElementById('resTime').textContent=`${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')}`;
+  // Category breakdown
+  const cats={};
+  shuffledQs.forEach((q,i)=>{if(!cats[q.cat])cats[q.cat]={c:0,t:0};cats[q.cat].t++;if(answered[i]===q.ans)cats[q.cat].c++;});
+  const cbd=document.getElementById('catBreakdown');
+  cbd.innerHTML='';
+  Object.entries(cats).sort((a,b)=>(a[1].c/a[1].t)-(b[1].c/b[1].t)).forEach(([cat,data])=>{
+    const p=Math.round(data.c/data.t*100);
+    const color=p>=75?'#15803D':p>=65?'#D97706':'#DC2626';
+    cbd.innerHTML+=`<div class="cat-row"><div class="cat-name">${cat}</div><div class="cat-bar-bg"><div class="cat-bar-fill" style="width:${p}%;background:${color}"></div></div><div class="cat-pct">${p}%</div></div>`;
+  });
+  // Missed questions
+  const ml=document.getElementById('missedList');
+  ml.innerHTML='';
+  shuffledQs.forEach((q,i)=>{
+    if(answered[i]!==null&&answered[i]!==q.ans){
+      ml.innerHTML+=`<div class="missed-item"><div class="missed-q">${q.q}</div><div class="missed-a">✓ ${q.opts[q.ans]}</div></div>`;
+    }
+  });
+  if(ml.innerHTML==='')ml.innerHTML='<div style="color:#15803D;font-weight:600;font-size:0.9rem;">No missed questions — perfect score!</div>';
+}
+
+function restartExam(){
+  shuffle(shuffledQs);
+  currentQ=0; answered=new Array(shuffledQs.length).fill(null); timeLeft=90*60;
+  document.getElementById('timerDisplay').textContent='90:00';
+  document.getElementById('timerDisplay').style.color='white';
+  document.getElementById('resultsScreen').classList.remove('active');
+  document.getElementById('startScreen').classList.add('active');
+}
+</script>
+</body>
+</html>
