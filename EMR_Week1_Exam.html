@@ -221,6 +221,8 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .build-item:hover { border-color: #2196F3; box-shadow: 0 0 0 1px #2196F3; }
+  .build-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .build-item.drag-over { border-color: #2196F3; background: #1e3a5f; transform: scale(1.02); box-shadow: 0 0 0 2px #2196F3; }
   .build-item.dragging { opacity: 0.4; }
   .build-item.dragover { border-color: #22c55e; background: #0f2a1a; }
   .build-handle { color: #475569; font-size: 18px; flex-shrink: 0; }
@@ -420,9 +422,14 @@ async function finishExam() {
   phase = "submitting";
   render();
  
-  const result = await submitToFirebase(subData);
+  try {
+    const result = await submitToFirebase(subData);
+    window._submitResult = result;
+  } catch(e) {
+    console.error('finishExam error:', e);
+    window._submitResult = { success: false, error: e.toString() };
+  }
   phase = "results";
-  window._submitResult = result;
   window._examScore = {score,total,pct};
   window._questionResults = questionResults;
   render();
@@ -720,6 +727,57 @@ function attachEvents() {
         render();
       }
     });
+  }
+ 
+  // BUILD — drag to reorder
+  const buildList = document.getElementById("buildList");
+  if (buildList) {
+    let dragSrcPos = null;
+ 
+    buildList.querySelectorAll(".build-item").forEach(item => {
+      item.addEventListener("dragstart", e => {
+        dragSrcPos = parseInt(item.dataset.pos);
+        item.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", dragSrcPos);
+      });
+ 
+      item.addEventListener("dragend", () => {
+        item.classList.remove("dragging");
+        buildList.querySelectorAll(".build-item").forEach(i => i.classList.remove("drag-over"));
+      });
+ 
+      item.addEventListener("dragover", e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        buildList.querySelectorAll(".build-item").forEach(i => i.classList.remove("drag-over"));
+        item.classList.add("drag-over");
+      });
+ 
+      item.addEventListener("dragleave", () => {
+        item.classList.remove("drag-over");
+      });
+ 
+      item.addEventListener("drop", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        item.classList.remove("drag-over");
+        const targetPos = parseInt(item.dataset.pos);
+        if (dragSrcPos === null || dragSrcPos === targetPos) return;
+ 
+        // Reorder the current answers array
+        const currentOrder = answers[current] || [...Array(questions[current].items.length).keys()];
+        const newOrder = [...currentOrder];
+        const [moved] = newOrder.splice(dragSrcPos, 1);
+        newOrder.splice(targetPos, 0, moved);
+        answers[current] = newOrder;
+        dragSrcPos = null;
+        render();
+      });
+    });
+ 
+    // Allow drop on the list container itself (gap between items)
+    buildList.addEventListener("dragover", e => e.preventDefault());
   }
  
   // NAV
