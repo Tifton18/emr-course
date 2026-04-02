@@ -1018,6 +1018,11 @@ async function loadStudentData(name) {
   renderCourseTabs(); // re-render after data loaded to enforce enrollment
   renderExams();
   renderGrades(name);
+  // Render the active tab on load — defaults to announcements
+  if (portalActiveTab === 'announcements') renderPortalAnnouncements();
+  else if (portalActiveTab === 'resources') renderPortalResources();
+  else if (portalActiveTab === 'slides') renderPortalSlides();
+  else if (portalActiveTab === 'links') renderPortalLinks();
 }
  
 async function fetchStudentScores(name) {
