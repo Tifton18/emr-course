@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Week 1 Exam</title>
+<style>
+  /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
+  /* See SETUP_INSTRUCTIONS.txt for how to get this */
+ 
+  :root {
+    --bg: #1a2744;
+    --surface: #ffffff;
+    --border: rgba(255,255,255,0.15);
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --blue: #b91c1c;
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #b45309;
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    font-family: Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+ 
+  /* ── INTRO ── */
+  .intro-wrap {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a2744 0%, #1e3a5f 50%, #0f1e3d 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .intro-card { max-width: 680px; width: 100%; text-align: center; }
+  .intro-eyebrow { font-size: 12px; letter-spacing: 6px; color: #b91c1c; text-transform: uppercase; margin-bottom: 14px; }
+  .intro-title { font-size: 52px; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 8px; }
+  .intro-sub { font-size: 28px; color: #fca5a5; margin-bottom: 40px; }
+  .info-grid { background: #ffffff; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px 36px; margin-bottom: 32px; text-align: left; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #e7d5b3; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #fca5a5; font-weight: 600; }
+  .info-val { max-width: 340px; text-align: right; }
+  .intro-instructions { color: #78716c; font-size: 13px; line-height: 1.7; margin-bottom: 24px; }
+  .name-label { display: block; color: #fca5a5; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; text-align: left; }
+  .name-input {
+    width: 100%; background: #1e3a5f; border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 14px 18px; font-size: 16px; color: #fff;
+    outline: none; font-family: Georgia, serif; margin-bottom: 24px; transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: #7f1d1d; }
+  .name-input.has-value { border-color: #7f1d1d; }
+  .btn-begin {
+    background: #1e3a5f; color: #e2e8f0; border: none; border-radius: 12px;
+    padding: 18px 56px; font-size: 18px; font-weight: 700; cursor: default;
+    letter-spacing: 1px; transition: all 0.2s; font-family: Georgia, serif;
+  }
+  .btn-begin.active {
+    background: linear-gradient(135deg, #7f1d1d, #0d47a1); color: #fff;
+    cursor: pointer; box-shadow: 0 8px 32px rgba(21,101,192,0.5);
+  }
+  .btn-begin.active:hover { transform: translateY(-2px); }
+ 
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: #1a2744; border-bottom: 3px solid #b45309; padding: 0 24px;
+  }
+  .topbar-inner {
+    max-width: 860px; margin: 0 auto; display: flex;
+    align-items: center; gap: 16px; height: 60px;
+  }
+  .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .progress-bar { flex: 1; height: 6px; background: #ead9b8; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .progress-text { color: #44403c; font-size: 13px; white-space: nowrap; }
+  .timer-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #ffffff; border-radius: 8px; padding: 6px 14px;
+    border: 1px solid #d6c9a8;
+  }
+  .timer-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .timer-dot.pulse { animation: pulse 1s infinite; }
+  .timer-text { font-weight: 700; font-size: 18px; font-family: monospace; letter-spacing: 2px; }
+  .timer-bar { height: 3px; background: #ead9b8; transition: none; }
+  .timer-bar-fill { height: 100%; transition: width 1s linear, background 1s; }
+  .btn-submit-top {
+    background: #b91c1c; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; font-family: Georgia, serif;
+  }
+ 
+  /* ── EXAM BODY ── */
+  .exam-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 20px; padding: 5px 14px; margin-bottom: 20px;
+  }
+  .section-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .q-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .q-label { font-size: 13px; color: #f0f6ff; font-weight: 600; letter-spacing: 1px; }
+  .q-number { font-size: 42px; font-weight: 700; color: #fff; line-height: 1; }
+  .q-badge {
+    border-radius: 6px; padding: 3px 10px; font-size: 12px;
+    font-weight: 700; letter-spacing: 1px;
+  }
+  .q-points { margin-left: auto; color: #e2e8f0; font-size: 13px; }
+  .q-stem { font-size: 19px; color: #ffffff; line-height: 1.7; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #1e2a3a; }
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .best2-hint { color: #fcd34d; font-size: 13px; margin-bottom: 8px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px;
+    background: #ffffff; border: 2px solid #1e2a3a; border-radius: 10px;
+    cursor: pointer; text-align: left; transition: all 0.15s;
+    color: #1e3a5f; font-family: Georgia, serif; font-size: 16px; width: 100%;
+  }
+  .option-btn:hover { border-color: #1a2744; }
+  .option-btn.selected { background: #fef3c7; border-color: #b91c1c; color: #1e3a5f; }
+  .option-indicator {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #1a2744;
+    background: transparent; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: #44403c; font-weight: 700; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .option-btn.selected .option-indicator {
+    background: #b91c1c; border-color: #b91c1c; color: #fff;
+  }
+  .option-btn.best2 .option-indicator { border-radius: 6px; }
+  .option-text { padding-top: 2px; line-height: 1.6; }
+ 
+  /* ── MATCHING ── */
+  .match-instructions { color: #e2e8f0; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .match-instructions strong { color: #b45309; }
+  .bank-label { color: #44403c; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .def-bank {
+    min-height: 48px; background: #243860; border: 2px dashed #b45309;
+    border-radius: 10px; padding: 10px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .def-bank.dragover { border-color: #fcd34d; background: #1e3a5f; }
+  .def-chip {
+    padding: 10px 14px; background: #ffffff; border: 1px solid #d6c9a8;
+    border-radius: 8px; cursor: grab; color: #1e3a5f; font-size: 14px;
+    line-height: 1.5; user-select: none; transition: box-shadow 0.15s;
+    font-family: Georgia, serif;
+  }
+  .def-chip:hover { box-shadow: 0 0 0 2px #b45309; }
+  .def-chip.dragging { opacity: 0.4; }
+  .def-bank-empty { color: #94a3b8; font-size: 13px; font-style: italic; padding: 8px 14px; }
+  .terms-label { color: #44403c; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .term-rows { display: flex; flex-direction: column; gap: 8px; }
+  .term-row {
+    display: grid; grid-template-columns: 200px 1fr; border-radius: 10px;
+    overflow: hidden; border: 2px solid #1e2a3a; transition: border-color 0.15s;
+  }
+  .term-row.dragover { border-color: #b45309; box-shadow: 0 0 0 3px rgba(56,189,248,0.13); }
+  .term-row.assigned { border-color: #22c55e; }
+  .term-name { background: #1a2744; color: #ffffff; border-right: 3px solid #b45309; padding: 14px 16px; display: flex; align-items: center; }
+  .term-name span { color: #ffffff; font-weight: 700; font-size: 14px; }
+  .term-drop { background: #ffffff; padding: 12px 16px; display: flex; align-items: center; min-height: 52px; }
+  .term-row.dragover .term-drop { background: #fef3c7; }
+  .term-row.assigned .term-drop { background: #dcfce7; }
+  .term-placeholder { color: #94a3b8; font-size: 13px; font-style: italic; }
+  .term-placeholder.active { color: #b45309; }
+ 
+  /* ── NAV ── */
+  .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #1e2a3a; }
+  .btn-prev, .btn-next, .btn-submit-exam {
+    border-radius: 8px; padding: 10px 24px; font-size: 14px;
+    cursor: pointer; font-family: Georgia, serif; transition: all 0.15s;
+  }
+  .btn-prev { background: transparent; color: #e2e8f0; border: 1px solid #1a2744; }
+  .btn-prev:disabled { color: #e2e8f0; border-color: #e2e8f0; cursor: default; }
+  .btn-next { background: #b91c1c; color: #fff; border: none; font-weight: 700; }
+  .btn-submit-exam { background: #22c55e; color: #fff; border: none; font-weight: 700; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+  .dot { height: 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s; background: #ead9b8; }
+  .dot.answered { background: #ead9b8; }
+  .dot.current { background: #b91c1c; }
+ 
+  /* ── RESULTS ── */
+  .results-wrap { min-height: 100vh; padding: 40px 20px; font-family: Georgia, serif; }
+  .results-inner { max-width: 780px; margin: 0 auto; }
+  .results-hero { text-align: center; margin-bottom: 40px; }
+  .results-icon { font-size: 80px; margin-bottom: 8px; }
+  .results-name { font-size: 22px; color: #44403c; margin-bottom: 4px; }
+  .results-pct { font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .results-verdict { font-size: 22px; margin-bottom: 4px; }
+  .results-detail { color: #78716c; font-size: 15px; }
+  .results-card { background: #ffffff; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .results-card-title { color: #fca5a5; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 16px; }
+  .result-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .result-row:last-child { border-bottom: none; }
+  .result-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .result-badge.correct { background: #2e7d32; }
+  .result-badge.wrong { background: #c62828; }
+  .result-stem { color: #e7d5b3; font-size: 14px; margin-bottom: 4px; }
+  .result-correct-ans { font-size: 13px; color: #81c784; }
+  .result-pts { font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .submitting-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 16px; }
+  .submitting-spinner { width: 48px; height: 48px; border: 4px solid #1e2a3a; border-top-color: #b91c1c; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .submitting-text { color: #e2e8f0; font-size: 16px; }
+  .submit-status { text-align: center; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; }
+  .submit-status.success { background: #dcfce7; border: 1px solid #16a34a; color: #15803d; }
+  .submit-status.error { background: #2d0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+ 
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .build-instructions { color: #e2e8f0; font-size: 13px; margin-bottom: 12px; font-style: italic; }
+  .build-list { display: flex; flex-direction: column; gap: 8px; }
+  .build-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #243860; border: 1px solid #b45309; border-radius: 8px;
+    padding: 12px 14px; cursor: grab; user-select: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .build-item:hover { border-color: #b91c1c; box-shadow: 0 0 0 1px #b91c1c; }
+  .build-item.dragging { opacity: 0.4; cursor: grabbing; }
+  .build-item.drag-over { border-color: #b91c1c; background: #b45309; transform: scale(1.02); box-shadow: 0 0 0 2px #b91c1c; }
+  .build-item.dragging { opacity: 0.4; }
+  .build-item.dragover { border-color: #16a34a; background: #dcfce7; }
+  .build-handle { color: #e2e8f0; font-size: 18px; flex-shrink: 0; }
+  .build-num { 
+    background: #b91c1c; color: white; border-radius: 50%;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .build-text { color: #ffffff; font-size: 14px; line-height: 1.5; flex: 1; }
+  .q-badge-build { background: #dcfce7; color: #15803d; border: 1px solid #16a34a; }
+
+</style>
+</head>
+<body>
+ 
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIGURATION — update this URL after deploying your
+// Google Apps Script Web App (see SETUP_INSTRUCTIONS.txt)
+// ══════════════════════════════════════════════════════
+const FB_CONFIG = {
+  apiKey:"AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  authDomain:"class-attendance-72cd9.firebaseapp.com",
+  projectId:"class-attendance-72cd9",
+};
+const EXAM_LABEL      = "Week 1 Exam v2";
+const EXAM_CATEGORY   = "module";
+const TOTAL_TIME      = 25 * 60; // 25 minutes
+const LETTERS         = ["A","B","C","D","E"];
+ 
+// ── QUESTION DATA ────────────────────────────────────
+const questions = [
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"A 45-year-old male is unconscious following a car accident. No family is present. Under which legal doctrine may you provide care without expressed consent?",options:["Expressed consent","Informed consent","Implied consent","Involuntary consent"],correct:[2],explain:"Implied consent assumes an unconscious or incapacitated patient would consent to life-saving care if they were able to do so.",points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes the EMR's scope of practice in Georgia?",options:["EMRs may perform all interventions that paramedics perform if supervised","EMRs provide immediate life-saving interventions using basic equipment until higher-level care arrives","EMRs may independently transport patients to the hospital","EMRs must obtain a physician's order before providing any patient care"],correct:[1],explain:"EMRs are trained to provide immediate basic life-saving care using minimal equipment until more advanced EMS resources arrive.",points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"A DNR order has been verified for your patient who is now in cardiac arrest. Which action is MOST appropriate?",options:["Begin CPR regardless, as the scene may be unsafe","Withhold CPR and contact medical direction or law enforcement as required by protocol","Attempt resuscitation until an AED is applied","Contact the patient's family to confirm the DNR before withholding care"],correct:[1],explain:"A valid DNR order must be honored. The appropriate response is to withhold resuscitation, provide comfort measures, and notify medical direction or law enforcement per local protocol.",points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"You are documenting a patient care encounter. Which of the following is the MOST important principle of patient care documentation?",options:["Use abbreviations whenever possible to save time","Document only the information the receiving facility needs to know","Record findings objectively, accurately, and completely at the time of the call","Correct errors by completely crossing them out with multiple lines"],correct:[2],explain:"Documentation must be objective, accurate, and completed as close to the time of care as possible. Errors should be corrected with a single line through the error, initials, and the correct information.",points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which action by an EMR MOST clearly constitutes a breach of patient confidentiality?",options:["Sharing patient information with the receiving hospital nurse","Discussing a patient's condition with a family member present at the scene","Telling a coworker unrelated to the call about a patient's diagnosis at the fire station","Documenting the patient's chief complaint in the patient care report"],correct:[2],explain:"Patient information may only be shared on a need-to-know basis with those directly involved in the patient's care. Discussing protected health information with uninvolved coworkers violates HIPAA.",points:1},
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes the relationship between an EMR and medical direction?",options:["EMRs operate independently and do not require medical oversight","Medical direction provides the legal authority and clinical oversight under which EMRs practice","Medical direction only applies during online communication with a physician","EMRs only need medical direction for ALS-level interventions"],correct:[1],explain:"Both online (direct) and offline (protocols, training) medical direction provide the legal framework and clinical oversight for EMR practice.",points:1},
+  {section:"Communications & Documentation",type:"mc",stem:"When reporting to the receiving hospital by radio, which of the following components should be included FIRST?",options:["The patient's full name and address","Your unit identifier and estimated time of arrival","The patient's insurance information","A complete list of all medications the patient takes"],correct:[1],explain:"Radio reports to the receiving facility should begin with unit identification and ETA, followed by patient age/sex, chief complaint, vitals, treatment, and response.",points:1},
+  {section:"Communications & Documentation",type:"mc",stem:"You make an error while writing a patient care report. The CORRECT way to handle this is to:",options:["Use correction fluid (white-out) to cover the error and write over it","Draw multiple lines through the error until it is unreadable","Draw a single line through the error, initial it, and write the correct information","Start a new report from the beginning"],correct:[2],explain:"A single line through the error — leaving it legible — followed by initials and the correct information preserves the document's legal integrity.",points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"matching",stem:"Match each medical terminology prefix or suffix with its correct meaning.",pairs:[{term:"-emia",def:"Condition of the blood"},{term:"Brady-",def:"Slow"},{term:"Hyper-",def:"Above normal or excessive"},{term:"Tachy-",def:"Fast"},{term:"-itis",def:"Inflammation"}],points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The mediastinum is BEST described as the:",options:["Space between the lungs containing the heart, great vessels, trachea, and esophagus","Cavity between the parietal and visceral pleura","Lower portion of the abdominal cavity","Space between the diaphragm and the pelvis"],correct:[0],explain:"The mediastinum is the central chest compartment bounded by the lungs laterally, the sternum anteriorly, and the spine posteriorly. It contains the heart, great vessels, trachea, esophagus, and thymus.",points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Which organ is located in the RIGHT upper quadrant (RUQ) of the abdomen?",options:["Spleen","Liver","Sigmoid colon","Left kidney"],correct:[1],explain:"The liver is the primary organ in the RUQ, along with the gallbladder, portions of the colon, and the right kidney. The spleen is in the LUQ.",points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"A patient has a laceration on the medial aspect of the left forearm. This means the wound is on the:",options:["Outer surface toward the thumb side","Inner surface toward the little finger side","Posterior surface of the arm","Lateral surface near the elbow"],correct:[1],explain:"Medial means toward the midline of the body. On the forearm, medial is the inner surface — the side of the little finger (ulnar side).",points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"best2",stem:"Which TWO body systems work TOGETHER most directly to regulate oxygen delivery to tissues?",options:["Integumentary system","Respiratory system","Musculoskeletal system","Cardiovascular system"],correct:[1,3],explain:"The respiratory system brings oxygen into the blood, and the cardiovascular system delivers oxygenated blood to the tissues. These two systems are the primary drivers of oxygen delivery.",points:1},
+  {section:"Anatomy, Physiology & Medical Terminology",type:"matching",stem:"Match each body system with its PRIMARY function.",pairs:[{term:"Respiratory",def:"Gas exchange — delivers oxygen and removes CO2"},{term:"Nervous",def:"Controls and coordinates body functions via electrical signals"},{term:"Endocrine",def:"Regulates body functions through hormone secretion"},{term:"Lymphatic",def:"Returns excess fluid to circulation and supports immunity"},{term:"Integumentary",def:"Protects the body and regulates temperature"}],points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"You need to quickly move an unresponsive patient from a burning vehicle. The MOST appropriate technique is:",options:["Extremity lift","Long backboard carry","Emergency drag by the clothing or axillary drag","Stair chair carry"],correct:[2],explain:"Emergency drags are used when immediate danger requires moving a patient quickly without time for spinal precautions. The axillary drag or clothing drag keeps the spine as aligned as possible.",points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"Which of the following describes the CORRECT power grip technique?",options:["Palms facing downward with thumbs wrapped over the top","All fingers and the palm in contact with the object, thumbs up, with equal spacing","Two-fingered grip to avoid strain on the hands","Palms facing each other with fingers interlocked under the object"],correct:[1],explain:"The power grip uses all fingers and the palm in full contact with the stretcher bar. Palms face upward, thumbs point toward the direction of travel, and fingers are equally spaced.",points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"A patient with suspected spinal injury is found prone (face down). After applying spinal precautions, you should:",options:["Leave the patient prone and immobilize in that position for transport","Log roll the patient to a supine position using at least three rescuers maintaining in-line stabilization","Rapidly flip the patient supine using a scoop stretcher without additional personnel","Place the patient in the recovery position on their side"],correct:[1],explain:"Patients with suspected spinal injury found prone should be log-rolled to supine by at least 3 rescuers — one maintaining in-line cervical stabilization — before full spinal immobilization.",points:1},
+  {section:"Lifting, Moving & Patient Positioning",type:"best2",stem:"Which TWO of the following are correct principles of safe patient lifting?",options:["Keep the patient as far from your body as possible for better control","Keep your back straight and lift with your legs","Position your feet shoulder-width apart before lifting","Twist your torso to change direction while holding the patient"],correct:[1,2],explain:"Safe lifting requires a straight back, leg-driven power, and a stable base of support. Twisting while loaded and reaching far from the body are leading causes of back injury.",points:1},
+  {section:"Airway Management",type:"mc",stem:"You are ventilating an adult patient with a BVM when the chest is not rising. After repositioning the airway, the chest still does not rise. What is the NEXT step?",options:["Increase ventilation rate to 20 breaths per minute","Perform a visual check and attempt to remove any visible oral foreign body obstruction","Switch immediately to mouth-to-mask ventilation","Apply oxygen via non-rebreather mask and reassess"],correct:[1],explain:"If repositioning fails to produce chest rise, a foreign body airway obstruction should be suspected. Perform a visual check and, if an obstruction is visible, attempt to remove it.",points:1},
+  {section:"Airway Management",type:"mc",stem:"What is the MAXIMUM amount of time suctioning should be applied to a patient's airway at one time?",options:["5 seconds","15 seconds","30 seconds","45 seconds"],correct:[1],explain:"Suctioning should be limited to 15 seconds per attempt to prevent hypoxia. Pre-oxygenate before and after suctioning when possible.",points:1},
+  {section:"Airway Management",type:"mc",stem:"An NPA is contraindicated in which of the following situations?",options:["A conscious patient with an intact gag reflex","A pediatric patient requiring airway support","A patient with suspected basilar skull fracture","A patient who is semiconscious and will not tolerate an OPA"],correct:[2],explain:"A suspected basilar skull fracture is a contraindication for NPA insertion — the device could enter the cranial vault through the cribriform plate.",points:1},
+  {section:"Airway Management",type:"matching",stem:"Match each airway adjunct with the correct clinical indication.",pairs:[{term:"OPA",def:"Unconscious patient with no gag reflex requiring airway maintenance"},{term:"NPA",def:"Semiconscious patient who needs airway support but retains gag reflex"},{term:"Suction catheter",def:"Patient with secretions, blood, or vomit in the airway"},{term:"BVM",def:"Apneic or severely hypoventilating patient requiring positive pressure ventilation"},{term:"Non-rebreather mask",def:"Spontaneously breathing patient requiring high-concentration supplemental oxygen"}],points:1},
+  {section:"Airway Management",type:"build",stem:"Place the following steps for inserting an oropharyngeal airway (OPA) in a patient with no gag reflex in the CORRECT order.",items:["Insert the OPA with the tip pointing toward the roof of the mouth and rotate 180 degrees as it passes the hard palate","Measure the OPA from the corner of the mouth to the earlobe","Confirm proper placement — the flange rests at the lips and breathing is unobstructed","Open the mouth using the cross-finger technique","Select the appropriate OPA size and prepare equipment"],order:[4,3,1,0,2],explain:"Preparation and sizing come first, then opening the mouth, inserting with rotation technique, and confirming placement.",points:1},
+  {section:"Ventilation & Breathing Assessment",type:"mc",stem:"A patient is breathing at 28 breaths per minute with adequate depth and clear lung sounds. This breathing rate is BEST described as:",options:["Bradypnea","Eupnea","Tachypnea","Apnea"],correct:[2],explain:"Tachypnea is a respiratory rate above 20 breaths per minute in adults. Eupnea is normal breathing (12-20 bpm), bradypnea is abnormally slow, and apnea is the absence of breathing.",points:1},
+  {section:"Ventilation & Breathing Assessment",type:"best2",stem:"Which TWO findings indicate INADEQUATE breathing in an adult patient?",options:["Respiratory rate of 18 breaths per minute with clear breath sounds","Breathing rate of 8 breaths per minute with shallow chest rise","SpO2 of 99% on room air","Cyanosis of the lips and fingernail beds"],correct:[1,3],explain:"A rate of 8 bpm is bradypnea indicating hypoventilation. Cyanosis indicates severe hypoxia. Both are signs of inadequate breathing requiring immediate intervention.",points:1}
+];
+ 
+const SECTION_COLORS = {
+  "EMS Systems, EMR Role & Medical/Legal":        {bg:"#1e3a5f", accent:"#b45309"},
+  "Communications & Documentation":               {bg:"#1e3a5f", accent:"#b45309"},
+  "Anatomy, Physiology & Medical Terminology":    {bg:"#1e3a5f", accent:"#b45309"},
+  "Lifting, Moving & Patient Positioning":        {bg:"#1e3a5f", accent:"#b45309"},
+  "Airway Management":                            {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Ventilation & Breathing Assessment":           {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Circulation, Bleeding Control & Shock":        {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Cardiac Emergencies, CPR & AED":               {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Medical Emergencies I":                        {bg:"#1e3a5f", accent:"#b45309"},
+  "Medical Emergencies II":                       {bg:"#1e3a5f", accent:"#b45309"},
+  "Trauma Assessment, Soft Tissue & Burns":       {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Musculoskeletal, Spinal, Head & Chest Trauma": {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Obstetrics, Pediatrics & Geriatrics":          {bg:"#1e3a5f", accent:"#b45309"},
+  "Environmental Emergencies & Special Situations":{bg:"#1e3a5f", accent:"#b45309"},
+  "MCI, ICS, Hazmat & EMS Operations":            {bg:"#1e3a5f", accent:"#b45309"},
+  "Critical Thinking & Integrated Assessment":    {bg:"#1e3a5f", accent:"#b91c1c"},
+};
+
+ 
+// ── STATE ────────────────────────────────────────────
+// Pre-fill student name from portal URL param
+const _urlParams = new URLSearchParams(window.location.search);
+const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
+ 
+let phase        = "intro";
+let studentName  = _portalStudent || "";
+let current      = 0;
+let answers      = Array(questions.length).fill(null);
+let matchSels    = {};      // "qIdx-termIdx" -> def string
+let shuffledDefs = {};      // qIdx -> shuffled def array
+let timeLeft     = TOTAL_TIME;
+let timerInterval= null;
+let dragData     = null;    // {def, fromTermIdx}
+let startTime    = null;
+ 
+// ── SHUFFLE ──────────────────────────────────────────
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+function initShuffles() {
+  questions.forEach((q,i) => {
+    if (q.type === "matching") shuffledDefs[i] = shuffle(q.pairs.map(p=>p.def));
+  });
+}
+ 
+// ── SCORING ──────────────────────────────────────────
+function scoreQuestion(q, ans) {
+  if (ans === undefined || ans === null) return false;
+  if (q.type === "mc")      return Array.isArray(ans) && ans[0] === q.correct[0];
+  if (q.type === "best2")   return Array.isArray(ans) && ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "build") {
+    const order = Array.isArray(ans) ? ans : [...Array(q.items.length).keys()];
+    return order.length === q.order.length && order.every((v,j) => v === q.order[j]);
+  }
+  if (q.type === "matching") return Array.isArray(ans) && q.pairs.every((p,ti)=>ans[ti]===p.def);
+  return false;
+}
+function calcScore() {
+  let score=0, total=0;
+  questions.forEach((q,i)=>{ total+=q.points; if(scoreQuestion(q,answers[i])) score+=q.points; });
+  return {score,total};
+}
+ 
+// ── SAVE MATCHING ANS ────────────────────────────────
+function saveMatchingAnswers(qIdx) {
+  const q = questions[qIdx];
+  answers[qIdx] = q.pairs.map((_,ti)=>matchSels[`${qIdx}-${ti}`]||null);
+}
+ 
+// ── TIMER ────────────────────────────────────────────
+function startTimer() {
+  startTime = Date.now();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(); }
+  }, 1000);
+}
+function updateTimerUI() {
+  const m = Math.floor(timeLeft/60), s = timeLeft%60;
+  const str = `${m}:${String(s).padStart(2,"0")}`;
+  const color = timeLeft<60?"#ef4444":timeLeft<180?"#b45309":"#22c55e";
+  document.querySelectorAll(".timer-text").forEach(el=>{ el.textContent=str; el.style.color=color; });
+  document.querySelectorAll(".timer-dot").forEach(el=>{ el.style.background=color; el.classList.toggle("pulse",timeLeft<60); });
+  document.querySelectorAll(".timer-bar-fill").forEach(el=>{ el.style.width=`${(timeLeft/TOTAL_TIME)*100}%`; el.style.background=color; });
+}
+ 
+// ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
+// Uses GET with ?payload= because Apps Script cross-origin POST is blocked
+// by CORS preflight. GET requests follow the redirect and reach doGet().
+async function submitToFirebase(subData) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults`;
+    const answersStr = JSON.stringify(subData.answersData, (k,v) => v === undefined ? null : v);
+    const body = {
+      fields: {
+        examLabel:  {stringValue: subData.examLabel},
+        category:   {stringValue: EXAM_CATEGORY},
+        name:       {stringValue: subData.name},
+        score:      {integerValue: subData.score},
+        total:      {integerValue: subData.total},
+        pct:        {integerValue: subData.pct},
+        timeUsed:   {integerValue: subData.timeUsed},
+        submittedAt:{stringValue: subData.submittedAt},
+        answersData:{stringValue: answersStr},
+      }
+    };
+    const resp = await fetch(url + `?key=${FB_CONFIG.apiKey}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) { const errText = await resp.text(); throw new Error(errText); }
+    return { success: true };
+  } catch(e) {
+    clearTimeout(timeout);
+    console.error("Firebase submit error:", e);
+    return { success: false, error: e.toString() };
+  }
+}
+ 
+// ── FINISH EXAM ──────────────────────────────────────
+async function finishExam() {
+  clearInterval(timerInterval);
+  const {score,total} = calcScore();
+  const pct = Math.round((score/total)*100);
+  const timeUsed = TOTAL_TIME - timeLeft;
+  const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
+ 
+  const answersData = questions.map((q, i) => {
+    const given = answers[i] !== undefined ? answers[i] : null;
+    const correct = q.correct !== undefined ? q.correct
+                  : q.order   !== undefined ? q.order
+                  : q.pairs   !== undefined ? q.pairs.map(p => p.def)
+                  : null;
+    return { given, correct };
+  });
+  const subData = {
+    examLabel: EXAM_LABEL,
+    name: studentName,
+    score, total, pct, timeUsed,
+    answersData,
+    submittedAt: new Date().toISOString(),
+  };
+ 
+  phase = "submitting";
+  render();
+
+  try {
+    const result = await submitToFirebase(subData);
+    window._submitResult = result;
+  } catch(e) {
+    console.error('finishExam error:', e);
+    window._submitResult = { success: false, error: e.toString() };
+  }
+  phase = "results";
+  window._examScore = {score,total,pct};
+  window._questionResults = questionResults;
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────
+function render() {
+  const root = document.getElementById("root");
+  if (phase === "intro")       root.innerHTML = renderIntro();
+  else if (phase === "submitting") root.innerHTML = renderSubmitting();
+  else if (phase === "results") root.innerHTML = renderResults();
+  else                          root.innerHTML = renderExam();
+  attachEvents();
+}
+ 
+function renderIntro() {
+  return `
+    <div class="intro-wrap">
+      <div class="intro-card">
+        <div class="intro-eyebrow">Georgia OEMST · NHTSA 2021</div>
+        <div class="intro-title">Week 1</div>
+        <div class="intro-sub">Examination</div>
+        <div class="info-grid">
+          ${[["Questions","25"],["Total Points","25"],["Time Allowed","25 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","Ch. 1–7: EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management · Ventilation & Breathing Assessment"]]
+            .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
+        </div>
+        <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
+        <label class="name-label">Student Name</label>
+        <input class="name-input ${_portalStudent ? 'has-value' : ''}" id="nameInput" type="text" 
+          placeholder="Enter your full name to begin..." autocomplete="off"
+          ${_portalStudent ? `value="${_portalStudent}" readonly style="background:#fef9ee;color:#1e3a5f;cursor:default;border-color:#93c5fd;"` : ''}>
+        <br>
+        <button class="btn-begin ${_portalStudent ? 'active' : ''}" id="beginBtn" ${_portalStudent ? '' : 'disabled'}>Begin Exam</button>
+      </div>
+    </div>`;
+}
+ 
+function renderSubmitting() {
+  return `
+    <div style="min-height:100vh;background:#1a2744;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;">
+      <div class="submitting-spinner"></div>
+      <div class="submitting-text">Submitting your exam…</div>
+    </div>`;
+}
+ 
+function renderResults() {
+  const {score,total,pct} = window._examScore;
+  const passed = pct >= 70;
+  const qr = window._questionResults;
+  const sr = window._submitResult;
+ 
+  let statusHtml = "";
+  if (sr && !sr.noUrl) {
+    statusHtml = sr.success
+      ? `<div class="submit-status success">✓ Your results have been submitted to your instructor.</div>`
+      : `<div class="submit-status error">⚠ Could not reach the server. Please notify your instructor. Your score: ${pct}% (${score}/${total})</div>`;
+  }
+ 
+  const reviewRows = questions.map((q,i)=>{
+    const correct = qr[i];
+    let correctAns = "";
+    if (!correct) {
+      if (q.type==="mc" && q.options) correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
+      else if (q.type==="best2" && q.options) correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+      else if (q.type==="matching") correctAns = "See correct matches in the review above";
+      else if (q.type==="build") correctAns = "See correct order in the review above";
+    }
+    return `
+      <div class="result-row">
+        <div class="result-badge ${correct?"correct":"wrong"}">${correct?"✓":"✗"}</div>
+        <div style="flex:1">
+          <div class="result-stem"><strong style="color:#fca5a5">Q${i+1}.</strong> ${q.stem.length>100?q.stem.slice(0,100)+"…":q.stem}</div>
+          ${correctAns?`<div class="result-correct-ans">${correctAns}</div>`:""}
+        </div>
+        <div class="result-pts" style="color:${correct?"#81c784":"#ef9a9a"}">${correct?"+"+q.points:"0"}</div>
+      </div>`;
+  }).join("");
+ 
+  return `
+    <div class="results-wrap" style="background:${passed?"linear-gradient(135deg,#0d2818,#1b4332,#0d2818)":"linear-gradient(135deg,#2d0a0a,#4a1010,#2d0a0a)"}">
+      <div class="results-inner">
+        ${statusHtml}
+        <div class="results-hero">
+          <div class="results-icon">${passed?"✓":"✗"}</div>
+          <div class="results-name">${studentName}</div>
+          <div class="results-pct">${pct}%</div>
+          <div class="results-verdict" style="color:${passed?"#81c784":"#ef9a9a"}">${passed?"PASSED":"DID NOT PASS"}</div>
+          <div class="results-detail">${score} / ${total} points · Passing score: 70% (${Math.ceil(total*0.7)} pts)</div>
+        </div>
+        <div class="results-card">
+          <div class="results-card-title">Question Review</div>
+          ${reviewRows}
+        </div>
+      </div>
+    </div>`;
+}
+ 
+function renderExam() {
+  const q = questions[current];
+  const sc = SECTION_COLORS[q.section] || {bg:"#1a1a2e",accent:"#b91c1c"};
+  const progress = ((current+1)/questions.length)*100;
+  const ans = answers[current] || [];
+ 
+  let questionBody = "";
+  if (q.type==="mc" || q.type==="best2") {
+    const hint = q.type==="best2"
+      ? `<div class="best2-hint">★ Select the TWO best answers ${ans.length>0?"("+ans.length+"/2 selected)":""}</div>` : "";
+    const opts = q.options.map((opt,idx)=>{
+      const sel = ans.includes(idx);
+      return `<button class="option-btn ${q.type==="best2"?"best2":""} ${sel?"selected":""}" data-idx="${idx}">
+        <div class="option-indicator">${LETTERS[idx]}</div>
+        <div class="option-text">${opt}</div>
+      </button>`;
+    }).join("");
+    questionBody = `<div class="options-list">${hint}${opts}</div>`;
+ 
+  } else if (q.type==="matching") {
+    const defs = shuffledDefs[current] || q.pairs.map(p=>p.def);
+    const usedDefs = new Set(Object.entries(matchSels).filter(([k])=>k.startsWith(current+"-")).map(([,v])=>v));
+    const bankDefs = defs.filter(d=>!usedDefs.has(d));
+ 
+    const bankChips = bankDefs.map(def=>`<div class="def-chip" draggable="true" data-def="${encodeURIComponent(def)}">${def}</div>`).join("") ||
+      `<div class="def-bank-empty">All definitions assigned</div>`;
+ 
+    const termRows = q.pairs.map((pair,ti)=>{
+      const assigned = matchSels[`${current}-${ti}`];
+      return `
+        <div class="term-row ${assigned?"assigned":""}" data-term-idx="${ti}">
+          <div class="term-name"><span>${pair.term}</span></div>
+          <div class="term-drop">
+            ${assigned
+              ? `<div class="def-chip" draggable="true" data-def="${encodeURIComponent(assigned)}" data-from-term="${ti}" style="margin:0;width:100%">${assigned}</div>`
+              : `<span class="term-placeholder">— drag a definition here —</span>`}
+          </div>
+        </div>`;
+    }).join("");
+ 
+    questionBody = `
+      <div class="match-instructions"><strong>Drag</strong> a definition from the bank and <strong>drop</strong> it onto the matching term. Drag a placed definition back to the bank to unassign it.</div>
+      <div class="bank-label">Definition Bank</div>
+      <div class="def-bank" id="defBank">${bankChips}</div>
+      <div class="terms-label">Terms — Drop definitions here</div>
+      <div class="term-rows">${termRows}</div>`;
+
+  } else if (q.type==="build") {
+    const currentOrder = answers[current] || [...Array(q.items.length).keys()];
+    const listItems = currentOrder.map((itemIdx, pos) => `
+      <div class="build-item" data-pos="${pos}" data-item-idx="${itemIdx}" draggable="true">
+        <div class="build-handle">⠿</div>
+        <div class="build-num">${pos+1}</div>
+        <div class="build-text">${q.items[itemIdx]}</div>
+      </div>`).join("");
+    questionBody = `
+      <div class="build-instructions"><strong>Drag</strong> the steps into the correct order — first action at the top, last at the bottom.</div>
+      <div class="build-list" id="buildList">${listItems}</div>`;
+  }
+ 
+  const typeBadge = q.type==="build"
+    ? `<span class="q-badge q-badge-build">ORDER STEPS</span>`
+    : q.type==="best2"
+    ? `<span class="q-badge" style="background:rgba(180,83,9,0.2);color:#fcd34d;border:1px solid #b45309">SELECT 2</span>` : "";
+ 
+  const dots = questions.map((_,i)=>
+    `<div class="dot ${i===current?"current":answers[i]?"answered":""}" style="width:${i===current?20:10}px" data-dot="${i}"></div>`
+  ).join("");
+ 
+  const navRight = current < questions.length-1
+    ? `<button class="btn-next" id="nextBtn">Next →</button>`
+    : `<button class="btn-submit-exam" id="submitExamBtn">Submit Exam</button>`;
+ 
+  return `
+    <div>
+      <div class="topbar">
+        <div class="topbar-inner">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${sc.accent}"></div></div>
+            <span class="progress-text">${current+1} / ${questions.length}</span>
+          </div>
+          <div class="timer-box" style="border-color:#b45309">
+            <div class="timer-dot" style="background:#22c55e"></div>
+            <span class="timer-text" style="color:#22c55e">25:00</span>
+          </div>
+          <button class="btn-submit-top" id="submitTopBtn" style="background:${sc.accent}">Submit</button>
+        </div>
+        <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:#22c55e"></div></div>
+      </div>
+ 
+      <div class="exam-wrap">
+        <div class="section-badge" style="background:#1e3a5f;border-left:3px solid #b45309;padding-left:12px">
+          <div class="section-dot" style="background:${sc.accent}"></div>
+          <span class="section-label" style="color:#fcd34d;font-weight:600">${q.section}</span>
+        </div>
+ 
+        <div class="q-header">
+          <span class="q-label">QUESTION</span>
+          <span class="q-number">${current+1}</span>
+          ${typeBadge}
+          <span class="q-points">${q.points} pt</span>
+        </div>
+ 
+        <div class="q-stem">${q.stem}</div>
+        ${questionBody}
+ 
+        <div class="nav-bar">
+          <button class="btn-prev" id="prevBtn" ${current===0?"disabled":""}>← Previous</button>
+          <div class="dots">${dots}</div>
+          ${navRight}
+        </div>
+      </div>
+    </div>`;
+}
+ 
+// ── EVENT BINDING ────────────────────────────────────
+function attachEvents() {
+  // INTRO
+  const nameInput = document.getElementById("nameInput");
+  const beginBtn  = document.getElementById("beginBtn");
+  if (nameInput) {
+    nameInput.value = studentName;
+    nameInput.addEventListener("input", e=>{
+      studentName = e.target.value.trim();
+      nameInput.classList.toggle("has-value", !!studentName);
+      beginBtn.disabled = !studentName;
+      beginBtn.classList.toggle("active", !!studentName);
+    });
+    nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName) beginExam(); });
+  }
+  if (beginBtn) {
+    beginBtn.classList.toggle("active", !!studentName);
+    beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
+  }
+ 
+  // EXAM — MC / Best2
+  document.querySelectorAll(".option-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const q = questions[current];
+      if (q.type==="mc") {
+        answers[current] = [idx];
+      } else {
+        const prev = answers[current] || [];
+        if (prev.includes(idx)) answers[current] = prev.filter(i=>i!==idx);
+        else if (prev.length<2) answers[current] = [...prev,idx];
+        else answers[current] = [prev[1],idx];
+      }
+      render();
+    });
+  });
+ 
+  // EXAM — Matching drag & drop
+  let draggingEl = null;
+  document.querySelectorAll(".def-chip").forEach(chip=>{
+    chip.addEventListener("dragstart", e=>{
+      draggingEl = chip;
+      chip.classList.add("dragging");
+      const def = decodeURIComponent(chip.dataset.def);
+      const fromTerm = chip.dataset.fromTerm !== undefined ? parseInt(chip.dataset.fromTerm) : null;
+      dragData = {def, fromTermIdx: fromTerm};
+      e.dataTransfer.effectAllowed = "move";
+    });
+    chip.addEventListener("dragend", ()=>{ chip.classList.remove("dragging"); draggingEl = null; });
+  });
+ 
+  // Drop on term rows
+  document.querySelectorAll(".term-row").forEach(row=>{
+    row.addEventListener("dragover", e=>{ e.preventDefault(); row.classList.add("dragover"); });
+    row.addEventListener("dragleave", ()=>row.classList.remove("dragover"));
+    row.addEventListener("drop", e=>{
+      e.preventDefault(); row.classList.remove("dragover");
+      if (!dragData) return;
+      const termIdx = parseInt(row.dataset.termIdx);
+      const {def, fromTermIdx} = dragData; dragData = null;
+      // Remove from old slot
+      if (fromTermIdx !== null && fromTermIdx !== undefined) delete matchSels[`${current}-${fromTermIdx}`];
+      // Remove any slot that had this def
+      Object.keys(matchSels).forEach(k=>{ if(matchSels[k]===def) delete matchSels[k]; });
+      matchSels[`${current}-${termIdx}`] = def;
+      saveMatchingAnswers(current);
+      render();
+    });
+  });
+ 
+  // Drop on bank (return)
+  const bank = document.getElementById("defBank");
+  if (bank) {
+    bank.addEventListener("dragover", e=>{ e.preventDefault(); bank.classList.add("dragover"); });
+    bank.addEventListener("dragleave", ()=>bank.classList.remove("dragover"));
+    bank.addEventListener("drop", e=>{
+      e.preventDefault(); bank.classList.remove("dragover");
+      if (!dragData) return;
+      const {fromTermIdx} = dragData; dragData = null;
+      if (fromTermIdx !== null && fromTermIdx !== undefined) {
+        delete matchSels[`${current}-${fromTermIdx}`];
+        saveMatchingAnswers(current);
+        render();
+      }
+    });
+  }
+ 
+  // BUILD — drag to reorder
+  const buildList = document.getElementById("buildList");
+  if (buildList) {
+    let dragSrcPos = null;
+
+    buildList.querySelectorAll(".build-item").forEach(item => {
+      item.addEventListener("dragstart", e => {
+        dragSrcPos = parseInt(item.dataset.pos);
+        item.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", dragSrcPos);
+      });
+
+      item.addEventListener("dragend", () => {
+        item.classList.remove("dragging");
+        buildList.querySelectorAll(".build-item").forEach(i => i.classList.remove("drag-over"));
+      });
+
+      item.addEventListener("dragover", e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        buildList.querySelectorAll(".build-item").forEach(i => i.classList.remove("drag-over"));
+        item.classList.add("drag-over");
+      });
+
+      item.addEventListener("dragleave", () => {
+        item.classList.remove("drag-over");
+      });
+
+      item.addEventListener("drop", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        item.classList.remove("drag-over");
+        const targetPos = parseInt(item.dataset.pos);
+        if (dragSrcPos === null || dragSrcPos === targetPos) return;
+
+        // Reorder the current answers array
+        const currentOrder = answers[current] || [...Array(questions[current].items.length).keys()];
+        const newOrder = [...currentOrder];
+        const [moved] = newOrder.splice(dragSrcPos, 1);
+        newOrder.splice(targetPos, 0, moved);
+        answers[current] = newOrder;
+        dragSrcPos = null;
+        render();
+      });
+    });
+
+    // Allow drop on the list container itself (gap between items)
+    buildList.addEventListener("dragover", e => e.preventDefault());
+  }
+
+  // NAV
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const submitExamBtn = document.getElementById("submitExamBtn");
+  const submitTopBtn  = document.getElementById("submitTopBtn");
+ 
+  if (prevBtn) prevBtn.addEventListener("click", ()=>{ if(current>0){ current--; render(); }});
+  if (nextBtn) nextBtn.addEventListener("click", ()=>{ if(current<questions.length-1){ current++; render(); }});
+  if (submitExamBtn) submitExamBtn.addEventListener("click", finishExam);
+  if (submitTopBtn)  submitTopBtn.addEventListener("click",  finishExam);
+ 
+  // Dot nav
+  document.querySelectorAll(".dot").forEach(dot=>{
+    dot.addEventListener("click", ()=>{ current=parseInt(dot.dataset.dot); render(); });
+  });
+ 
+  // Update timer display immediately
+  updateTimerUI();
+}
+ 
+function beginExam() {
+  initShuffles();
+  phase = "exam";
+  render();
+  startTimer();
+}
+ 
+// ── BOOT ─────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("root").innerHTML = "";
+  render();
+});
+</script>
+ 
+<div id="root"></div>
+</body>
+</html>
+ 
