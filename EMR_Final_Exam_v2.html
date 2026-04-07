@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Final Exam</title>
+<style>
+  /* ── PASTE YOUR APPS SCRIPT WEB APP URL HERE ── */
+  /* See SETUP_INSTRUCTIONS.txt for how to get this */
+ 
+  :root {
+    --bg: #1a2744;
+    --surface: #ffffff;
+    --border: rgba(255,255,255,0.15);
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --blue: #b91c1c;
+    --green: #16a34a;
+    --red: #dc2626;
+    --amber: #b45309;
+  }
+ 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  body {
+    font-family: Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+ 
+  /* ── INTRO ── */
+  .intro-wrap {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a2744 0%, #1e3a5f 50%, #0f1e3d 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .intro-card { max-width: 680px; width: 100%; text-align: center; }
+  .intro-eyebrow { font-size: 12px; letter-spacing: 6px; color: #b91c1c; text-transform: uppercase; margin-bottom: 14px; }
+  .intro-title { font-size: 52px; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 8px; }
+  .intro-sub { font-size: 28px; color: #fca5a5; margin-bottom: 40px; }
+  .info-grid { background: #ffffff; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px 36px; margin-bottom: 32px; text-align: left; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #e7d5b3; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #fca5a5; font-weight: 600; }
+  .info-val { max-width: 340px; text-align: right; }
+  .intro-instructions { color: #78716c; font-size: 13px; line-height: 1.7; margin-bottom: 24px; }
+  .name-label { display: block; color: #fca5a5; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; text-align: left; }
+  .name-input {
+    width: 100%; background: #1e3a5f; border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 14px 18px; font-size: 16px; color: #fff;
+    outline: none; font-family: Georgia, serif; margin-bottom: 24px; transition: border-color 0.2s;
+  }
+  .name-input:focus { border-color: #7f1d1d; }
+  .name-input.has-value { border-color: #7f1d1d; }
+  .btn-begin {
+    background: #1e3a5f; color: #e2e8f0; border: none; border-radius: 12px;
+    padding: 18px 56px; font-size: 18px; font-weight: 700; cursor: default;
+    letter-spacing: 1px; transition: all 0.2s; font-family: Georgia, serif;
+  }
+  .btn-begin.active {
+    background: linear-gradient(135deg, #7f1d1d, #0d47a1); color: #fff;
+    cursor: pointer; box-shadow: 0 8px 32px rgba(21,101,192,0.5);
+  }
+  .btn-begin.active:hover { transform: translateY(-2px); }
+ 
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: #1a2744; border-bottom: 3px solid #b45309; padding: 0 24px;
+  }
+  .topbar-inner {
+    max-width: 860px; margin: 0 auto; display: flex;
+    align-items: center; gap: 16px; height: 60px;
+  }
+  .progress-wrap { flex: 1; display: flex; align-items: center; gap: 10px; }
+  .progress-bar { flex: 1; height: 6px; background: #ead9b8; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+  .progress-text { color: #44403c; font-size: 13px; white-space: nowrap; }
+  .timer-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #ffffff; border-radius: 8px; padding: 6px 14px;
+    border: 1px solid #d6c9a8;
+  }
+  .timer-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .timer-dot.pulse { animation: pulse 1s infinite; }
+  .timer-text { font-weight: 700; font-size: 18px; font-family: monospace; letter-spacing: 2px; }
+  .timer-bar { height: 3px; background: #ead9b8; transition: none; }
+  .timer-bar-fill { height: 100%; transition: width 1s linear, background 1s; }
+  .btn-submit-top {
+    background: #b91c1c; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer;
+    white-space: nowrap; font-family: Georgia, serif;
+  }
+ 
+  /* ── EXAM BODY ── */
+  .exam-wrap { max-width: 860px; margin: 0 auto; padding: 32px 24px; }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 20px; padding: 5px 14px; margin-bottom: 20px;
+  }
+  .section-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .section-label { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  .q-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .q-label { font-size: 13px; color: #f0f6ff; font-weight: 600; letter-spacing: 1px; }
+  .q-number { font-size: 42px; font-weight: 700; color: #fff; line-height: 1; }
+  .q-badge {
+    border-radius: 6px; padding: 3px 10px; font-size: 12px;
+    font-weight: 700; letter-spacing: 1px;
+  }
+  .q-points { margin-left: auto; color: #e2e8f0; font-size: 13px; }
+  .q-stem { font-size: 19px; color: #ffffff; line-height: 1.7; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #1e2a3a; }
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .best2-hint { color: #fcd34d; font-size: 13px; margin-bottom: 8px; }
+  .option-btn {
+    display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px;
+    background: #ffffff; border: 2px solid #1e2a3a; border-radius: 10px;
+    cursor: pointer; text-align: left; transition: all 0.15s;
+    color: #1e3a5f; font-family: Georgia, serif; font-size: 16px; width: 100%;
+  }
+  .option-btn:hover { border-color: #1a2744; }
+  .option-btn.selected { background: #fef3c7; border-color: #b91c1c; color: #1e3a5f; }
+  .option-indicator {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #1a2744;
+    background: transparent; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: #44403c; font-weight: 700; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .option-btn.selected .option-indicator {
+    background: #b91c1c; border-color: #b91c1c; color: #fff;
+  }
+  .option-btn.best2 .option-indicator { border-radius: 6px; }
+  .option-text { padding-top: 2px; line-height: 1.6; }
+ 
+  /* ── MATCHING ── */
+  .match-instructions { color: #e2e8f0; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .match-instructions strong { color: #b45309; }
+  .bank-label { color: #44403c; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .def-bank {
+    min-height: 48px; background: #243860; border: 2px dashed #b45309;
+    border-radius: 10px; padding: 10px; margin-bottom: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .def-bank.dragover { border-color: #fcd34d; background: #1e3a5f; }
+  .def-chip {
+    padding: 10px 14px; background: #ffffff; border: 1px solid #d6c9a8;
+    border-radius: 8px; cursor: grab; color: #1e3a5f; font-size: 14px;
+    line-height: 1.5; user-select: none; transition: box-shadow 0.15s;
+    font-family: Georgia, serif;
+  }
+  .def-chip:hover { box-shadow: 0 0 0 2px #b45309; }
+  .def-chip.dragging { opacity: 0.4; }
+  .def-bank-empty { color: #94a3b8; font-size: 13px; font-style: italic; padding: 8px 14px; }
+  .terms-label { color: #44403c; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .term-rows { display: flex; flex-direction: column; gap: 8px; }
+  .term-row {
+    display: grid; grid-template-columns: 200px 1fr; border-radius: 10px;
+    overflow: hidden; border: 2px solid #1e2a3a; transition: border-color 0.15s;
+  }
+  .term-row.dragover { border-color: #b45309; box-shadow: 0 0 0 3px rgba(56,189,248,0.13); }
+  .term-row.assigned { border-color: #22c55e; }
+  .term-name { background: #1a2744; color: #ffffff; border-right: 3px solid #b45309; padding: 14px 16px; display: flex; align-items: center; }
+  .term-name span { color: #ffffff; font-weight: 700; font-size: 14px; }
+  .term-drop { background: #ffffff; padding: 12px 16px; display: flex; align-items: center; min-height: 52px; }
+  .term-row.dragover .term-drop { background: #fef3c7; }
+  .term-row.assigned .term-drop { background: #dcfce7; }
+  .term-placeholder { color: #94a3b8; font-size: 13px; font-style: italic; }
+  .term-placeholder.active { color: #b45309; }
+ 
+  /* ── NAV ── */
+  .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid #1e2a3a; }
+  .btn-prev, .btn-next, .btn-submit-exam {
+    border-radius: 8px; padding: 10px 24px; font-size: 14px;
+    cursor: pointer; font-family: Georgia, serif; transition: all 0.15s;
+  }
+  .btn-prev { background: transparent; color: #e2e8f0; border: 1px solid #1a2744; }
+  .btn-prev:disabled { color: #e2e8f0; border-color: #e2e8f0; cursor: default; }
+  .btn-next { background: #b91c1c; color: #fff; border: none; font-weight: 700; }
+  .btn-submit-exam { background: #22c55e; color: #fff; border: none; font-weight: 700; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+  .dot { height: 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s; background: #ead9b8; }
+  .dot.answered { background: #ead9b8; }
+  .dot.current { background: #b91c1c; }
+ 
+  /* ── RESULTS ── */
+  .results-wrap { min-height: 100vh; padding: 40px 20px; font-family: Georgia, serif; }
+  .results-inner { max-width: 780px; margin: 0 auto; }
+  .results-hero { text-align: center; margin-bottom: 40px; }
+  .results-icon { font-size: 80px; margin-bottom: 8px; }
+  .results-name { font-size: 22px; color: #44403c; margin-bottom: 4px; }
+  .results-pct { font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .results-verdict { font-size: 22px; margin-bottom: 4px; }
+  .results-detail { color: #78716c; font-size: 15px; }
+  .results-card { background: #ffffff; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .results-card-title { color: #fca5a5; font-size: 13px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 16px; }
+  .result-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .result-row:last-child { border-bottom: none; }
+  .result-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .result-badge.correct { background: #2e7d32; }
+  .result-badge.wrong { background: #c62828; }
+  .result-stem { color: #e7d5b3; font-size: 14px; margin-bottom: 4px; }
+  .result-correct-ans { font-size: 13px; color: #81c784; }
+  .result-pts { font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .submitting-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 16px; }
+  .submitting-spinner { width: 48px; height: 48px; border: 4px solid #1e2a3a; border-top-color: #b91c1c; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .submitting-text { color: #e2e8f0; font-size: 16px; }
+  .submit-status { text-align: center; padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 14px; }
+  .submit-status.success { background: #dcfce7; border: 1px solid #16a34a; color: #15803d; }
+  .submit-status.error { background: #2d0a0a; border: 1px solid #7f1d1d; color: #fca5a5; }
+ 
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+ 
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIGURATION — update this URL after deploying your
+// Google Apps Script Web App (see SETUP_INSTRUCTIONS.txt)
+// ══════════════════════════════════════════════════════
+const FB_CONFIG = {
+  apiKey:"AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
+  authDomain:"class-attendance-72cd9.firebaseapp.com",
+  projectId:"class-attendance-72cd9",
+};
+const EXAM_LABEL      = "Final Exam v2";
+const EXAM_CATEGORY   = "final";
+const TOTAL_TIME      = 120 * 60; // 120 minutes
+const LETTERS         = ["A","B","C","D","E"];
+ 
+// ── QUESTION DATA ────────────────────────────────────
+const questions = [
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR completes patient care and transfers the patient to arriving paramedics. Which element is essential to prevent a claim of abandonment?",options:["The paramedics must sign a form acknowledging acceptance","A verbal patient care report must be given to the incoming providers","The EMR must remain on scene until the patient reaches the hospital","The patient must acknowledge the transfer in writing"],correct:[1],explain:"Abandonment is prevented by a proper transfer of care — which requires at minimum a verbal report to the incoming provider of equal or higher qualification.",points:1}
+  {section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR completes patient care and transfers the patient to arriving paramedics. Which element is essential to prevent a claim of abandonment?",options:["The paramedics must sign a form acknowledging acceptance","A verbal patient care report must be given to the incoming providers","The EMR must remain on scene until the patient reaches the hospital","The patient must acknowledge the transfer in writing"],correct:[1],explain:"Abandonment is prevented by a proper transfer of care — which requires at minimum a verbal report to the incoming provider of equal or higher qualification.",points:1}
+{section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"When an EMR transfers care to an arriving EMT, which of the following MUST occur to avoid abandonment?",options:["The patient must sign a transfer form","A verbal or written patient care report must be provided to the incoming provider","The EMR must remain on scene until the patient is loaded","The incoming EMT must assess the patient independently before accepting care"],correct:[1],explain:"Abandonment requires that care be discontinued without proper transfer to an equally or more qualified provider. A verbal report — at minimum — must be provided when transferring care.",points:1},
+{section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"A patient's advance directive specifies 'DNR — comfort care only.' The patient arrests. Which action is MOST appropriate?",options:["Begin CPR while verifying the document","Honor the directive, withhold CPR, and provide comfort measures per protocol","Ignore the directive — field personnel are not bound by advance directives","Begin CPR only if family members present agree"],correct:[1],explain:"A valid, verified advance directive (DNR) must be honored by EMS. Withhold CPR, provide comfort measures, contact medical direction as required by local protocol.",points:1},
+{section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"Which of the following BEST describes how an EMR should handle a patient who is a minor (under 18) and alone, refusing care after an injury?",options:["Respect the refusal — minors have full autonomy","Treat under implied consent and document thoroughly, since a minor cannot legally refuse emergency care","Walk away from the call — the patient is responsible for their own decisions","Contact the patient's school for guidance"],correct:[1],explain:"Minors generally cannot legally refuse emergency care. An EMR should treat under implied consent, document thoroughly, and contact law enforcement or medical direction as appropriate.",points:1},
+{section:"EMS Systems, EMR Role & Medical/Legal",type:"best2",stem:"Which TWO actions demonstrate an EMR acting within ethical and professional standards?",options:["Discussing a patient's case with uninvolved coworkers in a public area","Completing thorough, objective documentation of every patient encounter","Treating every patient with equal respect and dignity regardless of background","Using a patient's private information to contact their employer"],correct:[1,2],explain:"Ethical EMR practice includes accurate documentation and treating all patients with equal dignity. Discussing patient information with uninvolved parties or misusing private information violates HIPAA and professional ethics.",points:1},
+{section:"EMS Systems, EMR Role & Medical/Legal",type:"mc",stem:"An EMR acting within established protocols and medical direction is said to be operating under:",options:["Expressed consent","Scope of practice","Duty to act","Res ipsa loquitur"],correct:[1],explain:"Scope of practice defines the specific procedures and interventions an EMR is legally authorized to perform based on state law, training, and medical direction.",points:1},
+{section:"Communications & Documentation",type:"mc",stem:"A patient care report should be completed:",options:["Within 24 hours of the call whenever possible","As soon as possible after the call while details are fresh and accurate","Only when requested by the receiving hospital","At the beginning of the next shift"],correct:[1],explain:"PCRs should be completed as close to the time of the call as possible to ensure accuracy. Delayed documentation increases the risk of omissions and errors.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The sinoatrial (SA) node is BEST described as:",options:["The valve between the right atrium and right ventricle","The primary pacemaker of the heart, initiating the electrical impulse for each heartbeat","The fibrous ring separating the atria from the ventricles","The node between the atria and ventricles that delays the impulse"],correct:[1],explain:"The SA node is located in the right atrium and serves as the heart's primary pacemaker, initiating each electrical impulse at a rate of 60-100 beats per minute at rest.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The term 'anoxia' means:",options:["Low oxygen levels in the blood","Complete absence of oxygen to the tissues","Increased carbon dioxide in the blood","Difficulty breathing"],correct:[1],explain:"Anoxia means complete absence of oxygen delivery to tissues. Hypoxia means reduced oxygen (but not absent). Both are dangerous, but anoxia leads to rapid cellular death.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"The femur articulates with which of the following structures at the hip joint?",options:["Tibia","Acetabulum of the pelvis","Fibula","Patella"],correct:[1],explain:"The femoral head articulates with the acetabulum of the pelvis to form the ball-and-socket hip joint.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Which of the following BEST describes the function of platelets?",options:["Transport oxygen throughout the body","Initiate the clotting cascade to form blood clots at sites of vascular injury","Produce antibodies against pathogens","Regulate blood pressure via the renin-angiotensin system"],correct:[1],explain:"Platelets (thrombocytes) aggregate at sites of vascular injury and initiate the clotting cascade, forming a platelet plug and fibrin clot to control bleeding.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Tidal volume refers to:",options:["The maximum volume of air the lungs can hold","The amount of air moved with each normal breath","The air remaining in the lungs after maximum exhalation","The volume of air exhaled per minute"],correct:[1],explain:"Tidal volume is the amount of air moved with each normal breath — approximately 500 mL in a healthy adult. Minute volume = tidal volume × respiratory rate.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Which of the following correctly describes the anatomical position?",options:["Lying supine with arms crossed on the chest","Standing erect, facing forward, arms at sides, palms facing forward","Standing erect, facing forward, arms at sides, palms facing the body","Lying prone with arms extended above the head"],correct:[1],explain:"The anatomical position is the reference position for anatomical description: standing erect, facing forward, arms at sides, palms facing forward (anterior).",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"best2",stem:"Which TWO structures are part of the lower airway?",options:["Nasopharynx","Bronchi","Oropharynx","Alveoli"],correct:[1,3],explain:"The lower airway begins at the larynx (below the vocal cords) and includes the trachea, bronchi, bronchioles, and alveoli. The nasopharynx and oropharynx are upper airway structures.",points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"matching",stem:"Match each anatomical plane or direction with its correct description.",pairs:[{term:"Sagittal",def:"Divides the body into left and right sections"},{term:"Coronal (frontal)",def:"Divides the body into anterior and posterior sections"},{term:"Transverse (axial)",def:"Divides the body into superior and inferior sections"},{term:"Proximal",def:"Closer to the point of origin or the trunk"},{term:"Distal",def:"Farther from the point of origin or the trunk"}],points:1},
+{section:"Anatomy, Physiology & Medical Terminology",type:"mc",stem:"Carbon dioxide (CO2) is transported in the blood PRIMARILY by:",options:["Binding to hemoglobin in the red blood cells only","Being dissolved in plasma and as bicarbonate ions","Being stored in fat cells","Binding to white blood cells"],correct:[1],explain:"CO2 is transported in three ways: dissolved in plasma (7%), bound to hemoglobin as carbaminohemoglobin (23%), and as bicarbonate ions (HCO3-) in plasma (70%). Bicarbonate is the primary method.",points:1},
+{section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"When moving a patient down stairs using a stair chair, the EMR at the bottom should:",options:["Walk forward facing the patient","Walk backward while the chair is tipped to clear stairs","Face forward and pull the chair down","Stand beside the patient for stability"],correct:[1],explain:"When moving down stairs with a stair chair, the EMR at the bottom faces forward and walks backward, keeping the chair balanced and tipped slightly backward to clear each step.",points:1},
+{section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"A patient with an isolated lower leg injury is found in a seated position on the ground. The BEST device for moving them is:",options:["Long backboard","Scoop stretcher","Portable stretcher or stair chair","Improvised carry"],correct:[2],explain:"A portable stretcher or stair chair is appropriate for an ambulatory or seated patient with an isolated extremity injury who does not require full spinal immobilization.",points:1},
+{section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"The minimum number of rescuers required to safely perform a long backboard log roll is:",options:["2","3","4","5"],correct:[1],explain:"A minimum of 3 rescuers is required for a log roll — one at the head maintaining in-line stabilization, and two at the body. More rescuers improve safety for larger patients.",points:1},
+{section:"Lifting, Moving & Patient Positioning",type:"mc",stem:"A patient found in a chair with a suspected spinal injury needs to be moved urgently. The BEST method is:",options:["Lift the patient directly from the chair using an extremity carry","Apply a vest-style extrication device and transition to a long board","Use an emergency carry — standing takedown to a long backboard with manual stabilization","Have the patient stand and walk to the backboard"],correct:[2],explain:"A standing takedown (emergency carry) involves manual in-line stabilization, quickly lowering the patient to a backboard. This is the fastest safe method for an urgent situation with a patient in a chair.",points:1},,
+  {section:"Circulation, Bleeding Control & Shock",type:"best2",stem:"Which TWO of the following correctly describe signs of INTERNAL hemorrhage in a trauma patient?",options:["Bright red blood visible at the wound site","Tachycardia with hypotension and a rigid or distended abdomen","Pain, tenderness, and guarding over an injury site without visible bleeding","Normal vital signs — internal bleeding always causes immediate hemodynamic instability"],correct:[1,2],explain:"Internal hemorrhage signs include hemodynamic instability and peritoneal signs. Vital signs may be normal early — the abdomen findings are key.",points:1}
+{section:"Airway Management",type:"mc",stem:"When inserting an OPA in a pediatric patient, the preferred insertion technique is:",options:["Rotate the OPA 180 degrees as it passes the hard palate — same as adults","Insert the OPA directly (without rotation) using a tongue depressor to depress the tongue","Insert with the flange pointing toward the nose","Insert upside-down and rotate 90 degrees"],correct:[1],explain:"In pediatric patients, the OPA is inserted directly (anatomically correct) using a tongue depressor to avoid injuring the soft palate. Rotation is used in adults only.",points:1},
+{section:"Airway Management",type:"mc",stem:"Sellick's maneuver (cricoid pressure) is applied to:",options:["Open the airway during BVM ventilation","Reduce gastric regurgitation during ventilation by compressing the esophagus","Identify the correct position for an NPA","Confirm correct OPA placement"],correct:[1],explain:"Cricoid pressure applies firm posterior pressure on the cricoid cartilage, compressing the esophagus against the vertebral column to reduce passive regurgitation during positive pressure ventilation.",points:1},
+{section:"Airway Management",type:"mc",stem:"Which of the following is the MOST reliable indicator of correct BVM ventilation?",options:["The SpO2 reading immediately after the breath","Visible chest rise with each ventilation","Resistance felt in the bag during compression","The patient's skin color improving"],correct:[1],explain:"Visible, bilateral chest rise is the most immediate and reliable indicator that the airway is open, the mask seal is adequate, and tidal volume delivery is sufficient.",points:1},
+{section:"Airway Management",type:"mc",stem:"A patient with facial trauma has blood and broken teeth in the airway. After suctioning, the airway is clear. What is the NEXT priority?",options:["Apply a cervical collar before airway management","Assess breathing — rate, depth, and adequacy","Obtain a SAMPLE history","Check blood pressure"],correct:[1],explain:"After securing the airway, the next priority in the primary survey is breathing assessment — rate, depth, adequacy, and any signs of life-threatening chest problems.",points:1},
+{section:"Airway Management",type:"mc",stem:"Oxygen delivery via nasal cannula at 4 LPM is MOST appropriate for:",options:["A patient in respiratory arrest","A patient with severe anaphylaxis and bronchospasm","A conscious patient with mild dyspnea and SpO2 of 93%","A patient requiring high-concentration oxygen for CO poisoning"],correct:[2],explain:"Low-flow nasal cannula (1-6 LPM, delivering 24-44% O2) is appropriate for patients who are breathing adequately but need supplemental oxygen. High-concentration devices are needed for severe presentations.",points:1},
+{section:"Airway Management",type:"best2",stem:"Which TWO of the following are correct techniques for maintaining a mask seal during BVM ventilation by a single rescuer?",options:["EC-clamp technique — E fingers hook the jaw, C fingers press the mask","Holding the mask with only the thumb and index finger","Placing the mask over the chin first, then the nose","Connecting two hands from different rescuers for a two-person BVM"],correct:[0,2],explain:"Single rescuer BVM: use the EC-clamp (3 fingers under the mandible lifting the jaw, 2 fingers pressing the mask). Apply the mask narrow-end-up, seating over the bridge of the nose, then over the chin.",points:1},
+{section:"Airway Management",type:"matching",stem:"Match each airway condition with its PRIMARY clinical sign.",pairs:[{term:"Upper airway obstruction (partial)",def:"Inspiratory stridor — high-pitched sound from turbulent flow above the larynx"},{term:"Lower airway bronchospasm",def:"Expiratory wheezing — musical sounds from narrowed bronchioles"},{term:"Pulmonary edema",def:"Bilateral crackles (rales) — fluid in the alveoli disrupting airflow"},{term:"Foreign body complete obstruction",def:"Unable to speak, cough, or breathe — universal choking sign"},{term:"Epiglottitis",def:"Drooling, muffled voice, tripod position, high fever — do not examine the airway"}],points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"A child is breathing at 40 breaths per minute with nasal flaring and subcostal retractions. SpO2 is 91%. This patient is MOST accurately described as being in:",options:["Respiratory distress with adequate compensation","Compensated respiratory failure","Decompensated respiratory failure requiring immediate intervention","Normal range — pediatric rates are naturally higher"],correct:[2],explain:"SpO2 below 94% with signs of increased work of breathing (nasal flaring, retractions) in a child indicates respiratory failure — the child cannot maintain adequate oxygenation despite increased effort.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"The primary respiratory drive in healthy individuals is stimulated by:",options:["Low blood oxygen levels","Elevated CO2 levels (hypercapnia) detected by central chemoreceptors","Low blood pH only","High atmospheric nitrogen levels"],correct:[1],explain:"In healthy individuals, rising CO2 (hypercapnia) is the primary stimulus for breathing, detected by central chemoreceptors in the medulla. This is why the hypoxic drive theory for COPD is relevant.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"A patient is receiving positive pressure ventilation. You notice the stomach is becoming distended. The MOST likely cause is:",options:["Internal hemorrhage","Pneumothorax","Gastric insufflation from excessive ventilation pressure or rate","Ascites from liver disease"],correct:[2],explain:"Gastric insufflation occurs when air is forced into the stomach instead of the lungs — usually from excessive ventilation pressure, rate, or inadequate airway positioning. It increases aspiration risk.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"Which of the following patients requires ASSISTED ventilation immediately?",options:["A patient with SpO2 of 96% and a rate of 20, speaking in full sentences","A patient with a rate of 6 and shallow effort who is unresponsive","A patient with asthma who is speaking between breaths","A patient with anxiety hyperventilating at a rate of 28"],correct:[1],explain:"Respiratory rate of 6 with shallow effort and unresponsiveness indicates hypoventilation and inadequate gas exchange — immediate BVM ventilation is required.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"Which of the following statements about oxygen toxicity is MOST accurate in the prehospital setting?",options:["Oxygen should never be administered without a physician's order","High-concentration oxygen is contraindicated in all patients","In the short-term prehospital setting, oxygen toxicity is rarely a clinical concern — hypoxia is the immediate threat","COPD patients should never receive supplemental oxygen"],correct:[2],explain:"Oxygen toxicity requires prolonged exposure. In the prehospital setting (minutes to hours), the risk of hypoxia far outweighs the risk of toxicity. Even COPD patients should receive enough oxygen to prevent dangerous hypoxia.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"Flow-restricted, oxygen-powered ventilation devices (FROPVD/demand valves) are CONTRAINDICATED in:",options:["Adults with suspected cardiac arrest","Infants and young children due to the risk of barotrauma","Patients with suspected neck injuries","Patients receiving oxygen by nasal cannula"],correct:[1],explain:"Demand valve / FROPVD devices deliver high-pressure oxygen and carry a risk of barotrauma (pneumothorax) and gastric distension. They are contraindicated in pediatric patients.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"mc",stem:"Hyperventilation causes cerebral vasoconstriction by lowering CO2. Which clinical effect does this MOST directly cause?",options:["Increased cerebral blood flow","Reduced cerebral blood flow and perfusion","Improved oxygen delivery to the brain","Increased intracranial pressure"],correct:[1],explain:"Hyperventilation lowers CO2 (hypocarbia), causing cerebral vasoconstriction and reduced cerebral blood flow. Low CO2 also causes peripheral vasoconstriction, resulting in tingling and carpopedal spasm.",points:1},
+{section:"Ventilation & Breathing Assessment",type:"matching",stem:"Match each breathing rate with its correct clinical term for an adult patient.",pairs:[{term:"4 breaths per minute",def:"Severe bradypnea — requires immediate positive pressure ventilation"},{term:"12-20 breaths per minute",def:"Eupnea — normal adult respiratory rate"},{term:"28 breaths per minute",def:"Tachypnea — elevated rate indicating respiratory distress or metabolic demand"},{term:"0 breaths per minute",def:"Apnea — complete absence of breathing"},{term:"8 breaths per minute",def:"Bradypnea — slow breathing requiring close monitoring and likely assisted ventilation"}],points:1},
+{section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"A patient has bright red blood spurting from a wound on the medial thigh. Which intervention is the HIGHEST priority?",options:["Apply a pressure dressing and elevate the leg","Apply a tourniquet as high and tight on the thigh as possible","Pack the wound with hemostatic gauze only","Apply ice to reduce blood flow"],correct:[1],explain:"Spurting bright red blood from the medial thigh indicates arterial hemorrhage — likely the femoral artery. A tourniquet is the immediate life-saving intervention for proximal extremity hemorrhage.",points:1},
+{section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"Which of the following BEST describes septic shock?",options:["Shock from massive blood loss","Inadequate perfusion caused by the body's response to overwhelming infection, causing vasodilation and cellular dysfunction","Cardiogenic shock from a septal defect","Shock from anaphylaxis to a medication"],correct:[1],explain:"Septic shock is a distributive form of shock caused by the systemic inflammatory response to infection. Massive cytokine release causes vasodilation, increased vascular permeability, and cardiovascular dysfunction.",points:1},
+{section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"When assessing capillary refill time in a pediatric patient, a normal result is:",options:["Less than 4 seconds","Less than 2 seconds","Less than 6 seconds","Less than 1 second"],correct:[1],explain:"Normal capillary refill time is less than 2 seconds in children. Greater than 2 seconds suggests poor perfusion. CRT is a more reliable perfusion indicator in children than in adults.",points:1},
+{section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"A patient in neurogenic shock from a high cervical spinal cord injury will MOST likely present with:",options:["Tachycardia and hypertension","Bradycardia and hypotension with warm, dry, flushed skin below the level of injury","Tachycardia, hypotension, and cool, pale, diaphoretic skin","Normal vitals with paralysis only"],correct:[1],explain:"Neurogenic shock from loss of sympathetic tone below the injury level causes vasodilation (warm, flushed, dry skin) and bradycardia (no compensatory tachycardia). This distinguishes it from hypovolemic shock.",points:1},
+{section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"How should the time of tourniquet application be recorded?",options:["Estimated time based on when the call was dispatched","The exact time written directly on the tourniquet or the patient's skin in permanent marker","In the PCR only — do not write on the patient","It does not need to be recorded in the field"],correct:[1],explain:"The time of tourniquet application MUST be written directly on the tourniquet or patient's skin. Hospital staff use this to determine how long the tourniquet has been on, which affects decisions about limb salvage.",points:1},
+{section:"Circulation, Bleeding Control & Shock",type:"mc",stem:"Internal hemorrhage should be suspected in which of the following patients?",options:["A patient with a minor laceration to the forearm from a kitchen knife","A patient with a fractured pelvis after a high-speed MVC","A patient with a superficial abrasion on the knee","A patient with an isolated distal finger fracture"],correct:[1],explain:"Pelvic fractures are associated with massive internal hemorrhage — up to 3-4 liters of blood loss. High MOI and pelvic instability should trigger immediate concern for life-threatening internal bleeding.",points:1},
+  {section:"Circulation, Bleeding Control & Shock",type:"best2",stem:"Which TWO of the following correctly describe signs of INTERNAL hemorrhage in a trauma patient?",options:["Bright red blood visible at the wound site","Tachycardia with hypotension and a rigid or distended abdomen","Pain, tenderness, and guarding over an injury site without visible bleeding","Normal vital signs — internal bleeding always causes immediate hemodynamic instability"],correct:[1,2],explain:"Internal hemorrhage signs include hemodynamic instability and peritoneal signs. Vital signs may be normal early in hemorrhage.",points:1}
+{section:"Circulation, Bleeding Control & Shock",type:"matching",stem:"Match each type of external hemorrhage control with its correct indication.",pairs:[{term:"Direct pressure",def:"First-line control for most external wounds — firm sustained pressure for at least 3 minutes"},{term:"Tourniquet",def:"Life-threatening extremity hemorrhage uncontrolled by direct pressure or proximal to the joint"},{term:"Wound packing with hemostatic gauze",def:"Deep junctional wounds (groin, axilla, neck) not amenable to tourniquet"},{term:"Pressure dressing",def:"Wounds controlled by direct pressure that require hands-free management during transport"},{term:"Elevation",def:"Adjunct to direct pressure for extremity wounds — raises limb above heart level to reduce blood flow"}],points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"A patient develops ventricular fibrillation during your care. An AED is attached. The AED advises a shock. What is the CORRECT sequence immediately after delivering the shock?",options:["Check for a pulse","Resume CPR immediately starting with compressions","Analyze the rhythm again before resuming CPR","Apply supplemental oxygen before resuming CPR"],correct:[1],explain:"Immediately resume CPR after every AED shock — beginning with compressions. Do not stop to check for a pulse. Reanalyze after 5 cycles (approximately 2 minutes).",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following correctly describes hands-only CPR?",options:["Compressions without a mask — only for lay rescuers in cardiac arrest","Compressions at a rate of 60 per minute without ventilations","Continuous chest compressions at 100-120 per minute without rescue breaths — recommended for witnessed adult arrest","Compressions with ventilations delivered every 15 compressions"],correct:[2],explain:"Hands-only CPR consists of continuous chest compressions at 100-120/min without rescue breaths. It is recommended for bystanders witnessing adult cardiac arrest and is nearly as effective as conventional CPR in the first minutes.",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"The H's and T's of cardiac arrest identify reversible causes. Which of the following is a 'T' in this mnemonic?",options:["Hyperkalemia","Tension pneumothorax","Hypovolemia","Hypothermia"],correct:[1],explain:"The T's include: Tension pneumothorax, Toxins, Tamponade (cardiac), Thrombosis (coronary or pulmonary). The H's include: Hypovolemia, Hypoxia, Hydrogen ion (acidosis), Hypo/hyperkalemia, Hypothermia.",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"A patient presents with sudden syncope, a history of heart disease, and is now conscious. An AED is attached and shows a rapid, wide-complex rhythm at 180 bpm with a palpable pulse. You should:",options:["Deliver a shock immediately","Monitor and transport — do not shock a patient with a pulse","Begin CPR","Apply the AED pads to the patient's back"],correct:[1],explain:"AEDs and manual defibrillators are used only for pulseless patients in VF or pulseless VT. A patient with a pulse must not be shocked. Monitor and transport for evaluation.",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which finding is MOST consistent with cardiogenic shock?",options:["Warm, flushed skin with bradycardia","Cool, pale skin with pulmonary edema, JVD, and hypotension","Hypotension with massive hemorrhage from an extremity wound","Bradycardia and hypotension with warm skin below a cervical injury"],correct:[1],explain:"Cardiogenic shock: the failing heart cannot pump forward, causing backup of fluid into the lungs (pulmonary edema, crackles) and reduced forward flow (hypotension, cool pale skin, JVD).",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"Which of the following statements about AED use in water is MOST correct?",options:["AEDs cannot be used near any moisture","Move the patient from standing water, dry the chest, and apply the AED — it can be used safely","AEDs should never be used outdoors","Do not use an AED if the patient was in a bathtub — wait for advanced care"],correct:[1],explain:"Remove the patient from standing water if safely possible, dry the chest, and apply the AED. AEDs are safe to use on wet skin after the chest is dried. Do not delay defibrillation for a rescuable patient.",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"The primary purpose of chest recoil during CPR is to:",options:["Prevent rib fractures by reducing force","Allow the chest to return to its natural position, creating negative pressure that draws blood back into the heart","Increase the speed of compressions","Reduce fatigue in the rescuer"],correct:[1],explain:"Full chest recoil between compressions allows venous blood to fill the heart — without recoil, preload is reduced and cardiac output during CPR falls significantly.",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"mc",stem:"How often should compressors switch roles during 2-rescuer CPR to prevent fatigue-related quality decline?",options:["Every 5 minutes","Every 2 minutes (5 cycles)","Every 10 minutes","Only when the compressor requests a switch"],correct:[1],explain:"Applying AED pads without stopping compressions and rotating compressors every 2 minutes are key strategies to minimize hands-off time and maintain compression quality.",points:1},
+{section:"Cardiac Emergencies, CPR & AED",type:"matching",stem:"Match each component of the AHA Chain of Survival (Out-of-Hospital) with its description.",pairs:[{term:"1st link",def:"Recognition of cardiac arrest and activation of the emergency response system (call 911)"},{term:"2nd link",def:"Early, high-quality CPR — emphasis on compressions"},{term:"3rd link",def:"Rapid defibrillation — AED application and shock delivery"},{term:"4th link",def:"Advanced life support — ALS care and medication administration"},{term:"5th link",def:"Post-cardiac arrest care — targeted temperature management, PCI, rehabilitation"}],points:1},,
+  {section:"Medical Emergencies I",type:"mc",stem:"A patient with a known seizure disorder has had a prolonged seizure lasting 8 minutes. She is still convulsing. This is BEST described as:",options:["A simple partial seizure","Status epilepticus — a life-threatening emergency","A typical tonic-clonic seizure","A normal postictal state"],correct:[1],explain:"Status epilepticus is a seizure lasting longer than 5 minutes or two seizures without a return to consciousness. It is a neurological emergency with significant risk of brain damage.",points:1},
+{section:"Medical Emergencies I",type:"mc",stem:"A patient complains of sudden onset of a severe unilateral headache with nausea and vomiting. She describes it as 'the worst headache of her life.' Your HIGHEST concern is:",options:["Tension headache from dehydration","Migraine with aura","Subarachnoid hemorrhage","Cluster headache"],correct:[2],explain:"A sudden, severe headache described as the worst of life is the classic presentation of subarachnoid hemorrhage (SAH) from a ruptured cerebral aneurysm — a life-threatening emergency.",points:1},
+{section:"Medical Emergencies I",type:"mc",stem:"You respond to a 68-year-old male with sudden onset right arm weakness, confusion, and slurred speech. Using the Cincinnati Stroke Scale, how many abnormal findings does this patient have?",options:["0","1","2","3"],correct:[3],explain:"The Cincinnati Stroke Scale has three components: facial droop, arm drift, and speech. This patient has slurred speech (abnormal), arm weakness (abnormal), and confusion may reflect abnormal speech or behavior. Three abnormal findings indicate a high probability of stroke.",points:1},
+{section:"Medical Emergencies I",type:"mc",stem:"Which of the following BEST differentiates hypoglycemia from a stroke?",options:["Hypoglycemia always causes loss of consciousness; stroke does not","Stroke symptoms resolve with glucose administration; hypoglycemia symptoms do not","Hypoglycemia symptoms typically resolve after glucose administration; stroke deficits persist","Both conditions present identically and cannot be differentiated in the field"],correct:[2],explain:"Glucose administration resolves hypoglycemia symptoms. Stroke deficits from ischemic brain damage do not resolve with glucose. A blood glucose check is essential for any altered mental status patient.",points:1},
+{section:"Medical Emergencies I",type:"mc",stem:"A patient presents with acute onset urticaria, hypotension, and bronchospasm after eating shellfish. Which intervention has the HIGHEST priority?",options:["Administer antihistamine","Administer epinephrine via auto-injector or per protocol","Apply oxygen via nasal cannula","Obtain a SAMPLE history before treating"],correct:[1],explain:"Epinephrine is the first-line treatment for anaphylaxis. It reverses bronchospasm, vasodilation, and angioedema. Antihistamines are adjuncts only and act too slowly for anaphylaxis.",points:1},
+{section:"Medical Emergencies I",type:"mc",stem:"A patient with a known seizure disorder tells you he forgot to take his medication for 3 days. He is currently alert and post-ictal. Which statement is MOST important for your documentation?",options:["The patient had a witnessed fall","Last seizure medication dose — 3 days ago","The patient has had seizures before","The patient is currently alert"],correct:[1],explain:"Medication non-compliance is the most common cause of breakthrough seizures in known epileptics. Documenting last medication dose is critical for the receiving hospital's management decisions.",points:1},
+{section:"Medical Emergencies I",type:"best2",stem:"Which TWO signs or symptoms are MOST associated with anaphylaxis rather than a simple allergic reaction?",options:["Localized itching at the injection site","Hypotension and syncope","Diffuse urticaria (hives) and angioedema of the face and throat","Mild nasal congestion and watery eyes only"],correct:[1,2],explain:"Systemic reactions involving hemodynamic compromise (hypotension, syncope) and airway involvement (laryngeal edema, bronchospasm) distinguish anaphylaxis from a simple allergic reaction.",points:1},
+{section:"Medical Emergencies I",type:"mc",stem:"The AEIOU-TIPS mnemonic helps identify causes of altered mental status. What does the 'E' stand for?",options:["Epilepsy","Electrolyte abnormalities or endocrine","Environmental (temperature)","Elevated blood pressure"],correct:[0],explain:"AEIOU-TIPS: A=Alcohol, E=Epilepsy, I=Insulin (glucose), O=Overdose/oxygen, U=Uremia; T=Trauma, I=Infection, P=Psychiatric, S=Stroke/shock. E is for Epilepsy.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"A patient presents with coughing, wheezing, a history of asthma, and is only speaking in 2-3 word sentences. SpO2 is 88%. This patient is BEST categorized as:",options:["Mild asthma attack — monitor and reassure","Moderate asthma attack — oxygen and transport","Severe asthma attack — high-flow oxygen, position of comfort, and immediate transport","Respiratory arrest — begin BVM ventilation immediately"],correct:[2],explain:"Speaking only 2-3 words, SpO2 of 88%, and accessory muscle use indicate a severe asthma attack. High-flow oxygen, position of comfort, and immediate transport are indicated. BVM is not yet needed if the patient is still breathing.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"A patient found at home has decreased mentation, pinpoint pupils, and a respiratory rate of 5. His family reports he uses heroin. After opening the airway, which intervention is MOST important?",options:["Apply supplemental oxygen via nasal cannula and monitor","Provide ventilatory support with BVM and administer naloxone per protocol","Perform a rapid physical exam before treating","Position the patient in Fowler's position"],correct:[1],explain:"Opioid overdose causing respiratory depression (rate of 5) requires immediate ventilatory support. BVM ventilation addresses the hypoxia. Naloxone reverses the opioid effect per protocol.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"Carbon monoxide poisoning is BEST confirmed in the prehospital setting by:",options:["Observing cherry-red skin","Using pulse oximetry — SpO2 will read low","Patient history and symptoms combined with scene findings — SpO2 may appear falsely normal","Blood tests at the scene"],correct:[2],explain:"Standard pulse oximetry CANNOT detect CO poisoning — it reads CO-oxyhemoglobin as oxygenated hemoglobin, giving a falsely normal SpO2. History, symptoms, and scene clues are the prehospital diagnostic tools.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"Which of the following patients is MOST at risk for a hypertensive emergency?",options:["A 25-year-old athlete with a blood pressure of 130/85","A 65-year-old with known hypertension presenting with sudden severe headache and altered mental status","A 45-year-old with a blood pressure of 145/90 and no symptoms","A 30-year-old with anxiety and a blood pressure of 140/90"],correct:[1],explain:"A hypertensive emergency involves severely elevated blood pressure (typically >180/120) WITH signs of target organ damage — neurological symptoms (headache, AMS) indicate possible hypertensive encephalopathy.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"A patient intentionally swallowed a large quantity of aspirin (salicylates) 30 minutes ago. Which of the following prehospital interventions is MOST appropriate?",options:["Administer activated charcoal if approved by medical direction and within the appropriate time window","Induce vomiting to remove the pills","Administer sodium bicarbonate","Give oral milk to coat the stomach"],correct:[0],explain:"Activated charcoal may be indicated for certain ingestions when given within 1 hour if the airway is protected and medical direction approves. Induce vomiting is contraindicated for salicylates.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"Which of the following differentiates pulmonary edema from asthma in the prehospital setting?",options:["Both conditions present identically and cannot be differentiated","Pulmonary edema typically presents with frothy pink sputum and crackles; asthma with expiratory wheezing and prolonged expiration","Asthma causes bilateral crackles; pulmonary edema causes unilateral wheezing","Pulmonary edema presents with stridor; asthma presents with rhonchi"],correct:[1],explain:"Pulmonary edema: bilateral crackles, pink frothy sputum, JVD, cardiac history. Asthma: bilateral expiratory wheezing, prolonged expiration, history of asthma, possible trigger exposure.",points:1},
+{section:"Medical Emergencies II",type:"best2",stem:"Which TWO of the following are correct prehospital management principles for a patient in a behavioral emergency?",options:["Use physical restraint as the first-line intervention to ensure safety","Maintain a safe distance and position yourself near an exit","Use calm, clear, non-confrontational language","Immediately notify the patient that involuntary commitment will be initiated"],correct:[1,2],explain:"Scene safety (positioning near exit, maintaining safe distance) and de-escalation (calm, non-confrontational communication) are the cornerstones of behavioral emergency management.",points:1},
+{section:"Medical Emergencies II",type:"mc",stem:"A patient with chronic renal failure presents with altered mental status, muscle weakness, and peaked T-waves on the cardiac monitor. The MOST likely electrolyte abnormality is:",options:["Hyponatremia","Hyperkalemia","Hypocalcemia","Hypermagnesemia"],correct:[1],explain:"Hyperkalemia (elevated potassium) is common in chronic renal failure. Peaked T-waves are an early cardiac finding. It can progress to widened QRS, sine wave pattern, and cardiac arrest.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"During a rapid trauma assessment (RTA) of an unconscious trauma patient, which area should be assessed FIRST after BSI and scene safety?",options:["Extremities","Head and face","Chest","Pelvis"],correct:[1],explain:"The RTA proceeds head-to-toe: head (including airway assessment), face, neck, chest, abdomen, pelvis, extremities, and posterior. Head and face assessment reveals airway threats and facial trauma first.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"DCAP-BTLS is used to systematically assess body regions during a trauma assessment. What does the 'P' stand for?",options:["Pain","Pressure","Punctures or penetrations","Peripheral pulses"],correct:[2],explain:"DCAP-BTLS: D=Deformities, C=Contusions, A=Abrasions, P=Punctures/Penetrations, B=Burns, T=Tenderness, L=Lacerations, S=Swelling. It provides a systematic approach to identifying traumatic injuries.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"A patient has a burn to the entire anterior trunk, entire right arm, and the anterior surface of the right leg. Using the Rule of Nines, the TOTAL estimated BSA burned is:",options:["27%","36%","40.5%","45%"],correct:[2],explain:"Anterior trunk = 18%, right arm = 9%, anterior right leg = 9% (anterior leg is half of 18% = 9%). Total = 18 + 9 + 9 = 36%... Wait — entire anterior trunk = 18%, entire right arm = 9%, anterior right leg = 9%. Total = 36%. Let's recalculate: 18+9+9=36%. The correct answer here is 36%.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"An open fracture is MOST accurately defined as:",options:["Any fracture with more than 3 bone fragments","A fracture where broken bone ends protrude through or the skin is disrupted in the area of a fracture","A fracture that cannot be splinted","A fracture of the cortex only with no complete break"],correct:[1],explain:"An open (compound) fracture involves disruption of the skin in the area of the fracture, creating a pathway for contamination and infection. The bone may or may not be visible.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"Which of the following burns should be treated with cool running water for 10-20 minutes?",options:["Full thickness burns covering more than 30% BSA","Chemical burns — continuous irrigation to remove the caustic agent","Electrical burns at the entry and exit sites","Radiation burns from a nuclear event"],correct:[1],explain:"Chemical burns require continuous irrigation with large volumes of water to dilute and remove the caustic agent. Irrigation should continue for at least 20 minutes — brushing off dry chemicals first.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"A patient was shot in the left chest at the mid-axillary line. He has decreased breath sounds on the left and is hypotensive. These findings are MOST consistent with:",options:["Left pneumothorax without hemodynamic compromise","Hemothorax with significant blood loss into the pleural space","Cardiac tamponade","Tension pneumothorax with tracheal deviation"],correct:[1],explain:"Decreased left breath sounds with hypotension following penetrating left chest trauma suggests hemothorax — blood accumulating in the pleural space, reducing lung volume and causing hemorrhagic shock.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"best2",stem:"Which TWO findings are MOST consistent with a tension pneumothorax?",options:["Bilateral crackles with pink frothy sputum","Absent breath sounds on the affected side with tracheal deviation away from the injury","Hypotension with JVD and absent breath sounds on one side","Equal bilateral breath sounds with SpO2 of 88%"],correct:[1,2],explain:"Tension pneumothorax: absent breath sounds on the affected side, tracheal deviation away from injury, hypotension, and JVD. These are classic findings of this life-threatening emergency.",points:1},
+{section:"Trauma Assessment, Soft Tissue & Burns",type:"mc",stem:"An evisceration (exposed abdominal organs) from a stab wound should be managed by:",options:["Replacing the organs into the abdominal cavity using sterile technique","Applying a dry sterile dressing and direct pressure over the organs","Covering with a moist sterile dressing — do not replace the organs","Leaving exposed and transporting immediately to minimize handling"],correct:[2],explain:"Evisceration management: cover with a moist sterile dressing to prevent drying and contamination. Never attempt to replace the organs.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient with a suspected cervical spine injury is alert and breathing. After applying manual in-line stabilization, the NEXT step is:",options:["Apply a traction splint","Size and apply an appropriately sized cervical collar","Immediately apply the patient to a long backboard","Obtain a SAMPLE history"],correct:[1],explain:"Manual in-line stabilization is maintained while a cervical collar is applied. The collar alone does not replace manual stabilization but is a primary step before logrolling to a board.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"Which of the following BEST describes a flail chest?",options:["A single rib fracture causing localized pain","Two or more adjacent ribs fractured in two or more places, creating a free-floating segment that moves paradoxically","A sternal fracture with posterior displacement","Air in the pleural space from a rib fracture"],correct:[1],explain:"A flail chest occurs when a segment of the chest wall is isolated by multiple rib fractures (2+ ribs each fractured in 2+ places). The flail segment moves paradoxically — inward during inspiration, outward during expiration.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"Beck's triad — hypotension, muffled heart sounds, and JVD — is associated with:",options:["Tension pneumothorax","Cardiac tamponade","Massive hemothorax","Flail chest"],correct:[1],explain:"Beck's triad (hypotension, muffled heart sounds, JVD) is the classic presentation of cardiac tamponade — fluid in the pericardial sac compressing the heart and reducing cardiac output.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient fell from a horse and struck his head. He was unconscious for 2 minutes, is now alert, and complains only of a headache. During transport he becomes increasingly confused. This pattern is MOST consistent with:",options:["Concussion — normal recovery pattern","Epidural hematoma — 'lucid interval' followed by rapid deterioration","Diffuse axonal injury","Subdural hematoma from chronic alcohol use"],correct:[1],explain:"Loss of consciousness, then a lucid interval, followed by rapid neurological decline is the classic presentation of an epidural hematoma — usually from a middle meningeal artery tear.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"Which of the following correctly describes the purpose of the Babinski reflex test in trauma?",options:["Assesses grip strength in upper extremity injury","Checks for spinal cord injury — plantar extension of the great toe in adults indicates upper motor neuron lesion","Evaluates ankle stability after ligament injury","Assesses knee reflex integrity"],correct:[1],explain:"Babinski test: stroking the sole causes great toe extension (positive) in adults — indicating upper motor neuron dysfunction (spinal cord injury). Normally adults have plantar flexion (downward toe movement).",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"A patient has a suspected open femur fracture with active bleeding. After controlling the hemorrhage, which device is CONTRAINDICATED?",options:["Rigid splint","Traction splint","Padded board splint","Pillow splint"],correct:[1],explain:"Traction splints are contraindicated in open femur fractures, fractures near the knee or ankle joint, pelvic fractures, and partial amputations. They are indicated for closed mid-shaft femur fractures only.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"mc",stem:"Cushing's triad in a head-injured patient — hypertension, bradycardia, and irregular respirations — indicates:",options:["Compensated hemorrhagic shock","Critically elevated intracranial pressure — a late and ominous sign","Neurogenic shock from spinal cord injury","Normal autonomic response to pain"],correct:[1],explain:"Unequal pupils suggest herniation or CN III compression. Cushing's triad (bradycardia, hypertension, irregular respirations) indicates critically elevated ICP. Both are signs of severe TBI.",points:1},
+{section:"Musculoskeletal, Spinal, Head & Chest Trauma",type:"matching",stem:"Match each spinal cord injury finding with its description.",pairs:[{term:"Complete spinal cord injury",def:"Total loss of motor and sensory function below the level of injury"},{term:"Incomplete spinal cord injury",def:"Partial preservation of motor or sensory function below the level of injury"},{term:"Neurogenic shock",def:"Hypotension with bradycardia and warm, dry skin from loss of sympathetic tone"},{term:"Spinal shock",def:"Temporary loss of all reflexes and function below the injury level — may be reversible"},{term:"Dermatome",def:"Area of skin innervated by a single spinal nerve root — used to map sensory deficits"}],points:1},,
+  {section:"Critical Thinking & Integrated Assessment",type:"matching",stem:"Match each physical exam finding with the condition it MOST strongly suggests.",pairs:[{term:"Tracheal deviation away from the injured side",def:"Tension pneumothorax — mediastinal shift from trapped air"},{term:"JVD, hypotension, and muffled heart sounds after chest trauma",def:"Cardiac tamponade — Beck's triad from pericardial compression"},{term:"Unilateral pupil dilation and decreased consciousness after head injury",def:"Uncal herniation — CN III compression from rising ICP"},{term:"Bilateral crackles, orthopnea, and pink frothy sputum",def:"Acute pulmonary edema — fluid in the alveoli from left heart failure"},{term:"Bradycardia, hypotension, and warm dry skin below a spinal injury",def:"Neurogenic shock — loss of sympathetic tone from cord injury"}],points:1}
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"APGAR scoring is performed at 1 and 5 minutes after birth. A score of 4 indicates:",options:["A healthy newborn requiring routine care","A compromised newborn requiring stimulation and possible resuscitative intervention","The newborn is dead","A normal score for premature infants"],correct:[1],explain:"APGAR 7-10 = normal; 4-6 = requires stimulation and close monitoring; 0-3 = requires immediate resuscitation.",points:1},
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A child's medication doses and equipment sizes should be based PRIMARILY on:",options:["Age in years only","Length-based estimation (Broselow tape) or weight in kilograms","Body surface area assessed by eye","Standard adult dosing with a 50% reduction"],correct:[1],explain:"Pediatric drug doses are weight-based (mg/kg). Length-based tapes provide accurate weight estimates when weight is unknown.",points:1},
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A geriatric patient taking warfarin has a minor head strike after a fall. Despite appearing well, your GREATEST concern is:",options:["Osteoporosis causing a hip fracture","Anticoagulant use dramatically increasing risk of intracranial hemorrhage","Dementia causing unreliable symptom reporting","Hypertension causing a post-fall BP spike"],correct:[1],explain:"Anticoagulated patients have dramatically increased risk of intracranial hemorrhage from even minor head trauma. Any anticoagulated patient with a head strike requires hospital evaluation.",points:1},
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"Which of the following BEST describes why pediatric patients deteriorate more rapidly in respiratory emergencies?",options:["Children have stronger respiratory muscles than adults","Children have smaller airways with proportionally greater resistance and fewer metabolic reserves","Children's airways are always partially obstructed","Children have a lower respiratory rate than adults"],correct:[1],explain:"Pediatric airways are much smaller — small amounts of edema dramatically increase resistance. Children also have fewer metabolic reserves and decompensate faster.",points:1},
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"When delivering rescue breaths to a newborn, the correct rate is:",options:["12-16 breaths per minute","40-60 breaths per minute","20-30 breaths per minute","60-100 breaths per minute"],correct:[1],explain:"Neonatal ventilation rate is 40-60 breaths per minute using gentle puffs — just enough to see chest rise.",points:1},
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A geriatric patient taking multiple medications presents with acute confusion. Which cause should the EMR consider FIRST?",options:["New-onset dementia","Polypharmacy — drug interaction or medication side effect causing acute delirium","Normal aging","Hypoglycemia should be ruled out last in elderly patients"],correct:[1],explain:"Polypharmacy is a leading cause of acute confusion in geriatric patients. Always check blood glucose and consider medication side effects before attributing AMS to dementia.",points:1},
+{section:"Obstetrics, Pediatrics & Geriatrics",type:"mc",stem:"A 34-week pregnant patient has a generalized seizure with no prior seizure history. The MOST likely cause is:",options:["Eclampsia — hypertensive disorder of pregnancy","Status epilepticus from medication non-compliance","Stroke from hypercoagulability","Hypoglycemia from gestational diabetes"],correct:[0],explain:"New-onset seizures after 20 weeks of pregnancy without prior seizure history should be assumed eclampsia until proven otherwise.",points:1},
+{section:"Environmental Emergencies & Special Situations",type:"mc",stem:"A patient has severe hypothermia with core temperature of 86°F (30°C) and is pulseless and apneic. Which statement is MOST correct?",options:["This patient is dead — do not resuscitate","Begin CPR and transport — hypothermia may protect the brain and hospital rewarming may achieve ROSC","Apply the AED and deliver 3 shocks immediately","CPR is contraindicated in hypothermia"],correct:[1],explain:"No one is dead until they are warm and dead. Begin CPR and transport to a facility capable of active rewarming.",points:1},
+  {section:"Environmental Emergencies & Special Situations",type:"mc",stem:"A patient found in a hot car has a core temperature of 106°F, is combative and confused, and has dry hot skin. Your FIRST priority after ensuring scene safety is:",options:["Establish IV access for fluid resuscitation","Begin active cooling immediately — remove from heat, cool the skin with water and fanning","Administer aspirin for the fever","Transport without treating — cooling is a hospital intervention only"],correct:[1],explain:"Heat stroke requires immediate aggressive cooling. Remove from heat, apply cool water to skin, and fan vigorously.",points:1}
+{section:"Environmental Emergencies & Special Situations",type:"mc",stem:"Heat exhaustion is distinguished from heat stroke by:",options:["Heat exhaustion has a higher core temperature","Heat exhaustion patients are typically alert with intact sweating; heat stroke involves CNS dysfunction","Heat stroke always causes sweating; heat exhaustion does not","They are the same condition"],correct:[1],explain:"Heat exhaustion: normal to slightly elevated temperature, profuse sweating, alert. Heat stroke: markedly elevated temp >104°F, CNS dysfunction, skin may be dry (classic) or wet (exertional).",points:1},
+{section:"Environmental Emergencies & Special Situations",type:"mc",stem:"A 5-year-old is found face-down in a swimming pool, pulseless and apneic. Water temperature was 80°F. Which statement is MOST accurate?",options:["Warm-water drowning has no neuroprotective effect — prognosis is poor","Begin CPR — all drowning victims deserve resuscitation, especially children","Do not attempt resuscitation — aspiration prevents successful CPR","Apply AED before starting CPR"],correct:[1],explain:"All drowning victims should receive CPR regardless of water temperature. Children are particularly likely to respond to aggressive resuscitation.",points:1},
+{section:"Environmental Emergencies & Special Situations",type:"best2",stem:"Which TWO interventions are appropriate for a patient found in a confined space with suspected toxic gas inhalation?",options:["Enter the confined space immediately to rescue the patient","Do not enter without proper respiratory protection and confined space training","Remove the patient from the toxic environment as quickly and safely as possible","Apply oxygen via nasal cannula inside the confined space"],correct:[1,2],explain:"Confined space rescues require proper PPE and training. Many would-be rescuers die in unprotected entry. Remove the patient to fresh air safely.",points:1},
+{section:"Environmental Emergencies & Special Situations",type:"mc",stem:"The MOST important prehospital intervention for a patient with a brown recluse spider bite who has no systemic symptoms is:",options:["Apply a tourniquet proximal to the bite","Clean the wound, immobilize the area, apply cool compress, and transport","Incise the wound and suction the venom","Administer antihistamine from the patient's own medication"],correct:[1],explain:"Brown recluse bites cause local necrosis. Prehospital care is supportive: wound care, cool compress, immobilization, and transport for evaluation.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"In the START triage system, a patient who is not breathing after airway repositioning is tagged:",options:["Immediate (red)","Delayed (yellow)","Minor (green)","Expectant (black/gray)"],correct:[3],explain:"In START, apnea after airway repositioning = Expectant (black). Resources go to potentially survivable patients. JumpSTART gives 5 rescue breaths first for children.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"The ICS (Incident Command System) is used to manage MCIs because:",options:["It eliminates the need for radio communication","It provides a standardized, scalable management structure for incidents of any size","It is required only for incidents over 100 patients","It assigns all patient care decisions to law enforcement"],correct:[1],explain:"ICS provides a standardized, scalable management framework integrating multiple agencies. It uses unified command, defined roles, and clear span of control.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"At a hazmat scene, the EMR's role is MOST accurately described as:",options:["Entering the hot zone with gloves and a mask to rescue victims","Providing medical care in the cold zone after decontamination is complete","Operating in the warm zone with partial PPE","Performing triage in the hot zone"],correct:[1],explain:"EMRs operate in the cold zone, providing care to decontaminated patients. Entry into hot or warm zones requires specialized hazmat training and appropriate PPE.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"Under the ICS structure, optimal span of control means one supervisor manages:",options:["2-3 people","3-7 people","8-10 people","As many as needed"],correct:[1],explain:"Optimal ICS span of control is 3-7 subordinates per supervisor (ideally 5). Exceeding this leads to communication breakdown.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"In JumpSTART pediatric triage, the primary difference from adult START is:",options:["Children are always tagged immediate","If a child is apneic after airway opening, 5 rescue breaths are attempted before tagging expectant","Children are tagged delayed unless in cardiac arrest","Respiratory rate cutoff is 40 instead of 30"],correct:[1],explain:"JumpSTART: apneic child after airway → 5 rescue breaths → if breathing, tag immediate; if still apneic, tag expectant. Children often arrest from respiratory causes.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"best2",stem:"Which TWO actions should an EMR take upon arriving at a suspected hazmat scene?",options:["Immediately approach to identify the substance","Park uphill and upwind from the incident","Stage at a safe distance and call for specialized hazmat resources","Don nitrile gloves and approach to read the hazmat placard"],correct:[1,2],explain:"Park uphill and upwind to avoid fume and runoff exposure. Stage at safe distance and wait for hazmat resources with proper PPE.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"Which of the following BEST describes the purpose of the ERG (Emergency Response Guidebook)?",options:["Identifies hazardous materials by placard/UN number and provides initial emergency action guidelines","Calculates the number of patients exposed","Assigns ICS roles to first responders","Requests specialized decontamination teams"],correct:[0],explain:"The ERG identifies hazardous materials by placard number and provides initial isolation distances and protective action recommendations for first responders.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"Which START triage tag color is assigned to a patient who is walking and requires minimal treatment?",options:["Red","Yellow","Green","Black"],correct:[2],explain:"Minor (green) tag in START triage is for walking wounded — ambulatory patients with non-life-threatening injuries who can wait for treatment.",points:1},
+{section:"MCI, ICS, Hazmat & EMS Operations",type:"mc",stem:"The minimum recommended helicopter LZ size for a daytime landing is:",options:["60 × 60 feet","100 × 100 feet","200 × 200 feet","50 × 50 feet"],correct:[1],explain:"A minimum 100 × 100 foot clear, flat area free of debris and wires is required. Mark corners with cones or strobes.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 55-year-old male with chest pain takes metoprolol (a beta-blocker). His pulse is 58, BP is 94/60, and he is diaphoretic. The MOST appropriate interpretation is:",options:["Pulse of 58 is normal for beta-blocker use","Beta-blocker may be masking compensatory tachycardia — low BP with diaphoresis suggests cardiogenic shock","This is a normal physiological response to chest pain","The beta-blocker is solely causing the low BP"],correct:[1],explain:"Beta-blockers suppress compensatory tachycardia. Low BP + diaphoresis despite a low HR is a red flag for cardiogenic shock in this context.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A patient has confusion, fever, nuchal rigidity, photophobia, and a rapidly spreading petechial rash. Your interpretation is:",options:["Viral meningitis — monitor and transport","Meningococcemia — rapidly expanding petechial rash with meningeal signs is a septic emergency","Subarachnoid hemorrhage — the rash is coincidental","Migraine with autonomic features"],correct:[1],explain:"Rapidly spreading petechial rash + meningeal signs = meningococcal septicemia — a rapidly fatal infection requiring immediate transport.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 72-year-old female is unresponsive, breathing 6 times/min, with pinpoint pupils and diaphoresis. Her medication list includes oxycodone. Your PRIORITY is:",options:["Obtain IV access for naloxone","Provide BVM ventilation with supplemental oxygen and call for ALS","Apply AED and assess rhythm","Administer activated charcoal"],correct:[1],explain:"Opioid toxidrome with respiratory rate of 6 requires immediate ventilatory support. BVM ventilation addresses hypoxia first — naloxone follows per protocol.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A construction worker struck in the chest by a nail gun has paradoxical chest wall movement on the right, tachycardia, and SpO2 84%. The MOST appropriate immediate intervention is:",options:["Seal the chest wound and apply oxygen","Assist ventilations with BVM and transport immediately","Apply a traction splint to the chest wall","Administer aspirin"],correct:[1],explain:"SpO2 84% with flail chest indicates severe respiratory failure. BVM ventilation splints the flail segment and corrects hypoxia pending surgical stabilization.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"best2",stem:"A 19-year-old who took MDMA at a concert has hyperthermia (104°F), agitation, and tachycardia at 138. Which TWO complications are MOST important to anticipate?",options:["Respiratory arrest from CNS depression","Cardiac arrhythmia from hyperthermia and electrolyte disturbance","Rhabdomyolysis from muscle hyperactivity causing acute kidney injury","Bradycardia from parasympathetic surge"],correct:[1,2],explain:"MDMA causes hyperthermia via increased muscle activity. Severe hyperthermia causes rhabdomyolysis (muscle breakdown), hyperkalemia, and potentially fatal cardiac arrhythmias.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 45-year-old female is 8 months pregnant and pulseless. While initiating CPR, which modification is MOST important?",options:["Administer epinephrine immediately","Manually displace the uterus to the left to decompress the IVC during CPR","Perform compressions on the upper chest only","Apply AED after checking for fetal heart tones"],correct:[1],explain:"Left uterine displacement (LUD) prevents IVC compression by the gravid uterus, improving venous return and CPR effectiveness.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 28-year-old has a stab wound to the left chest at the 4th intercostal space. He is pale with JVD, BP 80/60, HR 128, and equal bilateral breath sounds. The MOST likely diagnosis is:",options:["Left tension pneumothorax","Cardiac tamponade","Massive hemothorax","Aortic dissection"],correct:[1],explain:"Stab wound + hypotension + JVD + equal breath sounds = cardiac tamponade (Beck's triad). Tension PTX would have absent breath sounds on one side.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 3-year-old has multiple bruises in various healing stages, burns on the palms, and a spiral femur fracture. The parents state he fell down stairs. Your MOST important responsibility is:",options:["Assume the parents are correct","Treat injuries, document objectively, and report to law enforcement or CPS as a mandatory reporter","Ask the child detailed questions in front of the parents","Not report — determining abuse is not the EMR's role"],correct:[1],explain:"EMRs are mandatory reporters of suspected child abuse. Document objectively and report per protocol. Treat injuries and transport.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"mc",stem:"A 70-year-old male who 'doesn't feel right' has BP 88/60, HR 42, warm dry skin, and blood glucose of 110. The MOST likely cause is:",options:["Dehydration","Acute inferior MI with conduction abnormality causing bradycardia and hypotension","Septic shock","Hypoglycemia"],correct:[1],explain:"Bradycardia + hypotension + warm dry skin in elderly = suspect inferior MI. The RCA supplies the SA and AV nodes — inferior MI classically causes bradyarrhythmias.",points:1},
+{section:"Critical Thinking & Integrated Assessment",type:"best2",stem:"Which TWO situations require an EMR to withhold resuscitation?",options:["Cardiac arrest in a cold water drowning victim","A valid DNR order is verified at the scene","Obvious signs of death — rigor mortis or dependent lividity","Patient has been down for an unknown time"],correct:[1,2],explain:"A valid DNR and obvious signs of death (rigor mortis, dependent lividity, decapitation) are recognized indications to withhold. Unknown downtime and cold water drowning do not justify withholding.",points:1},
+  {section:"Critical Thinking & Integrated Assessment",type:"matching",stem:"Match each physical exam finding with the condition it MOST strongly suggests.",pairs:[{term:"Tracheal deviation away from the injured side",def:"Tension pneumothorax — mediastinal shift from trapped air"},{term:"JVD, hypotension, and muffled heart sounds after chest trauma",def:"Cardiac tamponade — Beck's triad from pericardial compression"},{term:"Unilateral pupil dilation and decreased consciousness after head injury",def:"Uncal herniation — CN III compression from rising ICP"},{term:"Bilateral crackles, orthopnea, and pink frothy sputum",def:"Acute pulmonary edema from left heart failure"},{term:"Bradycardia, hypotension, and warm dry skin below a spinal injury",def:"Neurogenic shock — loss of sympathetic tone from cord injury"}],points:1}
+];
+ 
+const SECTION_COLORS = {
+  "EMS Systems, EMR Role & Medical/Legal":        {bg:"#1e3a5f", accent:"#b45309"},
+  "Communications & Documentation":               {bg:"#1e3a5f", accent:"#b45309"},
+  "Anatomy, Physiology & Medical Terminology":    {bg:"#1e3a5f", accent:"#b45309"},
+  "Lifting, Moving & Patient Positioning":        {bg:"#1e3a5f", accent:"#b45309"},
+  "Airway Management":                            {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Ventilation & Breathing Assessment":           {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Circulation, Bleeding Control & Shock":        {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Cardiac Emergencies, CPR & AED":               {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Medical Emergencies I":                        {bg:"#1e3a5f", accent:"#b45309"},
+  "Medical Emergencies II":                       {bg:"#1e3a5f", accent:"#b45309"},
+  "Trauma Assessment, Soft Tissue & Burns":       {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Musculoskeletal, Spinal, Head & Chest Trauma": {bg:"#1e3a5f", accent:"#b91c1c"},
+  "Obstetrics, Pediatrics & Geriatrics":          {bg:"#1e3a5f", accent:"#b45309"},
+  "Environmental Emergencies & Special Situations":{bg:"#1e3a5f", accent:"#b45309"},
+  "MCI, ICS, Hazmat & EMS Operations":            {bg:"#1e3a5f", accent:"#b45309"},
+  "Critical Thinking & Integrated Assessment":    {bg:"#1e3a5f", accent:"#b91c1c"},
+};
+
+ 
+// ── STATE ────────────────────────────────────────────
+// Pre-fill student name from portal URL param
+const _urlParams = new URLSearchParams(window.location.search);
+const _portalStudent = decodeURIComponent(_urlParams.get('student') || '').trim();
+ 
+let phase        = "intro";
+let studentName  = _portalStudent || "";
+let current      = 0;
+let answers      = Array(questions.length).fill(null);
+let matchSels    = {};      // "qIdx-termIdx" -> def string
+let shuffledDefs = {};      // qIdx -> shuffled def array
+let timeLeft     = TOTAL_TIME;
+let timerInterval= null;
+let dragData     = null;    // {def, fromTermIdx}
+let startTime    = null;
+ 
+// ── SHUFFLE ──────────────────────────────────────────
+function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
+function initShuffles() {
+  questions.forEach((q,i) => {
+    if (q.type === "matching") shuffledDefs[i] = shuffle(q.pairs.map(p=>p.def));
+  });
+}
+ 
+// ── SCORING ──────────────────────────────────────────
+function scoreQuestion(q, ans) {
+  if (ans === undefined || ans === null) return false;
+  if (q.type === "mc")      return Array.isArray(ans) && ans[0] === q.correct[0];
+  if (q.type === "best2")   return Array.isArray(ans) && ans.length===2 && ans.every(a=>q.correct.includes(a));
+  if (q.type === "matching") return Array.isArray(ans) && q.pairs.every((p,ti)=>ans[ti]===p.def);
+  return false;
+}
+function calcScore() {
+  let score=0, total=0;
+  questions.forEach((q,i)=>{ total+=q.points; if(scoreQuestion(q,answers[i])) score+=q.points; });
+  return {score,total};
+}
+ 
+// ── SAVE MATCHING ANS ────────────────────────────────
+function saveMatchingAnswers(qIdx) {
+  const q = questions[qIdx];
+  answers[qIdx] = q.pairs.map((_,ti)=>matchSels[`${qIdx}-${ti}`]||null);
+}
+ 
+// ── TIMER ────────────────────────────────────────────
+function startTimer() {
+  startTime = Date.now();
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) { clearInterval(timerInterval); finishExam(); }
+  }, 1000);
+}
+function updateTimerUI() {
+  const m = Math.floor(timeLeft/60), s = timeLeft%60;
+  const str = `${m}:${String(s).padStart(2,"0")}`;
+  const color = timeLeft<60?"#ef4444":timeLeft<180?"#b45309":"#22c55e";
+  document.querySelectorAll(".timer-text").forEach(el=>{ el.textContent=str; el.style.color=color; });
+  document.querySelectorAll(".timer-dot").forEach(el=>{ el.style.background=color; el.classList.toggle("pulse",timeLeft<60); });
+  document.querySelectorAll(".timer-bar-fill").forEach(el=>{ el.style.width=`${(timeLeft/TOTAL_TIME)*100}%`; el.style.background=color; });
+}
+ 
+// ── SUBMIT TO GOOGLE SHEETS ──────────────────────────
+// Uses GET with ?payload= because Apps Script cross-origin POST is blocked
+// by CORS preflight. GET requests follow the redirect and reach doGet().
+async function submitToFirebase(subData) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/examResults`;
+    const answersStr = JSON.stringify(subData.answersData, (k,v) => v === undefined ? null : v);
+    const body = {
+      fields: {
+        examLabel:  {stringValue: subData.examLabel},
+        category:   {stringValue: EXAM_CATEGORY},
+        name:       {stringValue: subData.name},
+        score:      {integerValue: String(isNaN(subData.score)    ? 0 : subData.score)},
+        total:      {integerValue: String(isNaN(subData.total)    ? 0 : subData.total)},
+        pct:        {integerValue: String(isNaN(subData.pct)      ? 0 : subData.pct)},
+        timeUsed:   {integerValue: String(isNaN(subData.timeUsed) ? 0 : subData.timeUsed)},
+        submittedAt:{stringValue: subData.submittedAt},
+        answersData:{stringValue: answersStr},
+      }
+    };
+    const resp = await fetch(url + `?key=${FB_CONFIG.apiKey}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!resp.ok) { const errText = await resp.text(); throw new Error(errText); }
+    return { success: true };
+  } catch(e) {
+    clearTimeout(timeout);
+    console.error("Firebase submit error:", e);
+    return { success: false, error: e.toString() };
+  }
+}
+ 
+// ── FINISH EXAM ──────────────────────────────────────
+async function finishExam() {
+  clearInterval(timerInterval);
+  const {score,total} = calcScore();
+  const pct = Math.round((score/total)*100);
+  const timeUsed = TOTAL_TIME - timeLeft;
+  const questionResults = questions.map((q,i)=>scoreQuestion(q,answers[i]));
+ 
+  const answersData = questions.map((q, i) => {
+    const given = answers[i] !== undefined ? answers[i] : null;
+    const correct = q.correct !== undefined ? q.correct
+                  : q.order   !== undefined ? q.order
+                  : q.pairs   !== undefined ? q.pairs.map(p => p.def)
+                  : null;
+    return { given, correct };
+  });
+  const subData = {
+    examLabel: EXAM_LABEL,
+    name: studentName,
+    score, total, pct, timeUsed,
+    answersData,
+    submittedAt: new Date().toISOString(),
+  };
+ 
+  phase = "submitting";
+  render();
+
+  try {
+    const result = await submitToFirebase(subData);
+    window._submitResult = result;
+  } catch(e) {
+    console.error('finishExam error:', e);
+    window._submitResult = { success: false, error: e.toString() };
+  }
+  phase = "results";
+  window._examScore = {score,total,pct};
+  window._questionResults = questionResults;
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────
+function render() {
+  const root = document.getElementById("root");
+  if (phase === "intro")       root.innerHTML = renderIntro();
+  else if (phase === "submitting") root.innerHTML = renderSubmitting();
+  else if (phase === "results") root.innerHTML = renderResults();
+  else                          root.innerHTML = renderExam();
+  attachEvents();
+}
+ 
+function renderIntro() {
+  return `
+    <div class="intro-wrap">
+      <div class="intro-card">
+        <div class="intro-eyebrow">Georgia OEMST · NHTSA 2021 · All Weeks</div>
+        <div class="intro-title">Final</div>
+        <div class="intro-sub">Examination</div>
+        <div class="info-grid">
+          ${[["Questions","120"],["Total Points","120"],["Time Allowed","120 minutes (1 min/question)"],["Passing Score","70% or higher"],["Content","All Weeks: EMS Systems · Anatomy · Airway · Ventilation · Circulation · Cardiac · Medical Emergencies · Trauma · OB/Peds · Environmental · MCI · Integrated Critical Thinking"]]
+            .map(([l,v])=>`<div class="info-row"><span class="info-label">${l}</span><span class="info-val">${v}</span></div>`).join("")}
+        </div>
+        <p class="intro-instructions">For multiple choice, select the single best answer. For Best 2 of 5, select exactly two answers. For matching, drag definitions from the bank and drop them onto the correct terms.</p>
+        <label class="name-label">Student Name</label>
+        <input class="name-input ${_portalStudent ? 'has-value' : ''}" id="nameInput" type="text" 
+          placeholder="Enter your full name to begin..." autocomplete="off"
+          ${_portalStudent ? `value="${_portalStudent}" readonly style="background:#fef9ee;color:#1e3a5f;cursor:default;border-color:#93c5fd;"` : ''}>
+        <br>
+        <button class="btn-begin ${_portalStudent ? 'active' : ''}" id="beginBtn" ${_portalStudent ? '' : 'disabled'}>Begin Exam</button>
+      </div>
+    </div>`;
+}
+ 
+function renderSubmitting() {
+  return `
+    <div style="min-height:100vh;background:#1a2744;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;font-family:Georgia,serif;">
+      <div class="submitting-spinner"></div>
+      <div class="submitting-text">Submitting your exam…</div>
+    </div>`;
+}
+ 
+function renderResults() {
+  const {score,total,pct} = window._examScore;
+  const passed = pct >= 70;
+  const qr = window._questionResults;
+  const sr = window._submitResult;
+ 
+  let statusHtml = "";
+  if (sr && !sr.noUrl) {
+    statusHtml = sr.success
+      ? `<div class="submit-status success">✓ Your results have been submitted to your instructor.</div>`
+      : `<div class="submit-status error">⚠ Could not reach the server. Please notify your instructor. Your score: ${pct}% (${score}/${total})</div>`;
+  }
+ 
+  const reviewRows = questions.map((q,i)=>{
+    const correct = qr[i];
+    let correctAns = "";
+    if (!correct) {
+      if (q.type==="mc" && q.options) correctAns = `Correct: ${LETTERS[q.correct[0]]}. ${q.options[q.correct[0]]}`;
+      else if (q.type==="best2" && q.options) correctAns = `Correct: ${q.correct.map(c=>`${LETTERS[c]}. ${q.options[c]}`).join(" & ")}`;
+      else if (q.type==="matching") correctAns = "See correct matches in the review above";
+      else if (q.type==="build") correctAns = "See correct order in the review above";
+    }
+    return `
+      <div class="result-row">
+        <div class="result-badge ${correct?"correct":"wrong"}">${correct?"✓":"✗"}</div>
+        <div style="flex:1">
+          <div class="result-stem"><strong style="color:#fca5a5">Q${i+1}.</strong> ${q.stem.length>100?q.stem.slice(0,100)+"…":q.stem}</div>
+          ${correctAns?`<div class="result-correct-ans">${correctAns}</div>`:""}
+        </div>
+        <div class="result-pts" style="color:${correct?"#81c784":"#ef9a9a"}">${correct?"+"+q.points:"0"}</div>
+      </div>`;
+  }).join("");
+ 
+  return `
+    <div class="results-wrap" style="background:${passed?"linear-gradient(135deg,#0d2818,#1b4332,#0d2818)":"linear-gradient(135deg,#2d0a0a,#4a1010,#2d0a0a)"}">
+      <div class="results-inner">
+        ${statusHtml}
+        <div class="results-hero">
+          <div class="results-icon">${passed?"✓":"✗"}</div>
+          <div class="results-name">${studentName}</div>
+          <div class="results-pct">${pct}%</div>
+          <div class="results-verdict" style="color:${passed?"#81c784":"#ef9a9a"}">${passed?"PASSED":"DID NOT PASS"}</div>
+          <div class="results-detail">${score} / ${total} points · Passing score: 70% (${Math.ceil(total*0.7)} pts)</div>
+        </div>
+        <div class="results-card">
+          <div class="results-card-title">Question Review</div>
+          ${reviewRows}
+        </div>
+      </div>
+    </div>`;
+}
+ 
+function renderExam() {
+  const q = questions[current];
+  const sc = SECTION_COLORS[q.section] || {bg:"#1a1a2e",accent:"#b91c1c"};
+  const progress = ((current+1)/questions.length)*100;
+  const ans = answers[current] || [];
+ 
+  let questionBody = "";
+  if (q.type==="mc" || q.type==="best2") {
+    const hint = q.type==="best2"
+      ? `<div class="best2-hint">★ Select the TWO best answers ${ans.length>0?"("+ans.length+"/2 selected)":""}</div>` : "";
+    const opts = q.options.map((opt,idx)=>{
+      const sel = ans.includes(idx);
+      return `<button class="option-btn ${q.type==="best2"?"best2":""} ${sel?"selected":""}" data-idx="${idx}">
+        <div class="option-indicator">${LETTERS[idx]}</div>
+        <div class="option-text">${opt}</div>
+      </button>`;
+    }).join("");
+    questionBody = `<div class="options-list">${hint}${opts}</div>`;
+ 
+  } else if (q.type==="matching") {
+    const defs = shuffledDefs[current] || q.pairs.map(p=>p.def);
+    const usedDefs = new Set(Object.entries(matchSels).filter(([k])=>k.startsWith(current+"-")).map(([,v])=>v));
+    const bankDefs = defs.filter(d=>!usedDefs.has(d));
+ 
+    const bankChips = bankDefs.map(def=>`<div class="def-chip" draggable="true" data-def="${encodeURIComponent(def)}">${def}</div>`).join("") ||
+      `<div class="def-bank-empty">All definitions assigned</div>`;
+ 
+    const termRows = q.pairs.map((pair,ti)=>{
+      const assigned = matchSels[`${current}-${ti}`];
+      return `
+        <div class="term-row ${assigned?"assigned":""}" data-term-idx="${ti}">
+          <div class="term-name"><span>${pair.term}</span></div>
+          <div class="term-drop">
+            ${assigned
+              ? `<div class="def-chip" draggable="true" data-def="${encodeURIComponent(assigned)}" data-from-term="${ti}" style="margin:0;width:100%">${assigned}</div>`
+              : `<span class="term-placeholder">— drag a definition here —</span>`}
+          </div>
+        </div>`;
+    }).join("");
+ 
+    questionBody = `
+      <div class="match-instructions"><strong>Drag</strong> a definition from the bank and <strong>drop</strong> it onto the matching term. Drag a placed definition back to the bank to unassign it.</div>
+      <div class="bank-label">Definition Bank</div>
+      <div class="def-bank" id="defBank">${bankChips}</div>
+      <div class="terms-label">Terms — Drop definitions here</div>
+      <div class="term-rows">${termRows}</div>`;
+  }
+ 
+  const typeBadge = q.type==="best2"
+    ? `<span class="q-badge" style="background:rgba(180,83,9,0.2);color:#fcd34d;border:1px solid #b45309">SELECT 2</span>` : "";
+ 
+  const dots = questions.map((_,i)=>
+    `<div class="dot ${i===current?"current":answers[i]?"answered":""}" style="width:${i===current?20:10}px" data-dot="${i}"></div>`
+  ).join("");
+ 
+  const navRight = current < questions.length-1
+    ? `<button class="btn-next" id="nextBtn">Next →</button>`
+    : `<button class="btn-submit-exam" id="submitExamBtn">Submit Exam</button>`;
+ 
+  return `
+    <div>
+      <div class="topbar">
+        <div class="topbar-inner">
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${sc.accent}"></div></div>
+            <span class="progress-text">${current+1} / ${questions.length}</span>
+          </div>
+          <div class="timer-box" style="border-color:#b45309">
+            <div class="timer-dot" style="background:#22c55e"></div>
+            <span class="timer-text" style="color:#22c55e">25:00</span>
+          </div>
+          <button class="btn-submit-top" id="submitTopBtn" style="background:${sc.accent}">Submit</button>
+        </div>
+        <div class="timer-bar"><div class="timer-bar-fill" style="width:100%;background:#22c55e"></div></div>
+      </div>
+ 
+      <div class="exam-wrap">
+        <div class="section-badge" style="background:#1e3a5f;border-left:3px solid #b45309;padding-left:12px">
+          <div class="section-dot" style="background:${sc.accent}"></div>
+          <span class="section-label" style="color:#fcd34d;font-weight:600">${q.section}</span>
+        </div>
+ 
+        <div class="q-header">
+          <span class="q-label">QUESTION</span>
+          <span class="q-number">${current+1}</span>
+          ${typeBadge}
+          <span class="q-points">${q.points} pt</span>
+        </div>
+ 
+        <div class="q-stem">${q.stem}</div>
+        ${questionBody}
+ 
+        <div class="nav-bar">
+          <button class="btn-prev" id="prevBtn" ${current===0?"disabled":""}>← Previous</button>
+          <div class="dots">${dots}</div>
+          ${navRight}
+        </div>
+      </div>
+    </div>`;
+}
+ 
+// ── EVENT BINDING ────────────────────────────────────
+function attachEvents() {
+  // INTRO
+  const nameInput = document.getElementById("nameInput");
+  const beginBtn  = document.getElementById("beginBtn");
+  if (nameInput) {
+    nameInput.value = studentName;
+    nameInput.addEventListener("input", e=>{
+      studentName = e.target.value.trim();
+      nameInput.classList.toggle("has-value", !!studentName);
+      beginBtn.disabled = !studentName;
+      beginBtn.classList.toggle("active", !!studentName);
+    });
+    nameInput.addEventListener("keydown", e=>{ if(e.key==="Enter"&&studentName) beginExam(); });
+  }
+  if (beginBtn) {
+    beginBtn.classList.toggle("active", !!studentName);
+    beginBtn.addEventListener("click", ()=>{ if(studentName) beginExam(); });
+  }
+ 
+  // EXAM — MC / Best2
+  document.querySelectorAll(".option-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const idx = parseInt(btn.dataset.idx);
+      const q = questions[current];
+      if (q.type==="mc") {
+        answers[current] = [idx];
+      } else {
+        const prev = answers[current] || [];
+        if (prev.includes(idx)) answers[current] = prev.filter(i=>i!==idx);
+        else if (prev.length<2) answers[current] = [...prev,idx];
+        else answers[current] = [prev[1],idx];
+      }
+      render();
+    });
+  });
+ 
+  // EXAM — Matching drag & drop
+  let draggingEl = null;
+  document.querySelectorAll(".def-chip").forEach(chip=>{
+    chip.addEventListener("dragstart", e=>{
+      draggingEl = chip;
+      chip.classList.add("dragging");
+      const def = decodeURIComponent(chip.dataset.def);
+      const fromTerm = chip.dataset.fromTerm !== undefined ? parseInt(chip.dataset.fromTerm) : null;
+      dragData = {def, fromTermIdx: fromTerm};
+      e.dataTransfer.effectAllowed = "move";
+    });
+    chip.addEventListener("dragend", ()=>{ chip.classList.remove("dragging"); draggingEl = null; });
+  });
+ 
+  // Drop on term rows
+  document.querySelectorAll(".term-row").forEach(row=>{
+    row.addEventListener("dragover", e=>{ e.preventDefault(); row.classList.add("dragover"); });
+    row.addEventListener("dragleave", ()=>row.classList.remove("dragover"));
+    row.addEventListener("drop", e=>{
+      e.preventDefault(); row.classList.remove("dragover");
+      if (!dragData) return;
+      const termIdx = parseInt(row.dataset.termIdx);
+      const {def, fromTermIdx} = dragData; dragData = null;
+      // Remove from old slot
+      if (fromTermIdx !== null && fromTermIdx !== undefined) delete matchSels[`${current}-${fromTermIdx}`];
+      // Remove any slot that had this def
+      Object.keys(matchSels).forEach(k=>{ if(matchSels[k]===def) delete matchSels[k]; });
+      matchSels[`${current}-${termIdx}`] = def;
+      saveMatchingAnswers(current);
+      render();
+    });
+  });
+ 
+  // Drop on bank (return)
+  const bank = document.getElementById("defBank");
+  if (bank) {
+    bank.addEventListener("dragover", e=>{ e.preventDefault(); bank.classList.add("dragover"); });
+    bank.addEventListener("dragleave", ()=>bank.classList.remove("dragover"));
+    bank.addEventListener("drop", e=>{
+      e.preventDefault(); bank.classList.remove("dragover");
+      if (!dragData) return;
+      const {fromTermIdx} = dragData; dragData = null;
+      if (fromTermIdx !== null && fromTermIdx !== undefined) {
+        delete matchSels[`${current}-${fromTermIdx}`];
+        saveMatchingAnswers(current);
+        render();
+      }
+    });
+  }
+ 
+  // NAV
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const submitExamBtn = document.getElementById("submitExamBtn");
+  const submitTopBtn  = document.getElementById("submitTopBtn");
+ 
+  if (prevBtn) prevBtn.addEventListener("click", ()=>{ if(current>0){ current--; render(); }});
+  if (nextBtn) nextBtn.addEventListener("click", ()=>{ if(current<questions.length-1){ current++; render(); }});
+  if (submitExamBtn) submitExamBtn.addEventListener("click", finishExam);
+  if (submitTopBtn)  submitTopBtn.addEventListener("click",  finishExam);
+ 
+  // Dot nav
+  document.querySelectorAll(".dot").forEach(dot=>{
+    dot.addEventListener("click", ()=>{ current=parseInt(dot.dataset.dot); render(); });
+  });
+ 
+  // Update timer display immediately
+  updateTimerUI();
+}
+ 
+function beginExam() {
+  initShuffles();
+  phase = "exam";
+  render();
+  startTimer();
+}
+ 
+// ── BOOT ─────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("root").innerHTML = "";
+  render();
+});
+
+// ── REVIEW MODE ──────────────────────────────────────
+async function startReviewMode(studentName) {
+  try {
+    const url = `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents:runQuery?key=${FB_CONFIG.apiKey}`;
+    const body = { structuredQuery: {
+      from: [{ collectionId: 'examResults' }],
+      where: { fieldFilter: { field: { fieldPath: 'name' }, op: 'EQUAL', value: { stringValue: studentName } } }
+    }};
+    const resp = await fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const rows = await resp.json();
+
+    let match = null;
+    for (const row of rows) {
+      if (!row.document) continue;
+      const f = row.document.fields || {};
+      if (f.examLabel?.stringValue === EXAM_LABEL) { match = f; break; }
+    }
+    if (!match) {
+      alert('No submission found for ' + studentName + ' on ' + EXAM_LABEL + '. Have them submit the exam first.');
+      return;
+    }
+
+    const saved = JSON.parse(match.answersData?.stringValue || '[]');
+    // Restore answers array — main exams store positional [{given, correct}, ...]
+    saved.forEach((a, i) => {
+      if (a && a.given !== undefined && a.given !== null) {
+        answers[i] = a.given;
+      }
+    });
+
+    // Restore matching answers
+    questions.forEach((q, qi) => {
+      if (q.type === 'matching' && saved[qi] && saved[qi].given) {
+        const givenPairs = saved[qi].given;
+        if (Array.isArray(givenPairs)) {
+          givenPairs.forEach((def, ti) => {
+            if (def) matchSels[qi + '-' + ti] = def;
+          });
+        }
+      }
+    });
+
+    studentName = studentName;
+    const timeUsed = parseInt(match.timeUsed?.integerValue || 0);
+    timeLeft = Math.max(0, TOTAL_TIME - timeUsed);
+
+    // Score and show results
+    const qr = questions.map((q, i) => scoreQuestion(q, answers[i]));
+    const {score, total} = calcScore();
+    const pct = Math.round((score / total) * 100);
+    window._examScore = {score, total, pct};
+    window._questionResults = qr;
+    window._submitResult = { success: true, noUrl: true };
+
+    phase = 'results';
+    render();
+
+    // Banner
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#1a2744;color:#fcd34d;border-bottom:3px solid #b45309;text-align:center;padding:10px;font-size:14px;font-weight:bold;position:sticky;top:0;z-index:999;';
+    banner.textContent = '📋 Review Mode — ' + studentName + ' — ' + EXAM_LABEL;
+    document.body.insertBefore(banner, document.body.firstChild);
+  } catch(e) {
+    console.error('Review mode error:', e);
+    alert('Could not load review. Check console for details.');
+  }
+}
+
+// Trigger review mode from URL params
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const isReview = params.get('review') === '1';
+  const reviewName = decodeURIComponent(params.get('name') || '').trim();
+  if (isReview && reviewName) {
+    window.addEventListener('DOMContentLoaded', () => { startReviewMode(reviewName); });
+  }
+})();
+
+</script>
+ 
+<div id="root"></div>
+</body>
+</html>
