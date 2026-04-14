@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Terminology Reference Sheet — EMR Initial Education</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #1a2a4a;
+    --blue:   #2563a8;
+    --blue-lt:#dbeafe;
+    --red:    #b91c1c;
+    --red-lt: #fee2e2;
+    --teal:   #0f6e56;
+    --teal-lt:#d1fae5;
+    --amber:  #92400e;
+    --amber-lt:#fef3c7;
+    --purple: #4c1d95;
+    --purple-lt:#ede9fe;
+    --slate:  #334155;
+    --border: #cbd5e1;
+    --bg:     #f8fafc;
+    --white:  #ffffff;
+    --text:   #1e293b;
+    --muted:  #64748b;
+  }
+
+  body {
+    font-family: 'Source Sans 3', Arial, sans-serif;
+    font-size: 9.5pt;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.4;
+  }
+
+  /* ── PAGE WRAPPER ── */
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0.5in 0.5in 0.6in;
+    background: var(--white);
+  }
+
+  /* ── HEADER ── */
+  .doc-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 10px 16px 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+  .doc-header h1 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 16pt;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin-bottom: 2px;
+  }
+  .doc-header .sub {
+    font-size: 8.5pt;
+    opacity: 0.8;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── INTRO NOTE ── */
+  .intro-note {
+    background: var(--blue-lt);
+    border-left: 4px solid var(--blue);
+    padding: 7px 12px;
+    font-size: 8.5pt;
+    color: #1e3a5f;
+    margin-bottom: 10px;
+    border-radius: 0 3px 3px 0;
+  }
+  .intro-note strong { font-weight: 700; }
+
+  /* ── SECTION HEADERS ── */
+  .section-title {
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 5px 10px 4px;
+    margin-bottom: 6px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title.blue   { background: var(--navy); color: #fff; }
+  .section-title.red    { background: var(--red);  color: #fff; }
+  .section-title.teal   { background: var(--teal); color: #fff; }
+  .section-title.amber  { background: #b45309;     color: #fff; }
+  .section-title.purple { background: var(--purple);color:#fff; }
+  .section-title.slate  { background: var(--slate); color: #fff; }
+
+  /* ── TERM TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-bottom: 10px;
+  }
+  thead th {
+    background: var(--border);
+    color: var(--navy);
+    font-weight: 700;
+    padding: 4px 7px;
+    text-align: left;
+    border: 1px solid #b0bec5;
+    font-size: 8pt;
+    letter-spacing: 0.03em;
+  }
+  tbody tr:nth-child(even) { background: #f1f5f9; }
+  tbody td {
+    padding: 3.5px 7px;
+    border: 1px solid #d1d9e0;
+    vertical-align: top;
+  }
+  .term { font-weight: 700; color: var(--navy); white-space: nowrap; }
+  .meaning { color: var(--slate); font-style: italic; font-size: 8pt; }
+  .example { color: #374151; }
+
+  /* ── GRID LAYOUT ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* ── ABBREVIATION GRID ── */
+  .abbrev-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .abbrev-item {
+    padding: 4px 8px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-size: 8pt;
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+  .abbrev-item:nth-child(3n) { border-right: none; }
+  .abbrev-item:nth-last-child(-n+3) { border-bottom: none; }
+  .abbrev-code {
+    font-weight: 700;
+    color: var(--navy);
+    min-width: 48px;
+    flex-shrink: 0;
+    font-size: 8.5pt;
+  }
+  .abbrev-def { color: var(--slate); }
+
+  /* ── ANATOMY TERMS: SMALL COLORED PILLS ── */
+  .pill-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  .pill {
+    background: var(--blue-lt);
+    color: #1e3a5f;
+    border: 1px solid #93c5fd;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 8pt;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill span { font-weight: 400; color: #374151; margin-left: 4px; }
+
+  /* ── BODY SYSTEM QUICK-REF ── */
+  .system-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    border-bottom: 1px solid var(--border);
+    font-size: 8.5pt;
+  }
+  .system-row:last-child { border-bottom: none; }
+  .system-label {
+    padding: 4px 8px;
+    font-weight: 700;
+    color: var(--navy);
+    background: #f1f5f9;
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+  }
+  .system-terms {
+    padding: 4px 8px;
+    color: var(--text);
+  }
+
+  /* ── WORD-BUILDING VISUAL ── */
+  .word-build {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 6px 0 10px;
+    flex-wrap: wrap;
+  }
+  .wb-part {
+    border-radius: 3px;
+    padding: 4px 10px;
+    font-weight: 700;
+    font-size: 9pt;
+    text-align: center;
+  }
+  .wb-prefix  { background: var(--blue-lt);   color: #1e3a5f;  border: 1px solid #93c5fd; }
+  .wb-root    { background: var(--teal-lt);   color: #064e3b;  border: 1px solid #6ee7b7; }
+  .wb-suffix  { background: var(--red-lt);    color: #7f1d1d;  border: 1px solid #fca5a5; }
+  .wb-arrow   { color: var(--muted); font-size: 10pt; }
+  .wb-label   { font-size: 7.5pt; color: var(--muted); display: block; font-weight: 400; }
+  .wb-result  { background: var(--navy); color: #fff; padding: 4px 12px; border-radius: 3px; font-size: 9.5pt; font-weight: 700; }
+  .wb-meaning { font-size: 8.5pt; color: var(--muted); font-style: italic; margin-left: 6px; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 4px;
+    padding: 7px 12px;
+    margin-bottom: 10px;
+    font-size: 8.5pt;
+  }
+  .callout.tip    { background: var(--teal-lt);   border-left: 4px solid var(--teal);   color: #064e3b; }
+  .callout.warn   { background: var(--amber-lt);  border-left: 4px solid #b45309;       color: #78350f; }
+  .callout.memory { background: var(--purple-lt); border-left: 4px solid var(--purple); color: #3b0764; }
+  .callout strong { font-weight: 700; }
+
+  /* ── PAGE BREAK ── */
+  @media print {
+    .page { padding: 0.4in 0.4in 0.5in; max-width: 100%; }
+    .no-break { break-inside: avoid; }
+    .page-break { break-before: page; }
+    body { font-size: 8.5pt; }
+
+    /* Force all text NOT on a dark background to pure black */
+    body,
+    .term,
+    .meaning,
+    .example,
+    .abbrev-def,
+    .wb-arrow,
+    .wb-meaning,
+    .system-terms,
+    .footer,
+    tbody td,
+    .intro-note,
+    .intro-note strong,
+    .callout,
+    .callout strong,
+    .abbrev-item {
+      color: #000 !important;
+    }
+
+    /* Table headers sit on a light gray — make text black */
+    thead th { color: #000 !important; }
+
+    /* Abbreviation codes and term labels — black */
+    .abbrev-code { color: #000 !important; }
+
+    /* Word-builder labels under the boxes */
+    .wb-label { color: #000 !important; }
+
+    /* Word-builder part text (prefix/root/suffix boxes have light backgrounds) */
+    .wb-part { color: #000 !important; }
+
+    /* Callout border-left colors survive print; ensure text is black */
+    .callout.tip,
+    .callout.warn,
+    .callout.memory { color: #000 !important; }
+
+    /* Footer text */
+    .footer { color: #000 !important; }
+
+    /* Section titles stay white-on-dark — do NOT override those */
+    .section-title,
+    .section-title.blue,
+    .section-title.red,
+    .section-title.teal,
+    .section-title.amber,
+    .section-title.purple,
+    .section-title.slate { color: #fff !important; }
+
+    /* Doc header stays white on navy */
+    .doc-header,
+    .doc-header h1,
+    .doc-header .sub { color: #fff !important; }
+
+    /* Word-builder result pill stays white on navy */
+    .wb-result { color: #fff !important; }
+
+    /* Card table headers inside cards with colored section-title bars */
+    .card thead th { color: #000 !important; }
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+  }
+
+  .footer {
+    margin-top: 14px;
+    padding-top: 8px;
+    border-top: 2px solid var(--navy);
+    display: flex;
+    justify-content: space-between;
+    font-size: 7.5pt;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<div class="doc-header">
+  <h1>Medical Terminology — Study Reference Sheet</h1>
+  <div class="sub">EMR Initial Education &nbsp;|&nbsp; AAOS EMR 7th Edition &nbsp;|&nbsp; NHTSA 2021 Standards &nbsp;|&nbsp; Georgia OEMST</div>
+</div>
+
+<div class="intro-note">
+  <strong>How medical terms are built:</strong> Most medical words are constructed from Greek or Latin parts — a <em>prefix</em> (before the root), a <em>root/combining form</em> (the core meaning), and a <em>suffix</em> (after the root). Learning these parts lets you decode unfamiliar terms on the fly.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ WORD STRUCTURE -->
+<div class="section-title blue">Word Structure — How to Break Down Any Term</div>
+
+<div class="word-build">
+  <div class="wb-part wb-prefix">tachy-<span class="wb-label">prefix</span></div>
+  <div class="wb-arrow">+</div>
+  <div class="wb-part wb-root">card/o<span class="wb-label">root</span></div>
+  <div class="wb-arrow">+</div>
+  <div class="wb-part wb-suffix">-ia<span class="wb-label">suffix</span></div>
+  <div class="wb-arrow">=</div>
+  <div class="wb-result">Tachycardia</div>
+  <div class="wb-meaning">Condition of fast heart</div>
+</div>
+<div class="word-build">
+  <div class="wb-part wb-prefix">brady-<span class="wb-label">prefix</span></div>
+  <div class="wb-arrow">+</div>
+  <div class="wb-part wb-root">card/o<span class="wb-label">root</span></div>
+  <div class="wb-arrow">+</div>
+  <div class="wb-part wb-suffix">-ia<span class="wb-label">suffix</span></div>
+  <div class="wb-arrow">=</div>
+  <div class="wb-result">Bradycardia</div>
+  <div class="wb-meaning">Condition of slow heart</div>
+</div>
+<div class="word-build">
+  <div class="wb-part wb-root">pneum/o<span class="wb-label">root</span></div>
+  <div class="wb-arrow">+</div>
+  <div class="wb-part wb-suffix">-thorax<span class="wb-label">suffix</span></div>
+  <div class="wb-arrow">=</div>
+  <div class="wb-result">Pneumothorax</div>
+  <div class="wb-meaning">Air in the chest cavity</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ PREFIXES + SUFFIXES GRID -->
+<div class="grid-2">
+
+  <!-- PREFIXES -->
+  <div class="card no-break">
+    <div class="section-title blue" style="border-radius:0; margin-bottom:0;">Common Prefixes</div>
+    <table>
+      <thead><tr><th>Prefix</th><th>Meaning</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td class="term">a- / an-</td><td class="meaning">without, absent</td><td class="example">Apnea, Anemia</td></tr>
+        <tr><td class="term">brady-</td><td class="meaning">slow</td><td class="example">Bradycardia</td></tr>
+        <tr><td class="term">tachy-</td><td class="meaning">fast, rapid</td><td class="example">Tachycardia</td></tr>
+        <tr><td class="term">hyper-</td><td class="meaning">above, excessive</td><td class="example">Hypertension</td></tr>
+        <tr><td class="term">hypo-</td><td class="meaning">below, deficient</td><td class="example">Hypoglycemia</td></tr>
+        <tr><td class="term">hemi-</td><td class="meaning">half</td><td class="example">Hemiplegia</td></tr>
+        <tr><td class="term">bi-</td><td class="meaning">two, both</td><td class="example">Bilateral</td></tr>
+        <tr><td class="term">uni-</td><td class="meaning">one</td><td class="example">Unilateral</td></tr>
+        <tr><td class="term">poly-</td><td class="meaning">many</td><td class="example">Polyuria</td></tr>
+        <tr><td class="term">dys-</td><td class="meaning">difficult, painful</td><td class="example">Dyspnea, Dysrhythmia</td></tr>
+        <tr><td class="term">eu-</td><td class="meaning">normal, good</td><td class="example">Eupnea</td></tr>
+        <tr><td class="term">peri-</td><td class="meaning">around</td><td class="example">Pericardium</td></tr>
+        <tr><td class="term">epi-</td><td class="meaning">upon, over</td><td class="example">Epidermis, Epiglottis</td></tr>
+        <tr><td class="term">sub-</td><td class="meaning">under, below</td><td class="example">Subcutaneous</td></tr>
+        <tr><td class="term">inter-</td><td class="meaning">between</td><td class="example">Intercostal</td></tr>
+        <tr><td class="term">intra-</td><td class="meaning">within</td><td class="example">Intracranial</td></tr>
+        <tr><td class="term">pre-</td><td class="meaning">before</td><td class="example">Prehospital</td></tr>
+        <tr><td class="term">post-</td><td class="meaning">after</td><td class="example">Postpartum</td></tr>
+        <tr><td class="term">trans-</td><td class="meaning">across, through</td><td class="example">Transdermal</td></tr>
+        <tr><td class="term">micro-</td><td class="meaning">small</td><td class="example">Microorganism</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SUFFIXES -->
+  <div class="card no-break">
+    <div class="section-title red" style="border-radius:0; margin-bottom:0;">Common Suffixes</div>
+    <table>
+      <thead><tr><th>Suffix</th><th>Meaning</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td class="term">-algia</td><td class="meaning">pain</td><td class="example">Myalgia, Neuralgia</td></tr>
+        <tr><td class="term">-cardia</td><td class="meaning">heart condition</td><td class="example">Tachycardia</td></tr>
+        <tr><td class="term">-centesis</td><td class="meaning">surgical puncture</td><td class="example">Thoracentesis</td></tr>
+        <tr><td class="term">-ectomy</td><td class="meaning">surgical removal</td><td class="example">Appendectomy</td></tr>
+        <tr><td class="term">-emia</td><td class="meaning">blood condition</td><td class="example">Hypoglycemia, Anemia</td></tr>
+        <tr><td class="term">-ia / -y</td><td class="meaning">condition, state</td><td class="example">Bradycardia, Dyspnea</td></tr>
+        <tr><td class="term">-itis</td><td class="meaning">inflammation</td><td class="example">Appendicitis, Gastritis</td></tr>
+        <tr><td class="term">-logy</td><td class="meaning">study of</td><td class="example">Cardiology, Neurology</td></tr>
+        <tr><td class="term">-megaly</td><td class="meaning">enlargement</td><td class="example">Cardiomegaly, Splenomegaly</td></tr>
+        <tr><td class="term">-ology</td><td class="meaning">science, study</td><td class="example">Pharmacology</td></tr>
+        <tr><td class="term">-oma</td><td class="meaning">tumor, mass</td><td class="example">Hematoma, Carcinoma</td></tr>
+        <tr><td class="term">-osis</td><td class="meaning">abnormal condition</td><td class="example">Cyanosis, Fibrosis</td></tr>
+        <tr><td class="term">-pathy</td><td class="meaning">disease</td><td class="example">Neuropathy, Cardiomyopathy</td></tr>
+        <tr><td class="term">-penia</td><td class="meaning">deficiency</td><td class="example">Thrombocytopenia</td></tr>
+        <tr><td class="term">-plasty</td><td class="meaning">surgical repair</td><td class="example">Rhinoplasty</td></tr>
+        <tr><td class="term">-plegia</td><td class="meaning">paralysis</td><td class="example">Hemiplegia, Paraplegia</td></tr>
+        <tr><td class="term">-pnea</td><td class="meaning">breathing</td><td class="example">Apnea, Dyspnea</td></tr>
+        <tr><td class="term">-rrhage / -rrhagia</td><td class="meaning">bursting forth, excessive flow</td><td class="example">Hemorrhage</td></tr>
+        <tr><td class="term">-scopy</td><td class="meaning">visual examination</td><td class="example">Endoscopy</td></tr>
+        <tr><td class="term">-stomy</td><td class="meaning">surgical opening</td><td class="example">Tracheostomy</td></tr>
+        <tr><td class="term">-tomy</td><td class="meaning">incision, cutting</td><td class="example">Cricothyrotomy</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div><!-- /grid-2 -->
+
+<!-- ═══════════════════════════════════════════════════════ ROOTS / COMBINING FORMS -->
+<div class="section-title teal">Roots &amp; Combining Forms — Body Systems &amp; Structures</div>
+
+<div class="grid-3">
+
+  <!-- Cardiovascular/Respiratory -->
+  <div class="card no-break">
+    <table>
+      <thead><tr><th colspan="2">Cardiovascular &amp; Respiratory</th></tr></thead>
+      <tbody>
+        <tr><td class="term">angi/o</td><td class="example">vessel → Angioplasty</td></tr>
+        <tr><td class="term">aort/o</td><td class="example">aorta → Aortic</td></tr>
+        <tr><td class="term">arteri/o</td><td class="example">artery → Arteriole</td></tr>
+        <tr><td class="term">card/o, cardi/o</td><td class="example">heart → Cardiomegaly</td></tr>
+        <tr><td class="term">hem/o, hemat/o</td><td class="example">blood → Hemothorax</td></tr>
+        <tr><td class="term">phleb/o, ven/o</td><td class="example">vein → Phlebitis</td></tr>
+        <tr><td class="term">bronch/o</td><td class="example">bronchus → Bronchitis</td></tr>
+        <tr><td class="term">laryng/o</td><td class="example">larynx → Laryngoscope</td></tr>
+        <tr><td class="term">nas/o, rhin/o</td><td class="example">nose → Nasopharynx</td></tr>
+        <tr><td class="term">pharyng/o</td><td class="example">pharynx → Pharyngitis</td></tr>
+        <tr><td class="term">pleur/o</td><td class="example">pleura → Pleuritis</td></tr>
+        <tr><td class="term">pneum/o, pulm/o</td><td class="example">lung → Pneumothorax</td></tr>
+        <tr><td class="term">trache/o</td><td class="example">trachea → Tracheostomy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Neuro/Musculoskeletal -->
+  <div class="card no-break">
+    <table>
+      <thead><tr><th colspan="2">Neuro &amp; Musculoskeletal</th></tr></thead>
+      <tbody>
+        <tr><td class="term">cephal/o</td><td class="example">head → Cephalic</td></tr>
+        <tr><td class="term">cerebr/o</td><td class="example">cerebrum → Cerebrovascular</td></tr>
+        <tr><td class="term">encephal/o</td><td class="example">brain → Encephalitis</td></tr>
+        <tr><td class="term">mening/o</td><td class="example">meninges → Meningitis</td></tr>
+        <tr><td class="term">my/o, muscul/o</td><td class="example">muscle → Myocardial</td></tr>
+        <tr><td class="term">neur/o</td><td class="example">nerve → Neuropathy</td></tr>
+        <tr><td class="term">oste/o</td><td class="example">bone → Osteoporosis</td></tr>
+        <tr><td class="term">arthr/o</td><td class="example">joint → Arthritis</td></tr>
+        <tr><td class="term">cost/o</td><td class="example">rib → Intercostal</td></tr>
+        <tr><td class="term">vertebr/o, spin/o</td><td class="example">spine → Vertebral</td></tr>
+        <tr><td class="term">stern/o</td><td class="example">sternum → Sternal</td></tr>
+        <tr><td class="term">ten/o, tendin/o</td><td class="example">tendon → Tendinitis</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GI / GU / Integumentary -->
+  <div class="card no-break">
+    <table>
+      <thead><tr><th colspan="2">GI, GU &amp; Integumentary</th></tr></thead>
+      <tbody>
+        <tr><td class="term">abdomin/o, lapar/o</td><td class="example">abdomen → Laparotomy</td></tr>
+        <tr><td class="term">append/o</td><td class="example">appendix → Appendicitis</td></tr>
+        <tr><td class="term">enter/o</td><td class="example">intestine → Gastroenteritis</td></tr>
+        <tr><td class="term">gastr/o</td><td class="example">stomach → Gastritis</td></tr>
+        <tr><td class="term">hepat/o</td><td class="example">liver → Hepatitis</td></tr>
+        <tr><td class="term">col/o</td><td class="example">colon → Colostomy</td></tr>
+        <tr><td class="term">nephr/o, ren/o</td><td class="example">kidney → Nephritis</td></tr>
+        <tr><td class="term">ur/o, urin/o</td><td class="example">urine → Urinary</td></tr>
+        <tr><td class="term">cyst/o</td><td class="example">bladder → Cystitis</td></tr>
+        <tr><td class="term">cutane/o, derm/o</td><td class="example">skin → Subcutaneous</td></tr>
+        <tr><td class="term">ocul/o, ophthalm/o</td><td class="example">eye → Ocular</td></tr>
+        <tr><td class="term">ot/o</td><td class="example">ear → Otitis</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div><!-- /grid-3 -->
+
+<!-- ═══════════════════════════════════════════════════════ EMS-CRITICAL TERMS -->
+<div class="section-title red">EMS-Critical Terms — Know These Cold</div>
+
+<div class="grid-2 no-break">
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td class="term">Airway Patency</td><td class="example">Airway is open and unobstructed</td></tr>
+      <tr><td class="term">Apnea</td><td class="example">Absence of breathing</td></tr>
+      <tr><td class="term">Agonal respirations</td><td class="example">Gasping, irregular breaths near death; not adequate breathing</td></tr>
+      <tr><td class="term">Bradypnea</td><td class="example">Abnormally slow respiratory rate (&lt;12 breaths/min adult)</td></tr>
+      <tr><td class="term">Tachypnea</td><td class="example">Abnormally rapid respiratory rate (&gt;20 breaths/min adult)</td></tr>
+      <tr><td class="term">Dyspnea</td><td class="example">Difficulty breathing, shortness of breath</td></tr>
+      <tr><td class="term">Cyanosis</td><td class="example">Bluish discoloration of skin/lips due to hypoxia</td></tr>
+      <tr><td class="term">Hypoxia</td><td class="example">Insufficient oxygen to tissues</td></tr>
+      <tr><td class="term">Hypercapnia</td><td class="example">Elevated CO₂ in the blood</td></tr>
+      <tr><td class="term">Hyperventilation</td><td class="example">Breathing too fast/deep; excess CO₂ expelled</td></tr>
+      <tr><td class="term">Hypoventilation</td><td class="example">Breathing too slow/shallow; CO₂ retained</td></tr>
+      <tr><td class="term">Anaphylaxis</td><td class="example">Severe, life-threatening allergic reaction</td></tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td class="term">Perfusion</td><td class="example">Delivery of oxygenated blood to tissues</td></tr>
+      <tr><td class="term">Hypoperfusion (Shock)</td><td class="example">Inadequate perfusion of tissues; insufficient O₂ delivery</td></tr>
+      <tr><td class="term">Hemorrhage</td><td class="example">Excessive bleeding</td></tr>
+      <tr><td class="term">Hemostasis</td><td class="example">Stoppage of bleeding</td></tr>
+      <tr><td class="term">Tachycardia</td><td class="example">Heart rate &gt;100 bpm</td></tr>
+      <tr><td class="term">Bradycardia</td><td class="example">Heart rate &lt;60 bpm</td></tr>
+      <tr><td class="term">Diaphoresis</td><td class="example">Profuse sweating; sign of shock or cardiac event</td></tr>
+      <tr><td class="term">Altered LOC / AMS</td><td class="example">Change from baseline mental status</td></tr>
+      <tr><td class="term">Syncope</td><td class="example">Transient loss of consciousness; fainting</td></tr>
+      <tr><td class="term">Seizure</td><td class="example">Abnormal electrical discharge in brain; may cause convulsions</td></tr>
+      <tr><td class="term">Stroke (CVA)</td><td class="example">Cerebrovascular accident; brain tissue death from disrupted blood flow</td></tr>
+      <tr><td class="term">Myocardial Infarction</td><td class="example">Heart attack; death of heart muscle from blocked coronary artery</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ COMMON ABBREVIATIONS -->
+<div class="section-title purple">Common EMS Abbreviations</div>
+
+<div class="abbrev-grid">
+  <div class="abbrev-item"><span class="abbrev-code">ALS</span><span class="abbrev-def">Advanced Life Support</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">AMS</span><span class="abbrev-def">Altered Mental Status</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">AVPU</span><span class="abbrev-def">Alert, Verbal, Pain, Unresponsive</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">BGL</span><span class="abbrev-def">Blood Glucose Level</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">BLS</span><span class="abbrev-def">Basic Life Support</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">BP</span><span class="abbrev-def">Blood Pressure</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">BVM</span><span class="abbrev-def">Bag-Valve Mask</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">C/C</span><span class="abbrev-def">Chief Complaint</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">CPR</span><span class="abbrev-def">Cardiopulmonary Resuscitation</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">CSM</span><span class="abbrev-def">Circulation, Sensation, Movement</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">CVA</span><span class="abbrev-def">Cerebrovascular Accident (stroke)</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">DNR</span><span class="abbrev-def">Do Not Resuscitate</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">EMS</span><span class="abbrev-def">Emergency Medical Services</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">EMR</span><span class="abbrev-def">Emergency Medical Responder</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">GCS</span><span class="abbrev-def">Glasgow Coma Scale</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">HTN</span><span class="abbrev-def">Hypertension</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">Hx</span><span class="abbrev-def">History</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">LOC</span><span class="abbrev-def">Level of Consciousness</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">MI</span><span class="abbrev-def">Myocardial Infarction</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">MOI</span><span class="abbrev-def">Mechanism of Injury</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">NKA</span><span class="abbrev-def">No Known Allergies</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">NPA</span><span class="abbrev-def">Nasopharyngeal Airway</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">NOI</span><span class="abbrev-def">Nature of Illness</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">OPA</span><span class="abbrev-def">Oropharyngeal Airway</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">PCR</span><span class="abbrev-def">Patient Care Report</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">PPE</span><span class="abbrev-def">Personal Protective Equipment</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">Px</span><span class="abbrev-def">Patient</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">Rx</span><span class="abbrev-def">Medication / Prescription</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">S/S</span><span class="abbrev-def">Signs and Symptoms</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">SpO₂</span><span class="abbrev-def">Oxygen Saturation (pulse ox)</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">TIA</span><span class="abbrev-def">Transient Ischemic Attack</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">Tx</span><span class="abbrev-def">Treatment / Transfer</span></div>
+  <div class="abbrev-item"><span class="abbrev-code">V/S</span><span class="abbrev-def">Vital Signs</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ CALLOUTS -->
+<div class="grid-2">
+  <div class="callout memory">
+    <strong>Memory Tip — Suffixes:</strong> "-itis" = inflammation (think "it is on fire"), "-oma" = tumor/mass, "-ology" = study of, "-ectomy" = cut it out, "-stomy" = open it up, "-tomy" = cut into it.
+  </div>
+  <div class="callout tip">
+    <strong>Decoding Unfamiliar Terms:</strong> Start at the end — identify the suffix first (tells you the type of condition), then the root (tells you the body part), then the prefix (tells you the qualifier). You can decode most terms you've never seen before.
+  </div>
+</div>
+
+<div class="callout warn">
+  <strong>Watch for Confusable Pairs:</strong> &nbsp;
+  <strong>Hyper-</strong> (too much) vs. <strong>Hypo-</strong> (too little) &nbsp;|&nbsp;
+  <strong>Brady-</strong> (slow) vs. <strong>Tachy-</strong> (fast) &nbsp;|&nbsp;
+  <strong>Apnea</strong> (no breath) vs. <strong>Dyspnea</strong> (difficult breathing) &nbsp;|&nbsp;
+  <strong>Supine</strong> (face up) vs. <strong>Prone</strong> (face down) &nbsp;|&nbsp;
+  <strong>Proximal</strong> (near trunk) vs. <strong>Distal</strong> (far from trunk)
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ FOOTER -->
+<div class="footer">
+  <span>EMR Initial Education — Medical Terminology Reference &nbsp;|&nbsp; AAOS EMR 7th Edition &nbsp;|&nbsp; NHTSA 2021 National EMS Education Standards</span>
+  <span>Georgia OEMST &nbsp;|&nbsp; For instructional use only</span>
+</div>
+
+</div><!-- /page -->
+</body>
+</html>
