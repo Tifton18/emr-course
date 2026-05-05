@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Jeopardy — TFD Recruit Class 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --navy: #0D1B3E;
+  --navy-mid: #162550;
+  --navy-light: #1E3370;
+  --gold: #F5C518;
+  --gold-dark: #C9A400;
+  --gold-glow: rgba(245,197,24,0.35);
+  --red: #C0272D;
+  --red-dark: #8B1A1E;
+  --red-glow: rgba(192,39,45,0.4);
+  --green: #10B981;
+  --green-glow: rgba(16,185,129,0.3);
+  --white: #FFFFFF;
+  --cell-bg: #1a2d5e;
+  --cell-hover: #243d7a;
+  --cell-used: #0a1020;
+  --muted: rgba(255,255,255,0.45);
+  --glow: 0 0 24px rgba(245,197,24,0.35);
+  --r: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Barlow', sans-serif; background: var(--navy); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+body::before { content:''; position:fixed; inset:0; background-image: radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.15) 0%,transparent 100%), radial-gradient(1px 1px at 60% 70%,rgba(255,255,255,.1) 0%,transparent 100%), radial-gradient(1px 1px at 80% 20%,rgba(255,255,255,.12) 0%,transparent 100%); pointer-events:none; z-index:0; }
+.hidden { display: none !important; }
+.screen { position: relative; z-index: 10; }
+
+/* ── SHARED ── */
+.center-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.card { background:rgba(255,255,255,0.04); border:2px solid rgba(255,255,255,0.1); border-radius:18px; padding:36px 28px; max-width:460px; width:100%; }
+.logo { font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--gold); letter-spacing:3px; text-shadow:0 0 30px var(--gold-glow); line-height:1; }
+.sub { font-size:11px; letter-spacing:2px; color:var(--muted); margin-bottom:28px; text-transform:uppercase; }
+.lbl { font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; display:block; margin-bottom:8px; }
+.inp { width:100%; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:8px; padding:11px 14px; color:white; font-family:'Barlow',sans-serif; font-size:16px; font-weight:600; outline:none; transition:border-color .15s; }
+.inp:focus { border-color:var(--gold); }
+.inp::placeholder { color:rgba(255,255,255,.25); }
+.btn { padding:13px 20px; border-radius:10px; border:none; cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1.5px; transition:all .15s; width:100%; margin-top:10px; }
+.btn.red { background:var(--red); color:white; }
+.btn.red:hover { background:var(--red-dark); box-shadow:0 4px 16px var(--red-glow); }
+.btn.ghost { background:rgba(255,255,255,0.07); color:white; border:1.5px solid rgba(255,255,255,.15); }
+.err { color:#FCA5A5; font-size:13px; margin-top:6px; display:none; }
+.sec { margin-bottom:16px; }
+
+/* ── ROLE SCREEN ── */
+.role-btns { display:flex; flex-direction:column; gap:12px; }
+.role-btn { padding:18px; border-radius:12px; border:none; cursor:pointer; font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; transition:all .15s; }
+.role-btn.host { background:linear-gradient(135deg,var(--red),var(--red-dark)); color:var(--gold); box-shadow:0 4px 20px var(--red-glow); }
+.role-btn.team { background:var(--navy-light); color:white; border:2px solid rgba(255,255,255,.15); }
+.role-btn.team:hover { border-color:var(--gold); color:var(--gold); }
+.role-desc { font-family:'Barlow',sans-serif; font-size:13px; opacity:.65; margin-top:3px; font-weight:400; }
+
+/* ══════════════════════════════
+   HOST — BOARD VIEW
+══════════════════════════════ */
+.game-header { position:relative; z-index:10; text-align:center; padding:14px 24px 8px; border-bottom:2px solid var(--gold-dark); }
+.game-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(26px,5vw,50px); letter-spacing:4px; color:var(--gold); text-shadow:0 0 40px var(--gold-glow),0 2px 4px rgba(0,0,0,.8); line-height:1; }
+.game-subtitle { font-family:'Barlow Condensed',sans-serif; font-size:clamp(10px,1.6vw,14px); letter-spacing:3px; color:var(--muted); margin-top:3px; text-transform:uppercase; }
+
+/* Scoreboard */
+.scoreboard { position:relative; z-index:10; display:flex; justify-content:center; gap:clamp(6px,1.5vw,20px); padding:10px 20px; flex-wrap:wrap; align-items:center; }
+.team-score { background:var(--navy-light); border:2px solid rgba(245,197,24,.25); border-radius:10px; padding:8px 14px; min-width:110px; text-align:center; position:relative; transition:border-color .2s,box-shadow .2s; }
+.team-score.buzzing { border-color:var(--gold); box-shadow:var(--glow); animation:buzz-pulse 0.6s ease-in-out; }
+@keyframes buzz-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+.delete-team-btn { position:absolute; top:3px; right:3px; width:16px; height:16px; border-radius:50%; border:none; background:transparent; color:rgba(255,255,255,.2); font-size:11px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; padding:0; }
+.delete-team-btn:hover { background:var(--red); color:white; }
+.team-name-input { background:transparent; border:none; outline:none; font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:rgba(255,255,255,.7); text-transform:uppercase; text-align:center; width:100%; }
+.team-pts { font-family:'Bebas Neue',sans-serif; font-size:clamp(24px,3.5vw,34px); color:var(--gold); line-height:1; display:block; }
+.score-btns { display:flex; gap:4px; justify-content:center; margin-top:4px; }
+.score-btn { width:26px; height:26px; border-radius:5px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); color:white; font-size:13px; font-weight:700; cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; }
+.score-btn.plus { color:#6EE7B7; }
+.score-btn.minus { color:#FCA5A5; }
+.score-btn:hover { background:rgba(255,255,255,.15); }
+.add-team-btn { background:rgba(255,255,255,.06); border:2px dashed rgba(255,255,255,.2); border-radius:10px; padding:8px 14px; min-width:60px; color:rgba(255,255,255,.4); font-size:20px; cursor:pointer; transition:all .2s; align-self:center; }
+.add-team-btn:hover { border-color:var(--gold); color:var(--gold); }
+
+/* Room code pill */
+.room-pill { background:rgba(0,0,0,.3); border:2px solid var(--gold-dark); border-radius:8px; padding:6px 14px; text-align:center; cursor:pointer; transition:border-color .2s; }
+.room-pill:hover { border-color:var(--gold); }
+.room-pill-lbl { font-size:8px; letter-spacing:2px; color:var(--muted); display:block; }
+.room-pill-val { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--gold); letter-spacing:3px; line-height:1; }
+
+/* Board */
+.board-wrap { position:relative; z-index:10; padding:8px 14px 20px; max-width:1200px; margin:0 auto; }
+.board { display:grid; grid-template-columns:repeat(6,1fr); gap:clamp(3px,0.8vw,8px); }
+.cat-header { background:linear-gradient(180deg,var(--navy-light) 0%,var(--navy-mid) 100%); border:2px solid var(--gold-dark); border-radius:7px; padding:clamp(6px,1.2vw,14px) 6px; text-align:center; font-family:'Barlow Condensed',sans-serif; font-size:clamp(10px,1.4vw,17px); font-weight:800; letter-spacing:0.5px; text-transform:uppercase; color:var(--gold); min-height:clamp(44px,7vw,72px); display:flex; align-items:center; justify-content:center; line-height:1.2; }
+.q-cell { background:var(--cell-bg); border:2px solid rgba(245,197,24,.2); border-radius:7px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; min-height:clamp(42px,7vw,82px); position:relative; overflow:hidden; }
+.q-cell::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.04) 0%,transparent 60%); pointer-events:none; }
+.q-cell:hover:not(.used) { background:var(--cell-hover); border-color:var(--gold); box-shadow:var(--glow); transform:scale(1.03); }
+.q-cell.used { background:var(--cell-used); border-color:rgba(255,255,255,.04); cursor:default; opacity:.35; }
+.q-cell .pts { font-family:'Bebas Neue',sans-serif; font-size:clamp(18px,3vw,40px); color:var(--gold); text-shadow:0 0 20px rgba(245,197,24,.4); letter-spacing:1px; }
+.q-cell.used .pts { color:rgba(255,255,255,.15); text-shadow:none; }
+
+/* Question Modal */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:100; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(6px); }
+.modal-overlay.show { display:flex; }
+.modal { background:linear-gradient(160deg,var(--navy-mid) 0%,var(--navy) 100%); border:2px solid var(--gold-dark); border-radius:16px; max-width:680px; width:100%; box-shadow:0 24px 80px rgba(0,0,0,.7),var(--glow); overflow:hidden; animation:mIn .3s cubic-bezier(.34,1.56,.64,1); }
+@keyframes mIn { from{transform:scale(.85) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+.modal-top { background:linear-gradient(90deg,var(--red-dark),var(--red)); padding:12px 22px; display:flex; align-items:center; justify-content:space-between; }
+.modal-cat { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; opacity:.85; }
+.modal-pts-badge { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); letter-spacing:2px; }
+.modal-body { padding:28px 26px 22px; }
+.modal-question { font-family:'Barlow Condensed',sans-serif; font-size:clamp(17px,2.8vw,26px); font-weight:600; line-height:1.4; text-align:center; margin-bottom:22px; }
+.answer-section { display:none; }
+.answer-section.show { display:block; }
+.answer-box { background:rgba(245,197,24,.08); border:2px solid var(--gold-dark); border-radius:10px; padding:14px 18px; font-size:15px; font-weight:600; color:var(--gold); text-align:center; margin-bottom:14px; line-height:1.5; }
+.modal-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:10px; }
+.modal-btn { padding:10px 20px; border-radius:8px; border:none; font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; letter-spacing:.5px; cursor:pointer; transition:all .15s; }
+.btn-reveal { background:var(--gold); color:var(--navy); }
+.btn-reveal:hover { background:#FFD84D; }
+.btn-close { background:rgba(255,255,255,.1); color:white; border:1px solid rgba(255,255,255,.2); }
+.btn-close:hover { background:rgba(255,255,255,.2); }
+.team-award-row { display:none; gap:7px; flex-wrap:wrap; justify-content:center; }
+.team-award-row.show { display:flex; }
+.team-award-btn { padding:8px 14px; border-radius:7px; border:2px solid rgba(245,197,24,.4); background:rgba(245,197,24,.08); color:var(--gold); font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; }
+.team-award-btn:hover { background:rgba(245,197,24,.2); border-color:var(--gold); }
+
+/* Buzz order display in modal */
+.buzz-order { margin-bottom:14px; }
+.buzz-order-title { font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; display:block; text-align:center; }
+.buzz-list { display:flex; flex-direction:column; gap:5px; }
+.buzz-item { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.05); border-radius:7px; padding:7px 12px; border:1px solid rgba(255,255,255,.08); }
+.buzz-rank { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--gold); width:22px; flex-shrink:0; }
+.buzz-rank.first { color:var(--gold); }
+.buzz-rank.second { color:rgba(192,192,192,.8); }
+.buzz-rank.third { color:rgba(205,127,50,.8); }
+.buzz-name { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; flex:1; }
+.buzz-time { font-size:11px; color:var(--muted); font-family:monospace; }
+.no-buzzes { text-align:center; color:var(--muted); font-size:13px; padding:10px; }
+
+/* Buzz flash on scoreboard team card */
+.buzz-flash { position:absolute; top:0; left:0; right:0; bottom:0; border-radius:8px; pointer-events:none; animation:flash .4s ease-out forwards; }
+@keyframes flash { 0%{background:rgba(245,197,24,.4)} 100%{background:transparent} }
+
+/* Clear buzz btn */
+.clear-buzz-btn { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:7px; color:rgba(255,255,255,.6); font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; padding:7px 14px; cursor:pointer; transition:all .15s; width:100%; margin-bottom:10px; }
+.clear-buzz-btn:hover { background:rgba(255,255,255,.15); color:white; }
+
+/* Final overlay */
+.final-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:200; align-items:center; justify-content:center; flex-direction:column; gap:22px; padding:40px; }
+.final-overlay.show { display:flex; }
+.final-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(34px,7vw,66px); color:var(--gold); letter-spacing:4px; text-shadow:0 0 60px var(--gold-glow); text-align:center; }
+.final-scores { display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
+.final-score-card { background:var(--navy-light); border:3px solid var(--gold-dark); border-radius:16px; padding:22px 28px; text-align:center; min-width:130px; }
+.final-score-card.winner { border-color:var(--gold); box-shadow:var(--glow); }
+.final-team-name { font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,.7); text-transform:uppercase; }
+.final-pts { font-family:'Bebas Neue',sans-serif; font-size:52px; color:var(--gold); line-height:1; }
+.winner-crown { font-size:28px; margin-bottom:4px; }
+.btn-play-again { padding:13px 32px; background:var(--red); color:white; border:none; border-radius:10px; font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; cursor:pointer; }
+.btn-play-again:hover { background:var(--red-dark); }
+
+/* ══════════════════════════════
+   TEAM PHONE — BUZZER VIEW
+══════════════════════════════ */
+#teamJoin { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; position:relative; z-index:10; }
+#teamBuzzer { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:28px 20px; position:relative; z-index:10; }
+
+.buzzer-header { text-align:center; }
+.buzzer-team-name { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--gold); letter-spacing:2px; line-height:1; }
+.buzzer-room { font-size:12px; letter-spacing:2px; color:var(--muted); margin-top:2px; }
+.buzzer-score { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--gold); }
+
+.buzzer-status { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; letter-spacing:1px; color:var(--muted); text-align:center; min-height:24px; }
+
+/* THE BIG BUTTON */
+.buzz-btn-wrap { position:relative; display:flex; align-items:center; justify-content:center; }
+.buzz-btn {
+  width: min(72vw, 280px);
+  height: min(72vw, 280px);
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 8vw, 48px);
+  letter-spacing: 3px;
+  color: white;
+  background: radial-gradient(circle at 35% 35%, #E8333A, var(--red-dark));
+  box-shadow: 0 8px 0 #5A0A0D, 0 10px 30px rgba(0,0,0,.5), inset 0 2px 4px rgba(255,255,255,.15);
+  transition: transform .1s, box-shadow .1s;
+  position: relative;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.buzz-btn:active, .buzz-btn.pressed {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 #5A0A0D, 0 4px 14px rgba(0,0,0,.4), inset 0 2px 4px rgba(255,255,255,.1);
+}
+.buzz-btn.buzzing-state {
+  background: radial-gradient(circle at 35% 35%, #34D399, #059669);
+  box-shadow: 0 8px 0 #064E3B, 0 10px 30px var(--green-glow), 0 0 60px var(--green-glow);
+  animation: buzz-glow .4s ease-out;
+}
+@keyframes buzz-glow { 0%{box-shadow:0 8px 0 #064E3B,0 0 80px rgba(16,185,129,.8)} 100%{box-shadow:0 8px 0 #064E3B,0 10px 30px var(--green-glow)} }
+.buzz-btn.disabled-state {
+  background: radial-gradient(circle at 35% 35%, #374151, #1F2937);
+  box-shadow: 0 8px 0 #111827, 0 6px 16px rgba(0,0,0,.4);
+  cursor: not-allowed;
+  opacity: .7;
+}
+.buzz-btn-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 3px solid rgba(245,197,24,.2);
+  pointer-events: none;
+}
+.buzz-btn.buzzing-state + .buzz-btn-ring { border-color:rgba(16,185,129,.5); animation:ring-pulse .8s ease-in-out infinite; }
+@keyframes ring-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.06);opacity:.5} }
+
+.buzz-rank-display { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; color:var(--muted); text-align:center; min-height:26px; }
+.buzz-rank-display.first { color:var(--gold); }
+
+.team-scoreboard { width:100%; max-width:320px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:12px; overflow:hidden; }
+.ts-header { background:rgba(255,255,255,.05); padding:6px 14px; font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+.ts-row { display:flex; align-items:center; padding:8px 14px; gap:10px; border-bottom:1px solid rgba(255,255,255,.04); }
+.ts-row:last-child { border-bottom:none; }
+.ts-name { flex:1; font-size:14px; font-weight:600; }
+.ts-pts { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--gold); }
+
+/* Waiting pulse */
+.pulse-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green); animation:pd 1s ease-in-out infinite; margin-right:6px; }
+@keyframes pd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+
+@media(max-width:600px) {
+  .board { grid-template-columns:repeat(3,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ ROLE SELECT ══ -->
+<div id="roleScreen" class="screen">
+  <div class="center-wrap">
+    <div class="card">
+      <div class="logo">EMR JEOPARDY</div>
+      <div class="sub">TFD · Recruit Class 2026</div>
+      <div class="role-btns">
+        <button class="role-btn host" onclick="showHostSetup()">
+          🎛 HOST / INSTRUCTOR
+          <div class="role-desc">Run the board on the projector</div>
+        </button>
+        <button class="role-btn team" onclick="show('teamJoin')">
+          📱 JOIN AS TEAM
+          <div class="role-desc">Enter room code · get your buzzer</div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOST SETUP ══ -->
+<div id="hostSetup" class="screen hidden">
+  <div class="center-wrap">
+    <div class="card">
+      <div class="logo" style="font-size:30px;">🎛 HOST SETUP</div>
+      <div class="sub">Jeopardy Game Room</div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">A room code will be generated. Teams join on their phones and use a buzzer. You control the board on the projector.</p>
+      <button class="btn red" onclick="createRoom()">CREATE ROOM →</button>
+      <button class="btn ghost" onclick="show('roleScreen')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOST BOARD ══ -->
+<div id="hostBoard" class="screen hidden">
+  <header class="game-header">
+    <div class="game-title">EMR JEOPARDY</div>
+    <div class="game-subtitle">Tifton Fire Department · Recruit Class 2026 · Chapters 1–10 & 14</div>
+  </header>
+
+  <div class="scoreboard" id="scoreboard">
+    <div class="room-pill" id="roomPill" title="Room code — teams join at this URL">
+      <span class="room-pill-lbl">ROOM CODE</span>
+      <div class="room-pill-val" id="dispCode">----</div>
+    </div>
+    <!-- teams injected here -->
+    <button class="add-team-btn" id="addTeamBtn" onclick="addTeam()">+</button>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+  </div>
+
+  <!-- Question Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-top">
+        <span class="modal-cat" id="modalCat"></span>
+        <span class="modal-pts-badge" id="modalPts"></span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-question" id="modalQ"></div>
+
+        <!-- Buzz order -->
+        <div class="buzz-order" id="buzzOrder">
+          <span class="buzz-order-title"><span class="pulse-dot"></span>Waiting for buzzers…</span>
+          <div class="buzz-list" id="buzzList"></div>
+        </div>
+
+        <button class="clear-buzz-btn" onclick="clearBuzzes()">↺ Clear All Buzzes</button>
+
+        <div class="answer-section" id="answerSection">
+          <div class="answer-box" id="answerBox"></div>
+        </div>
+        <div class="modal-actions" id="modalActions">
+          <button class="modal-btn btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
+          <button class="modal-btn btn-close" onclick="closeModal(true)">Mark Used & Close</button>
+        </div>
+        <div class="team-award-row" id="teamAwardRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final Scores -->
+  <div class="final-overlay" id="finalOverlay">
+    <div class="final-title">🏆 FINAL SCORES</div>
+    <div class="final-scores" id="finalScores"></div>
+    <button class="btn-play-again" onclick="resetGame()">PLAY AGAIN</button>
+  </div>
+</div>
+
+<!-- ══ TEAM JOIN ══ -->
+<div id="teamJoin" class="screen hidden">
+  <div class="center-wrap">
+    <div class="card">
+      <div class="logo" style="font-size:32px;">📱 JOIN GAME</div>
+      <div class="sub">TFD EMR Jeopardy</div>
+      <div class="sec">
+        <span class="lbl">Room Code</span>
+        <input class="inp" id="jCode" placeholder="e.g. TFD4K2" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-family:monospace;font-size:20px;">
+      </div>
+      <div class="sec">
+        <span class="lbl">Team Name</span>
+        <input class="inp" id="jTeamName" placeholder="e.g. Engine 1" maxlength="16">
+      </div>
+      <div class="err" id="jErr"></div>
+      <button class="btn red" onclick="joinRoom()">JOIN →</button>
+      <button class="btn ghost" onclick="show('roleScreen')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEAM BUZZER ══ -->
+<div id="teamBuzzer" class="screen hidden">
+  <div class="buzzer-header">
+    <div class="buzzer-team-name" id="bzTeamName"></div>
+    <div class="buzzer-room" id="bzRoom"></div>
+  </div>
+
+  <div class="buzzer-score" id="bzScore">0 pts</div>
+
+  <div class="buzzer-status" id="bzStatus"><span class="pulse-dot"></span>Waiting for question…</div>
+
+  <div class="buzz-btn-wrap">
+    <button class="buzz-btn disabled-state" id="buzzBtn" onclick="doBuzz()">BUZZ</button>
+    <div class="buzz-btn-ring"></div>
+  </div>
+
+  <div class="buzz-rank-display" id="bzRankDisplay"></div>
+
+  <div class="team-scoreboard">
+    <div class="ts-header">Live Scores</div>
+    <div id="tsRows"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// FIREBASE
+// ══════════════════════════════════════
+firebase.initializeApp({
+  apiKey: "AIzaSyExample-ReplaceWithYourActualKey",
+  authDomain: "class-attendance-72cd9.firebaseapp.com",
+  projectId: "class-attendance-72cd9",
+  storageBucket: "class-attendance-72cd9.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000000000000:web:000000000000000000"
+});
+const db = firebase.firestore();
+
+// ══════════════════════════════════════
+// QUESTION DATA
+// ══════════════════════════════════════
+const categories = [
+  { name:"EMS Basics", color:"#C0272D", questions:[
+    {q:"This type of consent applies when an unconscious patient cannot speak for themselves.",a:"Implied Consent"},
+    {q:"The four elements that must ALL be present to prove negligence against an EMR.",a:"Duty, Breach of Duty, Causation, Damages"},
+    {q:"Leaving a patient without transferring care to an equal or higher-level provider.",a:"Abandonment"},
+    {q:"This document allows an EMR to honor a patient's end-of-life wishes and withhold resuscitation.",a:"DNR (Do Not Resuscitate) Order"},
+    {q:"The legal boundary defining what an EMR is permitted to do based on training and certification.",a:"Scope of Practice"},
+  ]},
+  { name:"Anatomy & Assessment", color:"#1C2B4A", questions:[
+    {q:"RLQ abdominal pain in a young adult should be considered this condition until proven otherwise.",a:"Appendicitis"},
+    {q:"Kehr's sign — referred left shoulder pain — suggests injury to this organ.",a:"Spleen (splenic rupture)"},
+    {q:"This late sign of basilar skull fracture presents as bruising behind the ear.",a:"Battle's Sign"},
+    {q:"A femur fracture can conceal this much blood loss internally.",a:"500 mL–1.5 liters"},
+    {q:"Mnemonic: Signs/Symptoms, Allergies, Medications, Pertinent history, Last intake, Events.",a:"SAMPLE"},
+  ]},
+  { name:"Airway & O₂", color:"#0D6E3C", questions:[
+    {q:"This airway adjunct is CONTRAINDICATED in suspected basilar skull fracture.",a:"Nasopharyngeal Airway (NPA)"},
+    {q:"The OPA is sized by measuring from this point to this point.",a:"Corner of the mouth to the earlobe"},
+    {q:"A non-rebreather mask at 15 LPM delivers approximately this percentage of oxygen.",a:"90–95% FiO₂"},
+    {q:"This airway sound indicates partial upper airway obstruction — typically from the tongue.",a:"Snoring"},
+    {q:"When using a BVM, each breath should be delivered over this duration.",a:"1 second"},
+  ]},
+  { name:"Bleeding & Shock", color:"#7A2D00", questions:[
+    {q:"This is the FIRST step in the hemorrhage control hierarchy for extremity bleeding.",a:"Direct Pressure"},
+    {q:"Neurogenic shock differs from other shock types because it causes this unusual vital sign.",a:"Bradycardia (slow heart rate)"},
+    {q:"A tourniquet is applied this distance above the wound.",a:"2–3 inches proximal to the wound"},
+    {q:"This is the LATE sign of shock indicating the body's compensatory mechanisms are failing.",a:"Hypotension (low blood pressure)"},
+    {q:"Wound packing with hemostatic gauze requires sustained direct pressure for this minimum.",a:"3 minutes"},
+  ]},
+  { name:"Cardiac & CPR", color:"#5B21B6", questions:[
+    {q:"AHA 2020 guidelines specify this compression rate for adult, child, and infant CPR.",a:"100–120 compressions per minute"},
+    {q:"After delivering an AED shock, this is your IMMEDIATE next action.",a:"Resume CPR — compressions first, no pulse check"},
+    {q:"Mnemonic for reversible causes of cardiac arrest — covers hypovolemia, hypoxia, and more.",a:"Hs and Ts"},
+    {q:"This rhythm is chaotic electrical activity with no effective cardiac contraction.",a:"Ventricular Fibrillation (VF)"},
+    {q:"Two-rescuer CPR on an infant uses this compression-to-ventilation ratio.",a:"15:2"},
+  ]},
+  { name:"Burns & Soft Tissue", color:"#B45309", questions:[
+    {q:"Rule of Nines: burns to the entire right arm and anterior chest equal this % TBSA.",a:"27% (9% arm + 18% anterior trunk)"},
+    {q:"This burn depth destroys all skin layers, may appear dry or leathery, and is paradoxically less painful.",a:"Full Thickness (Third-Degree) Burn"},
+    {q:"An evisceration should be covered with this type of dressing.",a:"Moist sterile dressing — do NOT replace organs"},
+    {q:"For a chemical burn, after brushing off dry chemical, treatment begins with this.",a:"Copious water irrigation (flush)"},
+    {q:"An impaled object in the field should NEVER be removed — instead it is managed this way.",a:"Stabilize in place with bulky dressings"},
+  ]},
+];
+const pointValues = [200, 400, 600, 800, 1000];
+
+// ══════════════════════════════════════
+// SHARED STATE
+// ══════════════════════════════════════
+const SCREENS = ['roleScreen','hostSetup','hostBoard','teamJoin','teamBuzzer'];
+function show(id) { SCREENS.forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+function showHostSetup() { show('hostSetup'); }
+
+let roomCode = null, roomRef = null, teamRef = null, teamName = null;
+let unsubs = [], teams = {}, teamIdCounter = 0;
+let usedCells = {}, currentPts = 0, currentCell = null;
+let isHost = false;
+
+// ══════════════════════════════════════
+// HOST — CREATE ROOM
+// ══════════════════════════════════════
+function genCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = 'TFD';
+  for (let i = 0; i < 3; i++) r += c[Math.floor(Math.random() * c.length)];
+  return r;
+}
+
+async function createRoom() {
+  isHost = true;
+  roomCode = genCode();
+  roomRef = db.collection('jeopardyRooms').doc(roomCode);
+  await roomRef.set({ status: 'lobby', buzzes: [], questionOpen: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  document.getElementById('dispCode').textContent = roomCode;
+  show('hostBoard');
+  buildBoard();
+  createTeam('TEAM 1'); createTeam('TEAM 2'); createTeam('TEAM 3');
+  listenHostRoom();
+}
+
+// ══════════════════════════════════════
+// HOST — TEAM MANAGEMENT
+// ══════════════════════════════════════
+function createTeam(name) {
+  const id = `t${teamIdCounter++}`;
+  teams[id] = { name: name || `TEAM ${teamIdCounter}`, score: 0 };
+  renderScoreboard();
+  return id;
+}
+
+function deleteTeam(id) {
+  if (Object.keys(teams).length <= 1) return;
+  delete teams[id];
+  renderScoreboard();
+}
+
+function renderScoreboard() {
+  const sb = document.getElementById('scoreboard');
+  const addBtn = document.getElementById('addTeamBtn');
+  const pill = document.getElementById('roomPill');
+  sb.querySelectorAll('.team-score').forEach(el => el.remove());
+  Object.entries(teams).forEach(([id, team]) => {
+    const div = document.createElement('div');
+    div.className = 'team-score';
+    div.id = `tscore-${id}`;
+    div.innerHTML = `
+      <button class="delete-team-btn" onclick="deleteTeam('${id}')" title="Remove">✕</button>
+      <input class="team-name-input" value="${team.name}" maxlength="14" onchange="teams['${id}'].name=this.value;syncTeamScores()">
+      <span class="team-pts" id="pts-${id}">${team.score}</span>
+      <div class="score-btns">
+        <button class="score-btn minus" onclick="adjustScore('${id}',-currentPts)">−Q</button>
+        <button class="score-btn plus" onclick="adjustScore('${id}',currentPts)">+Q</button>
+      </div>
+    `;
+    sb.insertBefore(div, addBtn);
+  });
+  syncTeamScores();
+}
+
+function adjustScore(id, delta) {
+  if (!teams[id]) return;
+  teams[id].score = Math.max(0, teams[id].score + delta);
+  const el = document.getElementById(`pts-${id}`);
+  if (el) el.textContent = teams[id].score;
+  if (delta > 0) playCorrect();
+  syncTeamScores();
+}
+
+function addTeam() {
+  if (Object.keys(teams).length >= 6) return;
+  createTeam(`TEAM ${Object.keys(teams).length + 1}`);
+}
+
+// Sync team scores to Firebase so team phones can see live scores
+function syncTeamScores() {
+  if (!roomRef) return;
+  const scores = {};
+  Object.entries(teams).forEach(([id, t]) => { scores[id] = { name: t.name, score: t.score }; });
+  roomRef.update({ teamScores: scores }).catch(() => {});
+}
+
+// ══════════════════════════════════════
+// HOST — LISTEN TO ROOM (buzzes)
+// ══════════════════════════════════════
+function listenHostRoom() {
+  const u = roomRef.onSnapshot(snap => {
+    const d = snap.data();
+    if (!d) return;
+    const buzzes = d.buzzes || [];
+    renderBuzzOrder(buzzes);
+    // Flash team card on new buzz
+    if (buzzes.length > 0) {
+      const latest = buzzes[buzzes.length - 1];
+      const card = document.querySelector(`[id^="tscore-"]`);
+      // find by name match
+      Object.entries(teams).forEach(([id, t]) => {
+        if (t.name === latest.team) {
+          const el = document.getElementById(`tscore-${id}`);
+          if (el) {
+            el.classList.remove('buzzing');
+            void el.offsetWidth;
+            el.classList.add('buzzing');
+            setTimeout(() => el.classList.remove('buzzing'), 800);
+          }
+        }
+      });
+    }
+  });
+  unsubs.push(u);
+}
+
+let lastBuzzCount = 0;
+function renderBuzzOrder(buzzes) {
+  const list = document.getElementById('buzzList');
+  const title = document.querySelector('.buzz-order-title');
+  if (!list) return;
+  if (buzzes.length === 0) {
+    title.innerHTML = '<span class="pulse-dot"></span>Waiting for buzzers…';
+    list.innerHTML = '';
+    lastBuzzCount = 0;
+    return;
+  }
+  // Play buzz sound on host side whenever a new buzz arrives
+  if (buzzes.length > lastBuzzCount) playBuzz();
+  lastBuzzCount = buzzes.length;
+  title.innerHTML = `🔔 ${buzzes.length} buzz${buzzes.length !== 1 ? 'es' : ''} received`;
+  const rankClass = ['first', 'second', 'third'];
+  list.innerHTML = buzzes.map((b, i) => `
+    <div class="buzz-item">
+      <span class="buzz-rank ${rankClass[i] || ''}">${i + 1}</span>
+      <span class="buzz-name">${b.team}</span>
+      <span class="buzz-time">${new Date(b.ts).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+    </div>
+  `).join('');
+}
+
+async function clearBuzzes() {
+  playWrong();
+  if (roomRef) await roomRef.update({ buzzes: [] });
+}
+
+// ══════════════════════════════════════
+// HOST — BOARD & MODAL
+// ══════════════════════════════════════
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  categories.forEach(cat => {
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-header';
+    hdr.textContent = cat.name;
+    hdr.style.borderColor = cat.color;
+    board.appendChild(hdr);
+  });
+  pointValues.forEach((pts, ri) => {
+    categories.forEach((cat, ci) => {
+      const cell = document.createElement('div');
+      cell.className = 'q-cell';
+      cell.dataset.col = ci;
+      const key = `${ci}-${ri}`;
+      if (usedCells[key]) cell.classList.add('used');
+      cell.innerHTML = `<span class="pts">${pts}</span>`;
+      cell.onclick = () => openQuestion(ci, ri, pts, cat, cell, key);
+      board.appendChild(cell);
+    });
+  });
+}
+
+function openQuestion(ci, ri, pts, cat, cell, key) {
+  if (usedCells[key]) return;
+  currentPts = pts;
+  currentCell = { cell, key };
+  const q = cat.questions[ri];
+  document.getElementById('modalCat').textContent = cat.name;
+  document.getElementById('modalPts').textContent = pts;
+  document.getElementById('modalQ').textContent = q.q;
+  document.getElementById('answerSection').classList.remove('show');
+  document.getElementById('answerBox').textContent = q.a;
+  document.getElementById('teamAwardRow').classList.remove('show');
+  document.getElementById('teamAwardRow').innerHTML = '';
+  document.getElementById('modalActions').innerHTML = `
+    <button class="modal-btn btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
+    <button class="modal-btn btn-close" onclick="closeModal(true)">Mark Used & Close</button>
+  `;
+  // Reset buzzes when question opens
+  if (roomRef) roomRef.update({ buzzes: [], questionOpen: true });
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function revealAnswer() {
+  document.getElementById('answerSection').classList.add('show');
+  document.getElementById('modalActions').innerHTML = `<button class="modal-btn btn-close" onclick="closeModal(true)">Close</button>`;
+  const row = document.getElementById('teamAwardRow');
+  row.innerHTML = '<span style="font-size:12px;color:rgba(255,255,255,0.5);width:100%;text-align:center;display:block;margin-bottom:5px;">AWARD POINTS TO:</span>';
+  Object.entries(teams).forEach(([id, team]) => {
+    const btn = document.createElement('button');
+    btn.className = 'team-award-btn';
+    btn.textContent = `✓ ${team.name}`;
+    btn.onclick = () => { adjustScore(id, currentPts); closeModal(true); };
+    row.appendChild(btn);
+  });
+  const skip = document.createElement('button');
+  skip.className = 'team-award-btn';
+  skip.style.cssText = 'border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.4)';
+  skip.textContent = '✗ No award';
+  skip.onclick = () => closeModal(true);
+  row.appendChild(skip);
+  row.classList.add('show');
+}
+
+function closeModal(markUsed) {
+  document.getElementById('modalOverlay').classList.remove('show');
+  if (roomRef) roomRef.update({ buzzes: [], questionOpen: false });
+  if (markUsed && currentCell) {
+    usedCells[currentCell.key] = true;
+    currentCell.cell.classList.add('used');
+    currentCell.cell.style.pointerEvents = 'none';
+  }
+  currentCell = null;
+  const total = categories.length * pointValues.length;
+  if (Object.keys(usedCells).length === total) setTimeout(showFinal, 600);
+}
+
+function showFinal() {
+  playFanfare();
+  const container = document.getElementById('finalScores');
+  container.innerHTML = '';
+  const maxScore = Math.max(...Object.values(teams).map(t => t.score));
+  Object.values(teams).forEach(team => {
+    const card = document.createElement('div');
+    const isWin = team.score === maxScore;
+    card.className = 'final-score-card' + (isWin ? ' winner' : '');
+    card.innerHTML = `${isWin ? '<div class="winner-crown">🏆</div>' : ''}<div class="final-team-name">${team.name}</div><div class="final-pts">${team.score}</div>`;
+    container.appendChild(card);
+  });
+  document.getElementById('finalOverlay').classList.add('show');
+}
+
+function resetGame() {
+  usedCells = {};
+  Object.values(teams).forEach(t => t.score = 0);
+  renderScoreboard();
+  document.getElementById('finalOverlay').classList.remove('show');
+  buildBoard();
+  if (roomRef) roomRef.update({ buzzes: [], questionOpen: false });
+}
+
+// ══════════════════════════════════════
+// TEAM — JOIN ROOM
+// ══════════════════════════════════════
+async function joinRoom() {
+  const code = document.getElementById('jCode').value.trim().toUpperCase();
+  const name = document.getElementById('jTeamName').value.trim();
+  const errEl = document.getElementById('jErr');
+  errEl.style.display = 'none';
+  if (!code || code.length < 3) { showJErr('Enter a valid room code.'); return; }
+  if (!name) { showJErr('Enter your team name.'); return; }
+  try {
+    const snap = await db.collection('jeopardyRooms').doc(code).get();
+    if (!snap.exists) { showJErr('Room not found. Check the code.'); return; }
+    roomCode = code;
+    teamName = name;
+    roomRef = db.collection('jeopardyRooms').doc(code);
+    document.getElementById('bzTeamName').textContent = name;
+    document.getElementById('bzRoom').textContent = `Room: ${code}`;
+    show('teamBuzzer');
+    listenTeamRoom();
+  } catch(e) { showJErr('Connection error. Try again.'); console.error(e); }
+}
+function showJErr(m) { const e = document.getElementById('jErr'); e.textContent = m; e.style.display = 'block'; }
+
+// ══════════════════════════════════════
+// TEAM — LISTEN TO ROOM
+// ══════════════════════════════════════
+function listenTeamRoom() {
+  const u = roomRef.onSnapshot(snap => {
+    const d = snap.data();
+    if (!d) return;
+
+    const questionOpen = d.questionOpen || false;
+    const buzzes = d.buzzes || [];
+    const myBuzz = buzzes.find(b => b.team === teamName);
+    const myRank = myBuzz ? buzzes.indexOf(myBuzz) + 1 : null;
+    const scores = d.teamScores || {};
+
+    // Update status + button state
+    const btn = document.getElementById('buzzBtn');
+    const status = document.getElementById('bzStatus');
+    const rankDisplay = document.getElementById('bzRankDisplay');
+
+    if (!questionOpen) {
+      btn.className = 'buzz-btn disabled-state';
+      status.innerHTML = '<span class="pulse-dot"></span>Waiting for question…';
+      rankDisplay.textContent = '';
+      rankDisplay.className = 'buzz-rank-display';
+    } else if (myBuzz) {
+      // Already buzzed
+      btn.className = 'buzz-btn buzzing-state';
+      status.textContent = '🔔 Buzzed in!';
+      if (myRank === 1) {
+        rankDisplay.textContent = '🥇 FIRST!';
+        rankDisplay.className = 'buzz-rank-display first';
+      } else {
+        rankDisplay.textContent = `#${myRank} in`;
+        rankDisplay.className = 'buzz-rank-display';
+      }
+    } else {
+      btn.className = 'buzz-btn';
+      status.textContent = 'Question is open — BUZZ IN!';
+      rankDisplay.textContent = '';
+      rankDisplay.className = 'buzz-rank-display';
+    }
+
+    // Update mini scoreboard
+    renderTeamScoreboard(scores);
+
+    // Update own score display
+    const myScore = Object.values(scores).find(s => s.name === teamName);
+    document.getElementById('bzScore').textContent = myScore ? `${myScore.score} pts` : '0 pts';
+  });
+  unsubs.push(u);
+}
+
+// ══════════════════════════════════════
+// TEAM — BUZZ IN
+// ══════════════════════════════════════
+async function doBuzz() {
+  const btn = document.getElementById('buzzBtn');
+  if (btn.classList.contains('disabled-state') || btn.classList.contains('buzzing-state')) return;
+
+  // Haptic feedback on mobile
+  if (navigator.vibrate) navigator.vibrate(80);
+
+  // Sound on the phone too
+  playBuzz();
+
+  btn.classList.add('pressed');
+  setTimeout(() => btn.classList.remove('pressed'), 120);
+
+  try {
+    await roomRef.update({
+      buzzes: firebase.firestore.FieldValue.arrayUnion({
+        team: teamName,
+        ts: Date.now()
+      })
+    });
+  } catch(e) { console.error('Buzz failed:', e); }
+}
+
+function renderTeamScoreboard(scores) {
+  const sorted = Object.values(scores).sort((a, b) => b.score - a.score);
+  document.getElementById('tsRows').innerHTML = sorted.map(s => `
+    <div class="ts-row ${s.name === teamName ? 'leader' : ''}">
+      <span class="ts-name" style="${s.name === teamName ? 'color:var(--gold)' : ''}">${s.name}</span>
+      <span class="ts-pts">${s.score}</span>
+    </div>
+  `).join('') || '<div style="color:var(--muted);font-size:13px;padding:10px 14px;">No scores yet</div>';
+}
+
+// ══════════════════════════════════════
+// AUDIO ENGINE — Web Audio API
+// All sounds synthesized — no external files
+// ══════════════════════════════════════
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Resume if suspended (browser autoplay policy)
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Utility: connect a chain of nodes and start/stop
+function playNodes(nodes, destination, startTime, stopTime) {
+  for (let i = 0; i < nodes.length - 1; i++) nodes[i].connect(nodes[i + 1]);
+  nodes[nodes.length - 1].connect(destination);
+  nodes[0].start(startTime);
+  nodes[0].stop(stopTime);
+}
+
+// ── BUZZ SOUND — harsh game show buzzer ──
+// Classic descending sawtooth + noise burst
+function playBuzz() {
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+
+  // Main buzzer tone — sawtooth sweep down
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(220, now);
+  osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+  gain.gain.setValueAtTime(0.55, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 0.4);
+
+  // Low reinforcement rumble
+  const osc2 = ctx.createOscillator();
+  const gain2 = ctx.createGain();
+  osc2.type = 'square';
+  osc2.frequency.setValueAtTime(110, now);
+  osc2.frequency.exponentialRampToValueAtTime(55, now + 0.3);
+  gain2.gain.setValueAtTime(0.3, now);
+  gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+  osc2.connect(gain2);
+  gain2.connect(ctx.destination);
+  osc2.start(now);
+  osc2.stop(now + 0.38);
+
+  // Noise burst for harshness
+  const bufSize = ctx.sampleRate * 0.15;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.25;
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(0.25, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+  noise.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noise.start(now);
+}
+
+// ── WRONG ANSWER — descending "wah wah" trombone ──
+function playWrong() {
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  const notes = [
+    { freq: 311, start: 0,    dur: 0.22 },
+    { freq: 277, start: 0.2,  dur: 0.22 },
+    { freq: 233, start: 0.4,  dur: 0.22 },
+    { freq: 196, start: 0.6,  dur: 0.45 },
+  ];
+  notes.forEach(n => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(n.freq, now + n.start);
+    gain.gain.setValueAtTime(0, now + n.start);
+    gain.gain.linearRampToValueAtTime(0.38, now + n.start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + n.start);
+    osc.stop(now + n.start + n.dur + 0.05);
+  });
+}
+
+// ── CORRECT ANSWER — bright ascending fanfare ──
+function playCorrect() {
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+  // Ascending major arpeggio: C4 E4 G4 C5
+  const notes = [
+    { freq: 261.6, start: 0,    dur: 0.15 },
+    { freq: 329.6, start: 0.12, dur: 0.15 },
+    { freq: 392.0, start: 0.24, dur: 0.15 },
+    { freq: 523.3, start: 0.36, dur: 0.45 },
+  ];
+  notes.forEach((n, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = i < 3 ? 'triangle' : 'sine';
+    osc.frequency.setValueAtTime(n.freq, now + n.start);
+    gain.gain.setValueAtTime(0, now + n.start);
+    gain.gain.linearRampToValueAtTime(0.4, now + n.start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + n.start);
+    osc.stop(now + n.start + n.dur + 0.05);
+  });
+
+  // Shimmer overtone on the top note
+  const shimmer = ctx.createOscillator();
+  const sGain = ctx.createGain();
+  shimmer.type = 'sine';
+  shimmer.frequency.setValueAtTime(1046.5, now + 0.36);
+  sGain.gain.setValueAtTime(0.15, now + 0.36);
+  sGain.gain.exponentialRampToValueAtTime(0.001, now + 0.82);
+  shimmer.connect(sGain);
+  sGain.connect(ctx.destination);
+  shimmer.start(now + 0.36);
+  shimmer.stop(now + 0.85);
+}
+
+// ── FINAL SCORES FANFARE — triumphant brass stabs ──
+function playFanfare() {
+  const ctx = getAudioCtx();
+  const now = ctx.currentTime;
+
+  // Chord stabs: two hits then a held chord
+  const chords = [
+    { freqs:[261.6,329.6,392.0], start:0,    dur:0.2 },
+    { freqs:[293.7,369.9,440.0], start:0.28,  dur:0.2 },
+    { freqs:[349.2,440.0,523.3,659.3], start:0.56, dur:1.2 },
+  ];
+
+  chords.forEach(chord => {
+    chord.freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now + chord.start);
+      gain.gain.setValueAtTime(0, now + chord.start);
+      gain.gain.linearRampToValueAtTime(0.22, now + chord.start + 0.03);
+      gain.gain.setValueAtTime(0.22, now + chord.start + chord.dur - 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + chord.start + chord.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + chord.start);
+      osc.stop(now + chord.start + chord.dur + 0.05);
+    });
+  });
+
+  // Percussion hits on stab 1 and 2
+  [0, 0.28].forEach(t => {
+    const bufSize = Math.floor(ctx.sampleRate * 0.08);
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufSize, 2);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.35, now + t);
+    src.connect(g);
+    g.connect(ctx.destination);
+    src.start(now + t);
+  });
+}
+
+// ══════════════════════════════════════
+// WIRE SOUNDS TO EVENTS
+// ══════════════════════════════════════
+
+// Unlock audio context on first user interaction (browser policy)
+document.addEventListener('click', () => getAudioCtx(), { once: true });
+document.addEventListener('touchstart', () => getAudioCtx(), { once: true });
+</script>
+</body>
+</html>
