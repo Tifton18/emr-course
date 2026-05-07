@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMR Patient Scenarios — TFD Recruit Class 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --bg: #0B0F0E;
+  --surface: #111816;
+  --surface2: #1A2220;
+  --surface3: #222D2A;
+  --green: #00FF94;
+  --green-dim: rgba(0,255,148,0.12);
+  --green-glow: rgba(0,255,148,0.25);
+  --red: #FF3B3B;
+  --red-dim: rgba(255,59,59,0.12);
+  --gold: #FFD166;
+  --gold-dim: rgba(255,209,102,0.12);
+  --blue: #4FC3F7;
+  --blue-dim: rgba(79,195,247,0.1);
+  --white: #E8F0EE;
+  --muted: rgba(232,240,238,0.4);
+  --border: rgba(232,240,238,0.08);
+  --r: 10px;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+
+/* grid texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,255,148,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,148,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+.hidden { display: none !important; }
+.screen { position: relative; z-index: 10; }
+
+/* ── SHARED ── */
+.center-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 36px 28px; max-width: 480px; width: 100%; }
+.mono { font-family: var(--mono); }
+.tag { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; display: inline-block; }
+.tag.green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,255,148,0.2); }
+.tag.red { background: var(--red-dim); color: var(--red); }
+.tag.gold { background: var(--gold-dim); color: var(--gold); }
+.tag.blue { background: var(--blue-dim); color: var(--blue); }
+.lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 8px; }
+.inp { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 14px; color: var(--white); font-family: var(--sans); font-size: 15px; font-weight: 500; outline: none; transition: border-color .15s; }
+.inp:focus { border-color: var(--green); }
+.inp::placeholder { color: rgba(255,255,255,.2); }
+.btn { padding: 12px 20px; border-radius: 9px; border: none; cursor: pointer; font-family: var(--mono); font-size: 14px; letter-spacing: 1px; transition: all .15s; width: 100%; margin-top: 10px; font-weight: 600; }
+.btn.primary { background: var(--green); color: #061a10; }
+.btn.primary:hover { background: #33ffaa; box-shadow: 0 0 20px var(--green-glow); }
+.btn.ghost { background: var(--surface2); color: var(--white); border: 1px solid var(--border); }
+.btn.ghost:hover { border-color: var(--green); color: var(--green); }
+.btn.danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,59,59,0.2); }
+.err { color: var(--red); font-family: var(--mono); font-size: 12px; margin-top: 6px; display: none; }
+.sec { margin-bottom: 16px; }
+.pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pd 1.2s ease-in-out infinite; margin-right: 6px; }
+@keyframes pd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.6)} }
+
+/* ── ROLE SELECT ── */
+.role-logo { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--green); letter-spacing: 3px; text-shadow: 0 0 30px var(--green-glow); line-height: 1; margin-bottom: 4px; }
+.role-sub { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; color: var(--muted); margin-bottom: 28px; }
+.role-btns { display: flex; flex-direction: column; gap: 10px; }
+.role-btn { padding: 18px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all .2s; text-align: left; }
+.role-btn:hover { border-color: var(--green); background: var(--green-dim); }
+.role-btn-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; color: var(--green); display: block; }
+.role-btn-desc { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+/* ══════════════════════════════
+   HOST — LOBBY
+══════════════════════════════ */
+#hostLobby { padding: 20px; max-width: 960px; margin: 0 auto; }
+.host-topbar { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding: 14px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); flex-wrap: wrap; }
+.host-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--green); flex: 1; }
+.code-display { background: var(--surface2); border: 1px solid rgba(0,255,148,0.3); border-radius: 8px; padding: 8px 16px; text-align: center; }
+.code-lbl { font-family: var(--mono); font-size: 8px; letter-spacing: 2px; color: var(--muted); display: block; }
+.code-val { font-family: var(--mono); font-size: 24px; color: var(--green); letter-spacing: 4px; line-height: 1; }
+.lobby-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:640px) { .lobby-grid { grid-template-columns: 1fr; } }
+.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+.panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px; color: var(--green); margin-bottom: 12px; }
+.player-list { display: flex; flex-direction: column; gap: 6px; min-height: 60px; }
+.pchip { background: var(--surface2); border-radius: 7px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; animation: fi .2s ease; border: 1px solid var(--border); }
+@keyframes fi { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.pchip-name { font-size: 14px; font-weight: 600; }
+.pchip-status { font-family: var(--mono); font-size: 10px; color: var(--green); }
+.no-players { color: var(--muted); font-family: var(--mono); font-size: 12px; text-align: center; padding: 16px 0; }
+.scenario-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.scenario-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; cursor: pointer; transition: all .15s; }
+.scenario-card:hover { border-color: var(--green); background: var(--green-dim); }
+.scenario-card.selected { border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 12px var(--green-glow); }
+.sc-category { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); margin-bottom: 5px; }
+.sc-title { font-size: 13px; font-weight: 700; line-height: 1.3; }
+.sc-diff { font-family: var(--mono); font-size: 10px; margin-top: 5px; }
+
+/* ══════════════════════════════
+   HOST — GAME
+══════════════════════════════ */
+#hostGame { padding: 16px; max-width: 1000px; margin: 0 auto; }
+.hg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); flex-wrap: wrap; }
+.hg-scenario-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1.5px; color: var(--green); flex: 1; }
+.hg-room { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.hg-step { font-family: var(--mono); font-size: 11px; color: var(--green); }
+
+/* Vitals strip */
+.vitals-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.vital-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.vital-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--muted); display: block; margin-bottom: 4px; }
+.vital-value { font-family: var(--mono); font-size: 18px; font-weight: 600; color: var(--white); line-height: 1; }
+.vital-value.abnormal { color: var(--red); }
+.vital-value.warning { color: var(--gold); }
+.vital-value.normal { color: var(--green); }
+
+/* Scene / patient card */
+.scene-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.scene-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--green); }
+.scene-dispatch { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 10px; letter-spacing: 1px; }
+.scene-text { font-size: clamp(14px,2vw,18px); font-weight: 500; line-height: 1.6; color: var(--white); }
+.scene-findings { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Decision prompt */
+.decision-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; margin-bottom: 14px; }
+.decision-question { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; color: var(--gold); margin-bottom: 14px; }
+.decision-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media(max-width:500px) { .decision-options { grid-template-columns: 1fr; } }
+.decision-opt { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; transition: all .15s; }
+.decision-opt.leading { border-color: var(--green); background: var(--green-dim); }
+.decision-opt.correct-reveal { border-color: var(--green); background: var(--green-dim); box-shadow: 0 0 14px var(--green-glow); }
+.decision-opt.wrong-reveal { border-color: var(--red); background: var(--red-dim); opacity: .6; }
+.opt-key-badge { font-family: var(--mono); font-size: 12px; font-weight: 600; width: 24px; height: 24px; border-radius: 5px; background: var(--surface3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.decision-opt.leading .opt-key-badge { background: rgba(0,255,148,.2); color: var(--green); }
+.opt-text { font-size: 13px; font-weight: 600; flex: 1; line-height: 1.3; }
+.opt-votes { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.vote-bar { height: 3px; background: var(--surface3); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+.vote-bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .4s; }
+
+/* Response panel */
+.response-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 14px; }
+.rp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.rp-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; color: var(--green); }
+.rp-count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.rp-grid { display: flex; flex-direction: column; gap: 5px; }
+.rp-row { display: flex; align-items: center; gap: 8px; background: var(--surface2); border-radius: 6px; padding: 6px 10px; border: 1px solid var(--border); }
+.rp-name { flex: 1; font-size: 13px; font-weight: 600; }
+.rp-answer { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.rp-badge { font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 4px; }
+.rp-badge.correct { background: var(--green-dim); color: var(--green); }
+.rp-badge.wrong { background: var(--red-dim); color: var(--red); }
+.rp-badge.waiting { background: var(--surface3); color: var(--muted); }
+
+/* Outcome / consequence card */
+.outcome-card { border-radius: var(--r); padding: 18px; margin-bottom: 14px; border: 1px solid; }
+.outcome-card.good { background: var(--green-dim); border-color: rgba(0,255,148,.3); }
+.outcome-card.bad { background: var(--red-dim); border-color: rgba(255,59,59,.3); }
+.outcome-card.neutral { background: var(--gold-dim); border-color: rgba(255,209,102,.3); }
+.outcome-icon { font-size: 28px; margin-bottom: 8px; }
+.outcome-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; margin-bottom: 8px; }
+.outcome-card.good .outcome-title { color: var(--green); }
+.outcome-card.bad .outcome-title { color: var(--red); }
+.outcome-card.neutral .outcome-title { color: var(--gold); }
+.outcome-text { font-size: 14px; line-height: 1.6; color: var(--white); }
+.teaching-points { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.tp-title { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; display: block; }
+.tp-item { font-size: 13px; line-height: 1.5; padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+.tp-item:last-child { border-bottom: none; }
+.tp-bullet { color: var(--green); flex-shrink: 0; }
+
+/* Host controls */
+.hg-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.hg-ctrl { flex: 1; min-width: 120px; padding: 11px; border-radius: 9px; border: none; font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: .5px; cursor: pointer; transition: all .15s; }
+.hg-ctrl.reveal { background: var(--gold); color: #1a0f00; }
+.hg-ctrl.reveal:hover { background: #ffe08a; }
+.hg-ctrl.next { background: var(--green); color: #061a10; }
+.hg-ctrl.next:hover { background: #33ffaa; box-shadow: 0 0 16px var(--green-glow); }
+.hg-ctrl.restart { background: var(--surface2); color: var(--white); border: 1px solid var(--border); }
+.hg-ctrl.end { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,59,59,.2); }
+.hg-ctrl:disabled { opacity: .3; cursor: not-allowed; }
+
+/* Score summary at end */
+.end-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 14px; }
+.es-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1.5px; color: var(--green); margin-bottom: 14px; }
+.es-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.es-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+.es-card.top { border-color: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+.es-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.es-score { font-family: var(--mono); font-size: 22px; color: var(--green); }
+.es-correct { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+/* ══════════════════════════════
+   STUDENT PHONE
+══════════════════════════════ */
+#studentGame { min-height: 100vh; display: flex; flex-direction: column; padding: 16px; max-width: 440px; margin: 0 auto; gap: 14px; position: relative; z-index: 10; }
+.sg-header { display: flex; align-items: center; justify-content: space-between; }
+.sg-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--green); letter-spacing: 1px; }
+.sg-score { font-family: var(--mono); font-size: 16px; color: var(--gold); }
+.sg-scenario { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+.sg-sc-cat { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 6px; }
+.sg-sc-title { font-size: 16px; font-weight: 700; color: var(--white); }
+.sg-step-info { font-family: var(--mono); font-size: 10px; color: var(--green); margin-top: 4px; }
+.sg-question { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; }
+.sg-q-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px; display: block; }
+.sg-q-text { font-size: clamp(14px,4vw,18px); font-weight: 600; line-height: 1.45; }
+.sg-options { display: flex; flex-direction: column; gap: 9px; }
+.sg-opt { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; text-align: left; width: 100%; }
+.sg-opt:hover:not(:disabled) { border-color: var(--green); background: var(--green-dim); }
+.sg-opt:disabled { cursor: default; }
+.sg-opt.selected { border-color: var(--blue); background: var(--blue-dim); }
+.sg-opt.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.sg-opt.wrong { border-color: var(--red); background: var(--red-dim); opacity: .6; }
+.sg-opt.show-correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.sg-opt-letter { font-family: var(--mono); font-size: 11px; width: 20px; flex-shrink: 0; color: var(--muted); }
+.sg-opt.correct .sg-opt-letter, .sg-opt.show-correct .sg-opt-letter { color: var(--green); }
+.sg-status { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; text-align: center; }
+.sg-status-icon { font-size: 32px; margin-bottom: 6px; }
+.sg-status-text { font-size: 14px; font-weight: 600; color: var(--muted); }
+.sg-status-pts { font-family: var(--mono); font-size: 26px; color: var(--gold); margin-top: 4px; }
+.sg-waiting { text-align: center; padding: 30px 16px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+.sg-outcome { border-radius: var(--r); padding: 16px; border: 1px solid; }
+.sg-outcome.good { background: var(--green-dim); border-color: rgba(0,255,148,.3); color: var(--green); }
+.sg-outcome.bad { background: var(--red-dim); border-color: rgba(255,59,59,.3); color: var(--red); }
+.sg-outcome.neutral { background: var(--gold-dim); border-color: rgba(255,209,102,.3); color: var(--gold); }
+.sg-outcome-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; margin-bottom: 6px; }
+.sg-outcome-text { font-size: 13px; color: var(--white); line-height: 1.5; }
+
+/* Final */
+#finalScreen { min-height: 100vh; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px; padding: 28px; position: relative; z-index: 10; }
+#finalScreen.show { display: flex; }
+.final-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(34px,7vw,60px); color: var(--green); letter-spacing: 4px; text-shadow: 0 0 40px var(--green-glow); text-align: center; }
+.final-podium { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; max-width: 700px; }
+.fp-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; text-align: center; min-width: 100px; }
+.fp-card.p1 { border-color: var(--green); box-shadow: 0 0 20px var(--green-glow); }
+.fp-medal { font-size: 24px; margin-bottom: 4px; }
+.fp-name { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.fp-pts { font-family: var(--mono); font-size: 32px; color: var(--green); line-height: 1; }
+.replay-btn { padding: 13px 32px; background: var(--green); border: none; border-radius: 9px; font-family: var(--mono); font-size: 14px; font-weight: 700; color: #061a10; cursor: pointer; letter-spacing: 1px; }
+.replay-btn:hover { background: #33ffaa; box-shadow: 0 0 16px var(--green-glow); }
+</style>
+</head>
+<body>
+
+<!-- ══ ROLE SELECT ══ -->
+<div id="roleScreen" class="screen">
+  <div class="center-wrap">
+    <div class="card">
+      <div class="role-logo">PATIENT SIM</div>
+      <div class="role-sub">TFD EMR · Recruit Class 2026</div>
+      <div class="role-btns">
+        <button class="role-btn" onclick="show('hostSetup')">
+          <span class="role-btn-title">🎛 INSTRUCTOR</span>
+          <span class="role-btn-desc">Choose a scenario · control progression · see live votes</span>
+        </button>
+        <button class="role-btn" onclick="show('studentJoin')">
+          <span class="role-btn-title">📱 STUDENT</span>
+          <span class="role-btn-desc">Enter room code · vote on treatment decisions</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOST SETUP ══ -->
+<div id="hostSetup" class="screen hidden">
+  <div class="center-wrap">
+    <div class="card">
+      <div class="role-logo" style="font-size:28px;">🎛 SCENARIO SELECT</div>
+      <div class="role-sub">Choose a scenario to run — or pick random</div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.6;">Students vote on treatment decisions at each branch point. Majority answer advances the scenario. You can override at any time.</p>
+      <button class="btn primary" onclick="createRoom()">CREATE ROOM →</button>
+      <button class="btn ghost" onclick="show('roleScreen')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOST LOBBY ══ -->
+<div id="hostLobby" class="screen hidden">
+  <div class="host-topbar">
+    <div class="host-title">⚡ PATIENT SIM — LOBBY</div>
+    <div style="font-size:13px;color:var(--muted);flex:1;">Waiting for students to join…</div>
+    <div class="code-display">
+      <span class="code-lbl">ROOM CODE</span>
+      <div class="code-val" id="dispCode">----</div>
+    </div>
+  </div>
+
+  <div class="lobby-grid">
+    <div class="panel">
+      <div class="panel-title">👥 STUDENTS (<span id="pCount">0</span>)</div>
+      <div class="player-list" id="pList"><div class="no-players"><span class="pulse"></span>No students yet</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🗂 SELECT SCENARIO</div>
+      <div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap;" id="catFilters"></div>
+      <div class="scenario-grid" id="scenarioGrid"></div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button class="btn primary" style="max-width:200px;" id="startBtn" onclick="startScenario()" disabled>▶ START SCENARIO</button>
+    <button class="btn ghost" style="max-width:160px;" onclick="cancelRoom();show('hostSetup')">← Back</button>
+  </div>
+</div>
+
+<!-- ══ HOST GAME ══ -->
+<div id="hostGame" class="screen hidden">
+  <div class="hg-header">
+    <div>
+      <div class="hg-scenario-title" id="hgTitle">—</div>
+      <div style="display:flex;gap:10px;margin-top:2px;">
+        <span class="hg-room" id="hgRoom"></span>
+        <span class="hg-step" id="hgStep"></span>
+      </div>
+    </div>
+    <div id="hgCatTag"></div>
+  </div>
+
+  <div class="vitals-strip" id="vitalsStrip"></div>
+
+  <div class="scene-card" id="sceneCard">
+    <div class="scene-dispatch" id="sceneDispatch"></div>
+    <div class="scene-text" id="sceneText"></div>
+    <div class="scene-findings" id="sceneFindings"></div>
+  </div>
+
+  <div class="decision-card hidden" id="decisionCard">
+    <div class="decision-question" id="decisionQ"></div>
+    <div class="decision-options" id="decisionOpts"></div>
+  </div>
+
+  <div class="outcome-card hidden" id="outcomeCard">
+    <div class="outcome-icon" id="outcomeIcon"></div>
+    <div class="outcome-title" id="outcomeTitle"></div>
+    <div class="outcome-text" id="outcomeText"></div>
+    <div class="teaching-points hidden" id="teachingPoints">
+      <span class="tp-title">TEACHING POINTS</span>
+      <div id="tpList"></div>
+    </div>
+  </div>
+
+  <div class="response-panel">
+    <div class="rp-header">
+      <div class="rp-title">📊 STUDENT VOTES</div>
+      <div class="rp-count" id="rpCount">0 / 0</div>
+    </div>
+    <div class="rp-grid" id="rpGrid"></div>
+  </div>
+
+  <div class="hg-controls">
+    <button class="hg-ctrl reveal" id="btnReveal" onclick="hostReveal()" disabled>👁 REVEAL</button>
+    <button class="hg-ctrl next" id="btnNext" onclick="hostNext()" disabled>NEXT STEP ▶</button>
+    <button class="hg-ctrl restart" onclick="hostRestart()">↺ NEW SCENARIO</button>
+    <button class="hg-ctrl end" onclick="hostEnd()">■ END</button>
+  </div>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- ══ STUDENT JOIN ══ -->
+<div id="studentJoin" class="screen hidden">
+  <div class="center-wrap">
+    <div class="card">
+      <div class="role-logo" style="font-size:30px;">📱 JOIN SIM</div>
+      <div class="role-sub">TFD EMR Patient Scenarios</div>
+      <div class="sec">
+        <span class="lbl">Room Code</span>
+        <input class="inp mono" id="jCode" placeholder="e.g. TFD4K2" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-size:20px;">
+      </div>
+      <div class="sec">
+        <span class="lbl">Your Name</span>
+        <input class="inp" id="jName" placeholder="First name" maxlength="20">
+      </div>
+      <div class="err" id="jErr"></div>
+      <button class="btn primary" onclick="joinRoom()">JOIN →</button>
+      <button class="btn ghost" onclick="show('roleScreen')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDENT LOBBY ══ -->
+<div id="studentLobby" class="screen hidden">
+  <div class="center-wrap">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:36px;margin-bottom:10px;">✅</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green);letter-spacing:2px;" id="sLobbyName"></div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:4px;">Room: <span style="color:var(--green);" id="sLobbyCode"></span></div>
+      <div style="margin-top:20px;color:var(--muted);font-family:var(--mono);font-size:12px;"><span class="pulse"></span>Waiting for instructor to start…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDENT GAME ══ -->
+<div id="studentGame" class="screen hidden">
+  <div class="sg-header">
+    <div><div class="sg-name" id="sgName"></div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);" id="sgRoom"></div></div>
+    <div class="sg-score" id="sgScore">0 pts</div>
+  </div>
+  <div class="sg-scenario" id="sgScenario">
+    <div class="sg-sc-cat" id="sgCat"></div>
+    <div class="sg-sc-title" id="sgTitle"></div>
+    <div class="sg-step-info" id="sgStepInfo"></div>
+  </div>
+  <div class="sg-question hidden" id="sgQuestion">
+    <span class="sg-q-label">⚡ DECISION REQUIRED</span>
+    <div class="sg-q-text" id="sgQText"></div>
+  </div>
+  <div class="sg-options hidden" id="sgOptions"></div>
+  <div class="sg-status hidden" id="sgStatus">
+    <div class="sg-status-icon" id="sgIcon"></div>
+    <div class="sg-status-text" id="sgTxt"></div>
+    <div class="sg-status-pts" id="sgPts"></div>
+  </div>
+  <div class="sg-outcome hidden" id="sgOutcome">
+    <div class="sg-outcome-title" id="sgOutcomeTitle"></div>
+    <div class="sg-outcome-text" id="sgOutcomeText"></div>
+  </div>
+  <div class="sg-waiting" id="sgWaiting"><span class="pulse"></span>Waiting for instructor…</div>
+</div>
+
+<!-- ══ FINAL ══ -->
+<div id="finalScreen" class="screen hidden">
+  <div class="final-title">📋 DEBRIEF</div>
+  <div class="final-podium" id="finalPodium"></div>
+  <button class="replay-btn" onclick="location.reload()">RUN ANOTHER SCENARIO</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// FIREBASE
+// ══════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey: "AIzaSyExample-ReplaceWithYourActualKey",
+  authDomain: "class-attendance-72cd9.firebaseapp.com",
+  projectId: "class-attendance-72cd9",
+  storageBucket: "class-attendance-72cd9.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "1:000000000000:web:000000000000000000"
+});
+const db = firebase.firestore();
+
+// ══════════════════════════════════════════════
+// SCENARIO DATA
+// Each scenario: title, category, difficulty, steps[]
+// Each step: scene, vitals, question, options[]
+// Each option: text, correct(bool), outcome{type,title,text,teaching[]}, next(step index or 'end')
+// ══════════════════════════════════════════════
+const SCENARIOS = [
+  // ─────────────────────────────
+  // AIRWAY
+  // ─────────────────────────────
+  {
+    id: 'airway_01',
+    title: 'The Unconscious Driver',
+    category: 'Airway & Breathing',
+    difficulty: 'medium',
+    dispatch: 'DISPATCH: MVA — single vehicle. Driver unresponsive. EMS 12 minutes out.',
+    steps: [
+      {
+        scene: 'You arrive to find a 34-year-old male slumped over the steering wheel. The car struck a utility pole at low speed. Bystanders say he was talking, then went limp. No apparent deformity to the vehicle.',
+        vitals: {LOC:'Unresponsive',RR:'Absent',HR:'88',SpO2:'72%',Skin:'Pale/Cyanotic'},
+        question: 'Your FIRST action at this patient is:',
+        options: [
+          {
+            text: 'Open the airway using head-tilt chin-lift',
+            correct: false,
+            outcome: { type:'bad', icon:'⚠️', title:'Not Quite', text:'Head-tilt chin-lift is contraindicated here — MVA mechanism means you must assume spinal injury until cleared. Use jaw thrust to open the airway without moving the spine.', teaching:['Always consider spinal precautions with MVC mechanism','Jaw thrust is the trauma airway opener of choice','Airway still comes FIRST — use jaw thrust, not head-tilt'] }
+          },
+          {
+            text: 'Apply jaw thrust to open the airway',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'With MVC mechanism, jaw thrust protects the cervical spine while opening the airway. You open the airway — no air movement. You need to ventilate immediately.', teaching:['Jaw thrust = trauma airway standard','Open airway → assess for breathing → ventilate if absent','SpO2 of 72% is immediately life-threatening'] }
+          },
+          {
+            text: 'Start CPR — no pulse palpated',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'The patient has a pulse (HR 88). CPR without confirming pulselessness wastes critical time and may cause harm. Assess before acting.', teaching:['Always confirm pulselessness before starting CPR','Airway and breathing failure ≠ cardiac arrest','Primary survey order: X-A-B-C-D-E'] }
+          },
+          {
+            text: 'Apply non-rebreather mask at 15 LPM',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'A patient who is not breathing cannot benefit from a passive oxygen mask. The patient needs active ventilation with a BVM — the mask delivers oxygen only to spontaneously breathing patients.', teaching:['Apneic patients need BVM ventilation, not mask O2','NRB is for spontaneously breathing hypoxic patients','Assess breathing BEFORE applying oxygen'] }
+          },
+        ]
+      },
+      {
+        scene: 'Good — airway open with jaw thrust. No breathing detected. You begin BVM ventilation. After 2 breaths you see good chest rise. SpO2 climbing to 84%.',
+        vitals: {LOC:'Unresponsive',RR:'BVM assisted',HR:'88',SpO2:'84%↑',Skin:'Pale'},
+        question: 'You\'re ventilating effectively. Your partner notes snoring sounds between BVM breaths. What do you do?',
+        options: [
+          {
+            text: 'Insert an OPA to maintain the airway between breaths',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'An absent gag reflex (unresponsive patient) makes OPA insertion appropriate and indicated. It holds the tongue forward and maintains the airway between BVM breaths, reducing the work needed.', teaching:['OPA indicated: unresponsive patient + absent gag reflex','Size OPA: corner of mouth → earlobe','Snoring between breaths = tongue falling back — OPA fixes this'] }
+          },
+          {
+            text: 'Insert an NPA instead — safer choice',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Partially Correct', text:'NPA is not wrong here, but an OPA is the better choice for a completely unresponsive patient with no gag reflex — it provides superior airway maintenance. NPA is preferred for patients with intact gag reflex or semiconsciousness.', teaching:['OPA: unconscious, absent gag','NPA: semiconscious, intact gag, or OPA contraindicated','Suspected basilar skull fracture = NPA contraindicated'] }
+          },
+          {
+            text: 'Suction the airway — snoring suggests fluid',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Snoring is caused by soft tissue obstruction (tongue), not fluid. Gurgling indicates fluid and requires suctioning. Insert an airway adjunct to address the snoring.', teaching:['Snoring = soft tissue/tongue obstruction → OPA/NPA','Gurgling = fluid → suction immediately','Know your airway sounds: snoring vs gurgling vs stridor'] }
+          },
+          {
+            text: 'Continue BVM — no additional intervention needed',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Snoring between breaths means the airway is partially obstructing when you release the mask. An adjunct should be placed to maintain the airway passively.', teaching:['Airway maintenance is ongoing — not a one-time intervention','OPA reduces BVM effort and improves seal','Address all abnormal airway sounds'] }
+          },
+        ]
+      },
+      {
+        scene: 'OPA in place. Ventilating well. SpO2 now 96%. EMS is 6 minutes out. Patient remains unresponsive. Your partner is maintaining manual spinal stabilization.',
+        vitals: {LOC:'Unresponsive',RR:'BVM 10/min',HR:'92',SpO2:'96%',Skin:'Improving'},
+        question: 'Patient is being managed. What is your next priority while waiting for EMS?',
+        options: [
+          {
+            text: 'Continue BVM, maintain spinal stabilization, monitor vitals',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'You\'ve addressed the life threats. Now maintain what\'s working, monitor for changes, and be ready to report a complete handoff to EMS. This is appropriate ongoing management.', teaching:['Don\'t create new problems — maintain good interventions','Continuous monitoring catches deterioration early','Prepare your handoff: mechanism, interventions, response, vitals trend'] }
+          },
+          {
+            text: 'Remove the patient from the vehicle immediately',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not Now', text:'The patient is being ventilated effectively and there is no immediate scene danger (fire, flooding). Urgent extrication without adequate resources risks spinal injury. Wait for EMS with proper equipment unless a new life threat emerges.', teaching:['Move a spinal patient only when life threat demands it','Scene danger = immediate move','No danger + effective treatment = controlled extrication with EMS'] }
+          },
+          {
+            text: 'Begin a head-to-toe secondary assessment',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Not Priority', text:'Secondary assessment happens after all life threats are controlled and the patient is stabilized. With an apneic patient requiring ongoing BVM, your hands and attention are needed for airway management — not secondary exam.', teaching:['Primary survey → treat life threats → THEN secondary','Two-person airway management: one BVM, one stabilize','Secondary exam with EMS or after life threats resolved'] }
+          },
+          {
+            text: 'Stop BVM — SpO2 is 96%, patient may breathe on their own',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Dangerous', text:'Never stop ventilating an apneic patient because SpO2 improved. The SpO2 is good BECAUSE you are ventilating. Stopping will cause rapid desaturation. Continue BVM until the patient demonstrates adequate spontaneous breathing.', teaching:['Good SpO2 during BVM = BVM is working — keep going','Wean ventilation only when spontaneous adequate breathing returns','Apnea without intervention = rapid deterioration'] }
+          },
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────
+  // CARDIAC
+  // ─────────────────────────────
+  {
+    id: 'cardiac_01',
+    title: 'Chest Pain at the Station',
+    category: 'Cardiac & CPR',
+    difficulty: 'easy',
+    dispatch: 'DISPATCH: 58-year-old male, chest pain at a fire station. Off-duty firefighter.',
+    steps: [
+      {
+        scene: 'You find a 58-year-old male seated in a chair, clutching his chest. He is diaphoretic, pale, and visibly anxious. He says the pain started 20 minutes ago at rest, is 8/10, radiates to his left jaw and arm, and is NOT relieved by position change.',
+        vitals: {LOC:'Alert',RR:'20/min',HR:'96',SpO2:'94%',Skin:'Pale/Diaphoretic'},
+        question: 'This presentation is most consistent with AMI. Your FIRST interventions are:',
+        options: [
+          {
+            text: 'Aspirin 324mg chewed + high-flow O2 via NRB + position of comfort',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'Classic AMI presentation: rest pain, radiation, diaphoresis, not positional. Aspirin inhibits platelet aggregation. High-flow O2 for SpO2 <95%. Position of comfort (usually semi-recumbent) reduces cardiac workload.', teaching:['Aspirin 324mg — chewed for faster absorption','NRB at 15 LPM for SpO2 <94%','Position of comfort — usually 45° semi-recumbent','Do not delay transport for vitals — load and go'] }
+          },
+          {
+            text: 'Have patient lie flat — elevate legs for perfusion',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Trendelenburg (legs elevated) increases venous return and cardiac workload — harmful in AMI. The patient should be in a position of comfort, typically semi-recumbent (45°), which reduces preload and cardiac work.', teaching:['Trendelenburg = increased cardiac workload = bad for AMI','Position of comfort for cardiac patients = semi-recumbent','Trendelenburg is used for shock — not cardiac chest pain'] }
+          },
+          {
+            text: 'Perform a full head-to-toe assessment before any treatment',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'A classic AMI presentation warrants immediate treatment. Time = myocardium. Administering aspirin while gathering history is appropriate. Full secondary assessment can happen en route — do not delay life-saving treatment.', teaching:['Time-sensitive emergencies: treat while assessing','Aspirin should be given within minutes of AMI suspicion','History and treatment are not mutually exclusive'] }
+          },
+          {
+            text: 'Apply AED — patient may go into arrest',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not Yet', text:'The patient is alert with a pulse. AED is applied only to patients in cardiac arrest. However, having the AED nearby and ready is smart. Apply it if the patient loses consciousness and becomes pulseless.', teaching:['AED = cardiac arrest (pulseless) only','Keep AED nearby and ready in high-risk cardiac patients','Monitor closely — AMI patients can deteriorate to arrest'] }
+          },
+        ]
+      },
+      {
+        scene: 'Aspirin given. NRB applied. Patient is semi-recumbent. SpO2 improving to 97%. Suddenly the patient goes limp, eyes roll back. You check — no pulse, no breathing.',
+        vitals: {LOC:'Unresponsive',RR:'Absent',HR:'No pulse',SpO2:'N/A',Skin:'Ashen'},
+        question: 'The patient is now in cardiac arrest. Your immediate action:',
+        options: [
+          {
+            text: 'Begin CPR — 30 compressions, then 2 breaths, while partner applies AED',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'Simultaneous CPR and AED application is the correct response. Every second without compressions reduces survival. Do not wait for the AED to be ready before starting compressions.', teaching:['Start CPR immediately — do not wait','30:2 ratio until advanced airway placed','AED application should not interrupt compressions for >10 seconds','Survival drops 7-10% per minute without defibrillation'] }
+          },
+          {
+            text: 'Apply AED first — analyze rhythm before starting CPR',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'CPR should start immediately. Do not wait for the AED to be applied before beginning compressions. Have one rescuer start CPR while the other applies the AED — these happen simultaneously.', teaching:['CPR starts immediately — no delay','AED and CPR happen simultaneously with 2 rescuers','Every second of no compressions = decreased survival'] }
+          },
+          {
+            text: 'Give 2 rescue breaths first to establish oxygenation',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'AHA 2020 guidelines: start with 30 compressions, THEN 2 breaths (C-A-B, not A-B-C). Compressions maintain coronary perfusion pressure — they take priority.', teaching:['2020 AHA: C-A-B sequence (compressions first)','Chest compressions → 30 compressions → 2 breaths','Exception: drowning patients may benefit from rescue breaths first'] }
+          },
+          {
+            text: 'Check pulse again for 30 seconds to confirm arrest',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Pulse checks should take no more than 10 seconds. If you are uncertain, start CPR — compressions on a patient with a pulse are far less harmful than withholding CPR from a patient in arrest.', teaching:['Pulse check: maximum 10 seconds','When in doubt, start CPR','False positive (CPR on beating heart) < false negative (no CPR on arrested heart)'] }
+          },
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────
+  // TRAUMA
+  // ─────────────────────────────
+  {
+    id: 'trauma_01',
+    title: 'GSW to the Thigh',
+    category: 'Trauma & Bleeding',
+    difficulty: 'hard',
+    dispatch: 'DISPATCH: 26-year-old male, gunshot wound to the left thigh. Scene cleared by PD.',
+    steps: [
+      {
+        scene: 'PD clears you in. You find a 26-year-old male supine on the sidewalk. He is conscious but confused and very anxious. There is a single GSW entry wound to the left mid-thigh with bright red, pulsatile bleeding soaking through his jeans. A large pool of blood is on the ground.',
+        vitals: {LOC:'Confused',RR:'24/min',HR:'122',SpO2:'97%',Skin:'Pale/Clammy'},
+        question: 'Bright red pulsatile bleeding from the thigh. FIRST action:',
+        options: [
+          {
+            text: 'Apply a tourniquet — 2 to 3 inches above the wound',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'Pulsatile bright red bleeding from an extremity with signs of significant hemorrhage = immediate tourniquet. This is arterial bleeding. Direct pressure alone is unlikely to control it fast enough. The XABCDE framework puts hemorrhage control FIRST.', teaching:['Bright red + pulsatile = arterial bleeding','Tourniquet first for life-threatening extremity hemorrhage','2–3 inches proximal to wound','Tighten until bleeding STOPS — not just slows','Note time of application — write on skin'] }
+          },
+          {
+            text: 'Apply direct pressure with both hands over the wound',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Not Enough', text:'Direct pressure is the first step for minor-moderate bleeding, but with pulsatile arterial hemorrhage of this severity and volume already lost, a tourniquet is faster and more reliable. Every second of arterial bleeding worsens his hemodynamic status.', teaching:['Direct pressure: first line for non-life-threatening bleeding','Tourniquet: life-threatening extremity hemorrhage or amputation','Don\'t waste time on pressure when tourniquet is indicated','TCCC / TECC: tourniquet early and aggressively'] }
+          },
+          {
+            text: 'Elevate the leg above heart level and apply pressure',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Elevation is a supplemental technique with minimal evidence for arterial hemorrhage. It is not a primary intervention. For significant arterial bleeding, a tourniquet is required. Do not waste time on ineffective measures.', teaching:['Elevation has limited effect on arterial hemorrhage','Tourniquet is the primary intervention for extremity arterial bleeding','Don\'t let bystander-level care delay definitive hemorrhage control'] }
+          },
+          {
+            text: 'Establish airway first — follow XABCDE',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Read XABCDE Again', text:'XABCDE: the X stands for eXsanguinating hemorrhage — it comes BEFORE airway. This patient is bleeding out from an arterial wound. His airway is patent (he is talking). Stop the bleeding FIRST.', teaching:['X = eXsanguinating hemorrhage — controlled BEFORE airway','Airway is still patent in a talking patient','Hemorrhage is the #1 preventable cause of traumatic death'] }
+          },
+        ]
+      },
+      {
+        scene: 'Tourniquet applied 2 inches above the wound, tightened until pulsatile bleeding stops. Time noted: 14:32. Patient is more alert after hemorrhage control. However, his vitals are concerning.',
+        vitals: {LOC:'Alert',RR:'22/min',HR:'118',SpO2:'97%',Skin:'Pale/Clammy'},
+        question: 'Tourniquet in place, bleeding controlled. Patient is tachycardic and pale. You suspect compensated shock. Your next action:',
+        options: [
+          {
+            text: 'Rapid transport — load and go, continue assessment en route',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'This is a load-and-go situation. The patient has signs of compensated hemorrhagic shock and needs definitive care (surgery, blood products) that you cannot provide in the field. Rapid transport is the most important intervention.', teaching:['Hemorrhagic shock = surgical emergency','Load and go — scene time <10 minutes for major trauma','Definitive care for bleeding = OR, not the field','Continue assessment and treatment en route'] }
+          },
+          {
+            text: 'Start IV fluid bolus to replace lost blood volume',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Outside Scope', text:'IV access and fluid resuscitation are outside EMR scope of practice. Additionally, field fluid resuscitation in penetrating trauma is controversial — excessive fluids can dislodge clots. The priority is rapid transport to definitive care.', teaching:['IV fluids = EMT/Paramedic scope','EMR hemorrhage control = tourniquet, pressure, wound packing','Permissive hypotension in penetrating trauma — don\'t over-resuscitate','Transport is the treatment for hemorrhagic shock'] }
+          },
+          {
+            text: 'Remove tourniquet — bleeding has stopped, it may cause limb damage',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Never Remove in Field', text:'NEVER remove a tourniquet in the field once applied for hemorrhage control. Removal risks rebleeding and rapid decompensation. Tourniquets are safe for extended periods. Report time of application at handoff — the hospital will manage removal.', teaching:['Tourniquet = never remove in field','Note and communicate time of application','Risk of limb loss from tourniquet < risk of death from hemorrhage','Modern tourniquets safe for 2+ hours with monitoring'] }
+          },
+          {
+            text: 'Lay patient flat with legs elevated — Trendelenburg for shock',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Not Priority', text:'Trendelenburg\'s benefit in hemorrhagic shock is limited and controversial. While positioning is reasonable, it is not a priority over rapid transport. Get moving — position en route.', teaching:['Trendelenburg: limited evidence in hemorrhagic shock','Transport is the priority — position is secondary','Supine is generally acceptable for trauma shock'] }
+          },
+        ]
+      },
+      {
+        scene: 'En route to the trauma center. Patient is alert, talking. Tourniquet holding. You reassess — you notice the original entry wound has a second, smaller oozing wound adjacent to it you missed initially.',
+        vitals: {LOC:'Alert',RR:'20/min',HR:'110',SpO2:'98%',Skin:'Pale'},
+        question: 'Secondary wound noted — oozing, not pulsatile, next to the tourniquet site. What do you do?',
+        options: [
+          {
+            text: 'Pack the secondary wound with gauze and apply direct pressure',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'The secondary wound is venous (oozing, not pulsatile) and is not covered by the tourniquet. Wound packing with direct pressure is the appropriate intervention for this type of bleeding.', teaching:['Assess entire wound area — tourniquets only cover the distal vessels','Wound packing: push gauze firmly into wound cavity','Apply sustained direct pressure for minimum 3 minutes','Hemostatic gauze (QuikClot/Combat Gauze) if available'] }
+          },
+          {
+            text: 'Apply a second tourniquet over the secondary wound',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not Indicated', text:'A second tourniquet is not indicated for venous oozing. The tourniquet already in place should control arterial flow to the region. This wound requires direct pressure and wound packing, not another tourniquet.', teaching:['Second tourniquet: indicated if first fails to control bleeding','Venous ooze = wound packing + direct pressure','Assess what the first tourniquet is and isn\'t covering'] }
+          },
+          {
+            text: 'Ignore it — the tourniquet controls all bleeding in the limb',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Tourniquets occlude arterial inflow but may not control all bleeding, especially from wounds that are not directly distal to the tourniquet band. A second wound may still bleed venously. Assess and address it.', teaching:['Tourniquet controls arterial flow to distal structures','Secondary wounds at or near the tourniquet site may still bleed','Reassessment is essential — especially for multi-wound patients'] }
+          },
+          {
+            text: 'Do nothing — en route, minimize interventions',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Ongoing hemorrhage — even venous — worsens hemodynamic status. Addressing the secondary wound is a simple, indicated intervention. Do not ignore active bleeding.', teaching:['Active bleeding = always address, regardless of route status','Wound packing is a fast, effective field intervention','Every milliliter lost worsens the patient\'s outcome'] }
+          },
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────
+  // MEDICAL — DIABETIC
+  // ─────────────────────────────
+  {
+    id: 'medical_01',
+    title: 'Altered Mental Status — Diabetic',
+    category: 'Medical Emergency',
+    difficulty: 'easy',
+    dispatch: 'DISPATCH: 44-year-old female, found unresponsive at home by family. Known diabetic.',
+    steps: [
+      {
+        scene: 'Family states she took her insulin this morning but skipped breakfast. She has been "acting weird" for 30 minutes, now unresponsive. She is a known Type 1 diabetic. No trauma. No other medical history.',
+        vitals: {LOC:'Unresponsive',RR:'14/min',HR:'104',SpO2:'98%',Skin:'Diaphoretic'},
+        question: 'Unresponsive diabetic, likely hypoglycemia. You cannot measure blood glucose. Your priority:',
+        options: [
+          {
+            text: 'Open airway, place in recovery position, monitor until EMS arrives',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct for EMR Scope', text:'Without blood glucose measurement capability and with an unresponsive patient who cannot swallow safely, oral glucose is contraindicated. Airway management and recovery position are the priority. EMS with IV dextrose is the definitive treatment.', teaching:['Oral glucose: ONLY if patient is conscious and can swallow','Unresponsive patient = aspiration risk with oral glucose','EMR scope: airway, positioning, rapid EMS notification','EMS: IV dextrose 50% or IM glucagon for unresponsive hypoglycemia'] }
+          },
+          {
+            text: 'Place oral glucose gel under her tongue',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Dangerous', text:'Oral glucose in an unresponsive patient is a significant aspiration risk. The patient cannot protect her airway. Oral glucose is only safe for conscious patients who can swallow on command.', teaching:['Oral glucose: conscious + able to swallow ONLY','Unresponsive = aspiration risk = do NOT give oral glucose','Glucose gel under the tongue still requires swallowing reflex'] }
+          },
+          {
+            text: 'Rub glucose gel on her gums and inner cheeks',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Risky', text:'Buccal glucose has some absorption through mucous membranes, but the evidence is limited and there is still aspiration risk. For an unresponsive patient, airway management and rapid EMS response is the safer priority.', teaching:['Buccal absorption: very limited for glucose gel','Standard EMR protocol: no oral glucose for unresponsive patients','EMS with IV dextrose is the definitive treatment'] }
+          },
+          {
+            text: 'Begin BVM ventilation — respiratory rate may be inadequate',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not Indicated', text:'RR of 14/min is within the normal range (12-20). SpO2 is 98%. There is no indication for BVM ventilation. Over-ventilating a patient who is breathing adequately causes harm (hypocapnia, barotrauma).', teaching:['Normal adult RR: 12–20/min — 14 is normal','SpO2 98% = adequate oxygenation, no supplemental O2 needed','Only ventilate if breathing is absent or severely inadequate'] }
+          },
+        ]
+      },
+      {
+        scene: 'Patient is in recovery position, airway open. EMS is 4 minutes out. Family is panicking and gives you a glucagon kit they have at home, saying "she needs this."',
+        vitals: {LOC:'Unresponsive',RR:'14/min',HR:'108',SpO2:'98%',Skin:'Diaphoretic'},
+        question: 'Family hands you an epinephrine auto-injector — wait, it\'s a glucagon kit. What do you do?',
+        options: [
+          {
+            text: 'Do not administer — glucagon is outside EMR scope unless protocol allows',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct', text:'Glucagon administration is outside standard EMR scope of practice. Even though it would likely help the patient, administering medications outside your scope is a legal and ethical violation. EMS arriving in 4 minutes can administer it.', teaching:['Know your scope — do not exceed it even with good intentions','Glucagon: EMT/Paramedic scope in most systems','4-minute EMS ETA = wait and manage airway','If your local protocol authorizes glucagon assist — follow protocol'] }
+          },
+          {
+            text: 'Administer glucagon — it will help and EMS is 4 minutes out',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Outside Scope', text:'Administering glucagon without protocol authorization exceeds EMR scope of practice, even with good intentions. This creates legal liability and sets a precedent for bypassing training protocols.', teaching:['Acting outside scope = legal liability regardless of intent','EMS is 4 minutes — continue airway management','Scope of practice exists to protect you AND the patient'] }
+          },
+          {
+            text: 'Assist the family member in administering it to the patient',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Gray Area', text:'Assisting a family member who is authorized to use the device is a gray area. In some systems, this is acceptable. In others, it still constitutes practice outside scope. Know your local protocol. When in doubt — wait for EMS.', teaching:['Local protocol determines "assisting" vs "administering"','When in doubt: airway management + await EMS','Know your state and agency protocols'] }
+          },
+          {
+            text: 'Give oral glucose instead — family can help hold her head',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Dangerous', text:'Oral glucose in an unresponsive patient is never acceptable regardless of who is helping. The aspiration risk is real and significant.', teaching:['No oral glucose in unresponsive patients — ever','Recovery position + airway monitoring is the correct management','Aspiration pneumonia is a serious complication of unconscious oral administration'] }
+          },
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────
+  // MEDICAL — ALLERGIC REACTION
+  // ─────────────────────────────
+  {
+    id: 'medical_02',
+    title: 'Anaphylaxis at a Cookout',
+    category: 'Medical Emergency',
+    difficulty: 'medium',
+    dispatch: 'DISPATCH: 22-year-old female, allergic reaction after eating at a backyard party. EMS 8 minutes.',
+    steps: [
+      {
+        scene: 'You find a 22-year-old female seated in a lawn chair. Her face is flushed and swollen — lips and tongue are visibly enlarged. She is speaking in short sentences due to difficulty breathing. Hives cover her arms and chest. She ate shrimp 10 minutes ago. Her friend states she has a severe shellfish allergy.',
+        vitals: {LOC:'Alert/Anxious',RR:'24/min',HR:'116',SpO2:'93%',Skin:'Flushed/Urticarial'},
+        question: 'Classic anaphylaxis. She has a prescribed epinephrine auto-injector in her bag. Your action:',
+        options: [
+          {
+            text: 'Assist her in using her prescribed epinephrine auto-injector',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'Assisting a patient in using their own prescribed epinephrine auto-injector is within EMR scope of practice and is the priority intervention. Epinephrine is the only treatment for anaphylaxis — it reverses bronchoconstriction, reduces laryngeal edema, and increases blood pressure.', teaching:['Epinephrine auto-injector: lateral mid-thigh, hold 10 seconds','EMR scope: ASSIST patient with prescribed epi auto-injector','Epinephrine = #1 treatment for anaphylaxis','Patient may need a second dose — EMS arrives with more'] }
+          },
+          {
+            text: 'Apply non-rebreather mask at 15 LPM first',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Not Priority', text:'O2 is a supportive measure in anaphylaxis, but epinephrine is the priority. Anaphylaxis causes vasodilation, bronchoconstriction, and laryngeal edema that oxygen alone cannot treat. Epinephrine first, O2 as a concurrent measure.', teaching:['Epi is the priority — O2 is supportive','O2 can be given simultaneously with epi','Do not delay epi for any reason in anaphylaxis with airway compromise'] }
+          },
+          {
+            text: 'Have her lie flat with legs elevated',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Wrong Position', text:'Trendelenburg is contraindicated in anaphylaxis with respiratory compromise. The upright position (or position of comfort) reduces the work of breathing. Lying flat may worsen her breathing difficulty and increase laryngeal edema.', teaching:['Anaphylaxis + respiratory compromise = upright position','Trendelenburg: for shock WITHOUT respiratory compromise','Anaphylaxis = vasodilatory shock + airway involvement = epi + upright'] }
+          },
+          {
+            text: 'Wait for EMS — anaphylaxis requires ALS care',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Do Not Wait', text:'Anaphylaxis with airway involvement (tongue/lip swelling, stridor) can progress to complete airway obstruction within minutes. The prescribed epinephrine auto-injector is in hand. Use it now — every minute of delay risks her airway.', teaching:['Anaphylaxis can progress to complete obstruction in minutes','Epi auto-injector is EMR-appropriate — use it','"Wait for ALS" is never correct when a life-saving intervention is available now'] }
+          },
+        ]
+      },
+      {
+        scene: 'Epinephrine administered to the right lateral thigh. One minute later: her breathing improves slightly, RR down to 20. Lip swelling slightly reduced. SpO2 up to 96%. However, she complains of a racing heart and trembling hands.',
+        vitals: {LOC:'Alert',RR:'20/min',HR:'136',SpO2:'96%',Skin:'Less Flushed'},
+        question: 'Patient improving but tachycardic and trembling. EMS is 5 minutes. She asks if she needs more epi. What do you tell her and do?',
+        options: [
+          {
+            text: 'Reassure her — tachycardia and tremors are expected epinephrine side effects. Monitor closely.',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'Tachycardia and tremors are expected, predictable side effects of epinephrine. This does not indicate a problem — it indicates the drug is working. Continue monitoring for symptom recurrence, which may require a second dose by EMS.', teaching:['Epi side effects: tachycardia, tremors, anxiety, headache, pallor','These are expected — reassure the patient','Monitor for biphasic anaphylaxis — symptoms can return 1–8 hours later','EMS will assess need for second dose and IV diphenhydramine'] }
+          },
+          {
+            text: 'Administer a second epi dose immediately — HR is still elevated',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not Yet', text:'A second dose is indicated if symptoms are not improving or are worsening after 5–10 minutes. She IS improving. Tachycardia is a side effect of the first dose, not a sign of failure. Wait and monitor — let EMS reassess.', teaching:['Second epi: symptoms not improving after 5–10 min, or worsening','She IS improving — do not re-dose without clinical indication','Over-dosing epi risks hypertensive crisis, arrhythmia'] }
+          },
+          {
+            text: 'Tell her the tachycardia means the epinephrine is causing a heart attack',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Do Not Say This', text:'This is factually incorrect and would cause significant patient panic, potentially worsening her hemodynamics. Tachycardia post-epi is a normal, expected pharmacologic effect. Always calm and reassure.', teaching:['Never alarm patients with inaccurate clinical language','Epinephrine tachycardia is expected and temporary','Patient communication is part of EMR care'] }
+          },
+          {
+            text: 'Lay her flat now — shock protocol since HR is 136',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'The tachycardia is a medication side effect, not a new shock state. She is improving. Laying her flat will increase her respiratory effort — keep her upright. Manage the cause (anaphylaxis), not the symptom (HR).', teaching:['Treat the cause, not just the vital sign number','HR 136 post-epi = drug effect, not new shock','Continue upright position — respiratory compromise still present'] }
+          },
+        ]
+      }
+    ]
+  },
+
+  // ─────────────────────────────
+  // MEDICAL — SEIZURE
+  // ─────────────────────────────
+  {
+    id: 'medical_03',
+    title: 'Seizure at the Mall',
+    category: 'Medical Emergency',
+    difficulty: 'easy',
+    dispatch: 'DISPATCH: 19-year-old male, witnessed seizure at a shopping mall. Currently postictal.',
+    steps: [
+      {
+        scene: 'A 19-year-old male is on the floor, surrounded by bystanders. He is no longer seizing — he is confused, slow to respond, and mumbling. He bit his tongue during the seizure. There is some blood from the mouth and he is breathing noisily. His friend says he has no seizure history and this came out of nowhere.',
+        vitals: {LOC:'Confused/Postictal',RR:'16/min',HR:'100',SpO2:'95%',Skin:'Flushed'},
+        question: 'First-time seizure, now postictal. He is breathing noisily. Your first action:',
+        options: [
+          {
+            text: 'Position in recovery position — protect airway, let postictal phase resolve',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'The recovery position protects the airway from blood and secretions (tongue bite), maintains airway patency during altered consciousness, and prevents aspiration. The noisy breathing is likely positional — recovery position will help. Do not restrain; the seizure has stopped.', teaching:['Recovery position: standard for postictal/altered consciousness + no spinal injury','Blood/secretions in airway = aspiration risk','Postictal phase is normal — confusion and lethargy resolve over minutes','Do not restrain or put anything in the mouth'] }
+          },
+          {
+            text: 'Insert an OPA — he has noisy respirations',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not Yet', text:'He is confused but responding — he likely has an intact gag reflex. OPA in a patient with a gag reflex will trigger vomiting and laryngospasm. Recovery position will improve his airway without this risk.', teaching:['OPA: absent gag reflex only','Postictal patients often have intact gag reflex','Recovery position first — reassess need for adjunct','If he becomes fully unresponsive, reassess for OPA'] }
+          },
+          {
+            text: 'Hold him down — he may seize again',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'Do not restrain a postictal patient. The seizure has ended. Restraint is not necessary and can agitate the patient, making the postictal confusion worse. Clear the area of hazards instead.', teaching:['Do not restrain postictal patients','Clear the area of hard or sharp objects','If seizing: protect, do not restrain, time the seizure'] }
+          },
+          {
+            text: 'Suction the mouth aggressively to clear blood',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Not First', text:'Recovery position comes first to let blood and secretions drain naturally. If blood pools and creates a suction-level airway compromise, then suction with a rigid tip. Aggressive suctioning of an altered patient with a gag reflex risks vomiting.', teaching:['Recovery position → allow natural drainage','Suction if: recovery position insufficient OR large volume of fluid','Rigid tip suction: only in areas you can see','Maximum suction time: 15 seconds'] }
+          },
+        ]
+      },
+      {
+        scene: 'Patient is in recovery position. He is becoming more alert over 3 minutes — now answering questions slowly. He has no memory of the seizure. He denies any prior seizure history and takes no medications. His friend mentions he had an energy drink and hasn\'t slept in 2 days.',
+        vitals: {LOC:'Alert/Slow',RR:'16/min',HR:'94',SpO2:'97%',Skin:'Normal'},
+        question: 'He is now alert and asking to go home. He says he feels fine. What do you tell him?',
+        options: [
+          {
+            text: 'Strongly encourage EMS evaluation — first-time seizure requires medical workup',
+            correct: true,
+            outcome: { type:'good', icon:'✅', title:'Correct!', text:'A first-time seizure in a 19-year-old with no history requires medical evaluation to rule out serious causes: hypoglycemia, drug use, intracranial pathology, cardiac arrhythmia, or electrolyte abnormality. He cannot safely drive and should not be left alone.', teaching:['First-time seizure = mandatory medical evaluation','Never leave a postictal patient alone — could re-seize','He cannot legally or safely drive after a seizure','Document refusal of care thoroughly if he declines EMS'] }
+          },
+          {
+            text: 'Let him go — he is alert and the seizure stopped on its own',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'A first-time unprovoked seizure in a young adult requires a full medical workup. Sleep deprivation and energy drinks can lower seizure threshold but do not explain a first-time event. Allowing him to leave without evaluation is unsafe and a liability.', teaching:['Do not dismiss first-time seizures as benign','Seizure causes: hypoglycemia, drugs, cardiac, intracranial, metabolic','Your job is to strongly advise and document — not detain'] }
+          },
+          {
+            text: 'Call his parents — he is a minor and cannot consent',
+            correct: false,
+            outcome: { type:'bad', icon:'❌', title:'Incorrect', text:'At 19, he is a legal adult with full decision-making capacity. You cannot contact his parents without his consent. He can refuse care if he is competent. Document the refusal.', teaching:['Age of majority: 18 in most states','Adults = full decision-making capacity unless altered or impaired','HIPAA: cannot contact family without patient consent','Competent adult refusal: document thoroughly, have them sign'] }
+          },
+          {
+            text: 'Perform a full neurological assessment and report findings to EMS',
+            correct: false,
+            outcome: { type:'neutral', icon:'⚠️', title:'Reasonable But Not Priority', text:'While gathering neuro assessment data is useful for EMS, the priority is ensuring he stays, accepts care, and does not leave or drive. First encourage him to wait for EMS, then gather your assessment.', teaching:['Patient cooperation and safety first','Assessment data is useful but secondary to patient decision-making','EMS will perform their own neuro assessment'] }
+          },
+        ]
+      }
+    ]
+  }
+];
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+const SCREENS = ['roleScreen','hostSetup','hostLobby','hostGame','studentJoin','studentLobby','studentGame','finalScreen'];
+function show(id) { SCREENS.forEach(s => document.getElementById(s).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); }
+
+// ══════════════════════════════════════════════
+// SHARED STATE
+// ══════════════════════════════════════════════
+let roomCode = null, roomRef = null, playerRef = null, playerName = null;
+let unsubs = [], selectedScenario = null, currentStepIdx = 0;
+let currentScenario = null, isHost = false;
+let stepAnswered = false, stepRevealed = false;
+let playerScore = 0;
+
+// ══════════════════════════════════════════════
+// HOST — SETUP
+// ══════════════════════════════════════════════
+function genCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = 'TFD';
+  for (let i = 0; i < 3; i++) r += c[Math.floor(Math.random() * c.length)];
+  return r;
+}
+
+async function createRoom() {
+  isHost = true;
+  roomCode = genCode();
+  roomRef = db.collection('scenarioRooms').doc(roomCode);
+  await roomRef.set({ status: 'lobby', scenario: null, stepIdx: -1, revealed: false, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  document.getElementById('dispCode').textContent = roomCode;
+  show('hostLobby');
+  buildScenarioSelector();
+  listenLobby();
+}
+
+function buildScenarioSelector() {
+  // Category filters
+  const cats = [...new Set(SCENARIOS.map(s => s.category))];
+  const filterEl = document.getElementById('catFilters');
+  const allBtn = document.createElement('button');
+  allBtn.className = 'btn ghost'; allBtn.style.cssText = 'width:auto;margin:0;padding:5px 10px;font-size:11px;';
+  allBtn.textContent = 'All'; allBtn.onclick = () => buildScenarioGrid('All');
+  filterEl.appendChild(allBtn);
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn ghost'; btn.style.cssText = 'width:auto;margin:0;padding:5px 10px;font-size:11px;';
+    btn.textContent = cat.split(' ')[0]; btn.onclick = () => buildScenarioGrid(cat);
+    filterEl.appendChild(btn);
+  });
+  buildScenarioGrid('All');
+}
+
+function buildScenarioGrid(catFilter) {
+  const grid = document.getElementById('scenarioGrid');
+  const filtered = catFilter === 'All' ? SCENARIOS : SCENARIOS.filter(s => s.category === catFilter);
+  grid.innerHTML = '';
+  filtered.forEach(sc => {
+    const card = document.createElement('div');
+    card.className = 'scenario-card' + (selectedScenario?.id === sc.id ? ' selected' : '');
+    const diffColor = sc.difficulty === 'easy' ? 'var(--green)' : sc.difficulty === 'medium' ? 'var(--gold)' : 'var(--red)';
+    card.innerHTML = `
+      <div class="sc-category">${sc.category}</div>
+      <div class="sc-title">${sc.title}</div>
+      <div class="sc-diff" style="color:${diffColor}">${sc.difficulty.toUpperCase()} · ${sc.steps.length} STEPS</div>
+    `;
+    card.onclick = () => {
+      selectedScenario = sc;
+      document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      document.getElementById('startBtn').disabled = false;
+    };
+    grid.appendChild(card);
+  });
+}
+
+function cancelRoom() { unsubs.forEach(u => u()); unsubs = []; if (roomRef) roomRef.delete().catch(() => {}); roomRef = null; roomCode = null; }
+
+function listenLobby() {
+  const u = roomRef.collection('players').onSnapshot(snap => {
+    const ps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    document.getElementById('pCount').textContent = ps.length;
+    document.getElementById('pList').innerHTML = ps.length
+      ? ps.map(p => `<div class="pchip"><span class="pchip-name">${p.name}</span><span class="pchip-status">READY</span></div>`).join('')
+      : '<div class="no-players"><span class="pulse"></span>No students yet</div>';
+  });
+  unsubs.push(u);
+}
+
+// ══════════════════════════════════════════════
+// HOST — START SCENARIO
+// ══════════════════════════════════════════════
+async function startScenario() {
+  if (!selectedScenario) return;
+  currentScenario = selectedScenario;
+  currentStepIdx = 0;
+  await roomRef.update({ status: 'playing', scenario: currentScenario.id, stepIdx: 0, phase: 'scene', revealed: false });
+  show('hostGame');
+  renderHostStep(0);
+  listenHostRoom();
+}
+
+function listenHostRoom() {
+  const u = roomRef.collection('players').onSnapshot(snap => {
+    const ps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderVotes(ps);
+  });
+  unsubs.push(u);
+}
+
+// ══════════════════════════════════════════════
+// HOST — RENDER STEP
+// ══════════════════════════════════════════════
+function renderHostStep(idx) {
+  if (!currentScenario) return;
+  const step = currentScenario.steps[idx];
+  if (!step) return;
+  stepAnswered = false; stepRevealed = false;
+
+  // Header
+  document.getElementById('hgTitle').textContent = currentScenario.title;
+  document.getElementById('hgRoom').textContent = `Room: ${roomCode}`;
+  document.getElementById('hgStep').textContent = `Step ${idx + 1} of ${currentScenario.steps.length}`;
+  const catColors = {'Airway & Breathing':'var(--blue)','Cardiac & CPR':'var(--red)','Trauma & Bleeding':'var(--red)','Medical Emergency':'var(--gold)'};
+  document.getElementById('hgCatTag').innerHTML = `<span class="tag" style="background:${catColors[currentScenario.category]||'var(--green-dim)'};color:var(--white);border:none;">${currentScenario.category}</span>`;
+
+  // Vitals
+  const vs = step.vitals;
+  const vitalDefs = [
+    {key:'LOC',label:'LOC'},
+    {key:'RR',label:'RESP RATE'},
+    {key:'HR',label:'HEART RATE'},
+    {key:'SpO2',label:'SpO2'},
+    {key:'Skin',label:'SKIN'},
+  ];
+  document.getElementById('vitalsStrip').innerHTML = vitalDefs.map(v => {
+    const val = vs[v.key] || '—';
+    const cls = val.includes('↑') || val.includes('BVM') ? 'normal' : val.includes('Unresponsive') || val.includes('Absent') || val.includes('No pulse') ? 'abnormal' : val.includes('Confused') || val.includes('Anxious') ? 'warning' : '';
+    return `<div class="vital-box"><span class="vital-label">${v.label}</span><span class="vital-value ${cls}">${val}</span></div>`;
+  }).join('');
+
+  // Scene
+  document.getElementById('sceneDispatch').textContent = idx === 0 ? currentScenario.dispatch : `STEP ${idx + 1}`;
+  document.getElementById('sceneText').textContent = step.scene;
+  document.getElementById('sceneFindings').innerHTML = '';
+
+  // Decision
+  const decCard = document.getElementById('decisionCard');
+  decCard.classList.remove('hidden');
+  document.getElementById('decisionQ').textContent = step.question;
+  const letters = ['A','B','C','D'];
+  document.getElementById('decisionOpts').innerHTML = step.options.map((o, i) => `
+    <div class="decision-opt" id="hopt-${i}">
+      <span class="opt-key-badge">${letters[i]}</span>
+      <span class="opt-text">${o.text}</span>
+      <div style="flex:1;"></div>
+      <span class="opt-votes" id="ovotes-${i}">0</span>
+    </div>
+  `).join('');
+
+  // Outcome
+  document.getElementById('outcomeCard').classList.add('hidden');
+  document.getElementById('teachingPoints').classList.add('hidden');
+
+  // Controls
+  document.getElementById('btnReveal').disabled = false;
+  document.getElementById('btnNext').disabled = true;
+
+  // Reset player answers
+  resetPlayerAnswers();
+}
+
+async function resetPlayerAnswers() {
+  const ps = await roomRef.collection('players').get();
+  const batch = db.batch();
+  ps.docs.forEach(d => batch.update(d.ref, { answer: null, correct: null }));
+  await batch.commit();
+  await roomRef.update({ phase: 'voting', revealed: false });
+}
+
+function renderVotes(players) {
+  if (!currentScenario) return;
+  const step = currentScenario.steps[currentStepIdx];
+  if (!step) return;
+
+  const answered = players.filter(p => p.answer !== null && p.answer !== undefined);
+  document.getElementById('rpCount').textContent = `${answered.length} / ${players.length}`;
+
+  // Tally votes
+  const tally = [0, 0, 0, 0];
+  answered.forEach(p => { if (p.answer !== undefined && p.answer !== null) tally[p.answer]++; });
+  const maxVotes = Math.max(...tally, 1);
+
+  step.options.forEach((_, i) => {
+    const el = document.getElementById(`ovotes-${i}`);
+    if (el) el.textContent = tally[i];
+    const opt = document.getElementById(`hopt-${i}`);
+    if (opt && !stepRevealed) {
+      opt.classList.toggle('leading', tally[i] === maxVotes && tally[i] > 0);
+    }
+  });
+
+  // Response grid
+  document.getElementById('rpGrid').innerHTML = players.map(p => {
+    const has = p.answer !== null && p.answer !== undefined;
+    const lbl = has ? (['A','B','C','D'][p.answer] || p.answer) : '—';
+    const badge = !has ? 'waiting' : stepRevealed ? (p.correct ? 'correct' : 'wrong') : 'waiting';
+    const txt = !has ? 'Thinking…' : stepRevealed ? (p.correct ? '✓ Correct' : '✗ Wrong') : 'Voted ✓';
+    return `<div class="rp-row"><span class="rp-name">${p.name}</span><span class="rp-answer">${lbl}</span><span class="rp-badge ${badge}">${txt}</span></div>`;
+  }).join('') || '<div style="color:var(--muted);font-family:var(--mono);font-size:12px;">No students yet</div>';
+}
+
+// ══════════════════════════════════════════════
+// HOST — REVEAL
+// ══════════════════════════════════════════════
+async function hostReveal() {
+  stepRevealed = true;
+  document.getElementById('btnReveal').disabled = true;
+  document.getElementById('btnNext').disabled = false;
+
+  const step = currentScenario.steps[currentStepIdx];
+  const correctIdx = step.options.findIndex(o => o.correct);
+
+  // Highlight options
+  step.options.forEach((_, i) => {
+    const el = document.getElementById(`hopt-${i}`);
+    if (el) {
+      el.classList.remove('leading');
+      el.classList.add(i === correctIdx ? 'correct-reveal' : 'wrong-reveal');
+    }
+  });
+
+  // Show outcome
+  const winningOpt = step.options[correctIdx];
+  const oc = document.getElementById('outcomeCard');
+  oc.className = `outcome-card ${winningOpt.outcome.type}`;
+  document.getElementById('outcomeIcon').textContent = winningOpt.outcome.icon;
+  document.getElementById('outcomeTitle').textContent = winningOpt.outcome.title;
+  document.getElementById('outcomeText').textContent = winningOpt.outcome.text;
+
+  // Teaching points
+  if (winningOpt.outcome.teaching?.length) {
+    document.getElementById('teachingPoints').classList.remove('hidden');
+    document.getElementById('tpList').innerHTML = winningOpt.outcome.teaching.map(t => `
+      <div class="tp-item"><span class="tp-bullet">→</span><span>${t}</span></div>
+    `).join('');
+  }
+  oc.classList.remove('hidden');
+
+  // Award points to correct players
+  await roomRef.update({ phase: 'revealed', revealed: true, correctIdx });
+  const ps = await roomRef.collection('players').get();
+  const batch = db.batch();
+  ps.docs.forEach(d => {
+    const data = d.data();
+    if (data.answer !== null && data.answer !== undefined) {
+      const ok = Number(data.answer) === correctIdx;
+      batch.update(d.ref, { correct: ok, score: (data.score || 0) + (ok ? 100 : 0) });
+    }
+  });
+  await batch.commit();
+}
+
+// ══════════════════════════════════════════════
+// HOST — NEXT STEP / END
+// ══════════════════════════════════════════════
+async function hostNext() {
+  const nextIdx = currentStepIdx + 1;
+  if (nextIdx >= currentScenario.steps.length) {
+    hostEnd();
+    return;
+  }
+  currentStepIdx = nextIdx;
+  await roomRef.update({ stepIdx: nextIdx, phase: 'scene', revealed: false });
+  renderHostStep(nextIdx);
+}
+
+async function hostRestart() {
+  show('hostLobby');
+  selectedScenario = null;
+  document.getElementById('startBtn').disabled = true;
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+  await roomRef.update({ status: 'lobby', scenario: null, stepIdx: -1, phase: 'lobby', revealed: false });
+}
+
+async function hostEnd() {
+  unsubs.forEach(u => u());
+  await roomRef.update({ status: 'ended' });
+  const snap = await roomRef.collection('players').get();
+  const players = snap.docs.map(d => d.data()).sort((a, b) => (b.score || 0) - (a.score || 0));
+  showFinal(players);
+}
+
+// ══════════════════════════════════════════════
+// STUDENT — JOIN
+// ══════════════════════════════════════════════
+async function joinRoom() {
+  const code = document.getElementById('jCode').value.trim().toUpperCase();
+  const name = document.getElementById('jName').value.trim();
+  const errEl = document.getElementById('jErr');
+  errEl.style.display = 'none';
+  if (!code || code.length < 3) { errEl.textContent = 'Enter a valid room code.'; errEl.style.display = 'block'; return; }
+  if (!name) { errEl.textContent = 'Enter your name.'; errEl.style.display = 'block'; return; }
+  try {
+    const snap = await db.collection('scenarioRooms').doc(code).get();
+    if (!snap.exists) { errEl.textContent = 'Room not found.'; errEl.style.display = 'block'; return; }
+    if (snap.data().status === 'ended') { errEl.textContent = 'This session has ended.'; errEl.style.display = 'block'; return; }
+    roomCode = code; playerName = name;
+    roomRef = db.collection('scenarioRooms').doc(code);
+    playerRef = roomRef.collection('players').doc();
+    await playerRef.set({ name, score: 0, answer: null, correct: null });
+    document.getElementById('sLobbyName').textContent = name;
+    document.getElementById('sLobbyCode').textContent = code;
+    document.getElementById('sgName').textContent = name;
+    document.getElementById('sgRoom').textContent = `Room: ${code}`;
+    show('studentLobby');
+    listenAsStudent();
+  } catch(e) { errEl.textContent = 'Connection error.'; errEl.style.display = 'block'; console.error(e); }
+}
+
+// ══════════════════════════════════════════════
+// STUDENT — LISTEN
+// ══════════════════════════════════════════════
+function listenAsStudent() {
+  let lastStepIdx = -1;
+  let lastPhase = '';
+
+  const u = roomRef.onSnapshot(snap => {
+    const d = snap.data();
+    if (!d) return;
+
+    if (d.status === 'ended') {
+      roomRef.collection('players').get().then(s => showFinal(s.docs.map(x => x.data()).sort((a,b) => (b.score||0)-(a.score||0))));
+      return;
+    }
+    if (d.status === 'playing') show('studentGame');
+    else return;
+
+    const sc = SCENARIOS.find(s => s.id === d.scenario);
+    if (!sc) return;
+
+    currentScenario = sc;
+    const idx = d.stepIdx || 0;
+
+    // Update scenario header
+    document.getElementById('sgCat').textContent = sc.category;
+    document.getElementById('sgTitle').textContent = sc.title;
+    document.getElementById('sgStepInfo').textContent = `Step ${idx + 1} of ${sc.steps.length}`;
+
+    if (idx !== lastStepIdx) {
+      lastStepIdx = idx;
+      stepAnswered = false;
+      renderStudentStep(sc.steps[idx], idx);
+    }
+
+    if (d.phase === 'revealed' && lastPhase !== 'revealed') {
+      lastPhase = 'revealed';
+      playerRef.get().then(snap => {
+        const pd = snap.data();
+        revealStudentAnswer(pd, d.correctIdx, sc.steps[idx]);
+      });
+    } else if (d.phase !== 'revealed') {
+      lastPhase = d.phase;
+    }
+  });
+  unsubs.push(u);
+
+  const u2 = playerRef.onSnapshot(snap => {
+    const d = snap.data();
+    if (d) { playerScore = d.score || 0; document.getElementById('sgScore').textContent = `${playerScore} pts`; }
+  });
+  unsubs.push(u2);
+}
+
+function renderStudentStep(step, idx) {
+  document.getElementById('sgQuestion').classList.remove('hidden');
+  document.getElementById('sgQText').textContent = step.question;
+  document.getElementById('sgStatus').classList.add('hidden');
+  document.getElementById('sgOutcome').classList.add('hidden');
+  document.getElementById('sgWaiting').classList.add('hidden');
+
+  const letters = ['A','B','C','D'];
+  document.getElementById('sgOptions').classList.remove('hidden');
+  document.getElementById('sgOptions').innerHTML = step.options.map((o, i) => `
+    <button class="sg-opt" id="sopt-${i}" onclick="studentVote(${i})">
+      <span class="sg-opt-letter">${letters[i]}</span>${o.text}
+    </button>
+  `).join('');
+}
+
+async function studentVote(idx) {
+  if (stepAnswered) return;
+  stepAnswered = true;
+  document.querySelectorAll('.sg-opt').forEach((b, i) => {
+    b.disabled = true;
+    if (i === idx) b.classList.add('selected');
+  });
+  await playerRef.update({ answer: idx });
+  document.getElementById('sgWaiting').classList.remove('hidden');
+  document.getElementById('sgWaiting').innerHTML = '<span class="pulse"></span>Answer locked in — waiting for instructor to reveal…';
+}
+
+function revealStudentAnswer(playerData, correctIdx, step) {
+  document.querySelectorAll('.sg-opt').forEach((b, i) => {
+    b.disabled = true;
+    b.classList.remove('selected');
+    if (i === correctIdx) b.classList.add('show-correct');
+    else b.classList.add('wrong');
+  });
+
+  const isCorrect = playerData?.correct === true;
+  const status = document.getElementById('sgStatus');
+  document.getElementById('sgIcon').textContent = isCorrect ? '🎉' : '📖';
+  document.getElementById('sgTxt').textContent = isCorrect ? 'Correct!' : 'Study the correct answer above';
+  document.getElementById('sgPts').textContent = isCorrect ? '+100 pts' : '';
+  status.classList.remove('hidden');
+
+  // Show outcome summary
+  const correctOpt = step.options[correctIdx];
+  const out = document.getElementById('sgOutcome');
+  out.className = `sg-outcome ${correctOpt.outcome.type}`;
+  document.getElementById('sgOutcomeTitle').textContent = correctOpt.outcome.title;
+  document.getElementById('sgOutcomeText').textContent = correctOpt.outcome.text;
+  out.classList.remove('hidden');
+
+  document.getElementById('sgWaiting').classList.remove('hidden');
+  document.getElementById('sgWaiting').innerHTML = '<span class="pulse"></span>Waiting for next step…';
+}
+
+// ══════════════════════════════════════════════
+// FINAL
+// ══════════════════════════════════════════════
+function showFinal(players) {
+  unsubs.forEach(u => u());
+  const medals = ['🥇','🥈','🥉'], cls = ['p1','p2','p3'];
+  document.getElementById('finalPodium').innerHTML = players.slice(0, 8).map((p, i) => `
+    <div class="fp-card ${cls[i]||''}">
+      <div class="fp-medal">${medals[i]||`#${i+1}`}</div>
+      <div class="fp-name">${p.name}</div>
+      <div class="fp-pts">${p.score||0}</div>
+    </div>
+  `).join('');
+  show('finalScreen');
+}
+
+show('roleScreen');
+</script>
+</body>
+</html>
