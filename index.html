@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tifton Fire Department — Training Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #0d1b2e;
+    --navy2:  #162640;
+    --red:    #cc1f1f;
+    --red2:   #e02424;
+    --gold:   #c9922a;
+    --gold2:  #e5a830;
+    --white:  #f4f0e8;
+    --gray:   #8a9ab0;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #1e3a5f 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(204,31,31,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 90% 20%, rgba(201,146,42,0.08) 0%, transparent 60%),
+      var(--navy);
+  }
+  .bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* ── DIAGONAL ACCENT ── */
+  .diagonal {
+    position: fixed;
+    top: 0; right: -10%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(165deg, rgba(204,31,31,0.06) 0%, transparent 60%);
+    border-left: 1px solid rgba(204,31,31,0.12);
+    transform: skewX(-8deg);
+    z-index: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+
+  /* ── HEADER BADGE ── */
+  .dept-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 48px;
+    padding: 8px 20px 8px 10px;
+    border: 1px solid rgba(201,146,42,0.3);
+    border-radius: 40px;
+    background: rgba(201,146,42,0.06);
+    animation: fadeDown 0.6s ease both;
+  }
+  .dept-badge .shield {
+    width: 28px; height: 28px;
+    background: var(--red);
+    clip-path: polygon(50% 0%, 100% 20%, 100% 70%, 50% 100%, 0% 70%, 0% 20%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .dept-badge span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold2);
+  }
+
+  /* ── LOGO AREA ── */
+  .logo-wrap {
+    margin-bottom: 20px;
+    animation: fadeDown 0.7s ease 0.1s both;
+  }
+  .logo-wrap img {
+    width: 120px; height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px rgba(204,31,31,0.4)) drop-shadow(0 0 60px rgba(204,31,31,0.15));
+  }
+
+  /* ── HEADLINE ── */
+  .headline {
+    text-align: center;
+    margin-bottom: 12px;
+    animation: fadeDown 0.7s ease 0.2s both;
+  }
+  .headline h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 8vw, 80px);
+    letter-spacing: 4px;
+    line-height: 0.95;
+    color: var(--white);
+    text-shadow: 0 0 60px rgba(204,31,31,0.3);
+  }
+  .headline h1 span {
+    color: var(--red2);
+  }
+
+  .sub {
+    text-align: center;
+    font-size: 14px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 56px;
+    animation: fadeDown 0.7s ease 0.3s both;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex; align-items: center; gap: 16px;
+    width: 100%; max-width: 480px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.7s ease 0.4s both;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,146,42,0.4), transparent);
+  }
+  .divider span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ── PORTAL CARDS ── */
+  .portals {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 560px;
+    animation: fadeUp 0.7s ease 0.5s both;
+  }
+
+  .portal-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 36px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+  .portal-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 12px;
+    transition: opacity 0.25s ease;
+  }
+  .portal-card:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Student card */
+  .portal-card.student {
+    background: linear-gradient(145deg, #162640 0%, #0d1b2e 100%);
+    border: 1px solid rgba(37, 99, 235, 0.4);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .portal-card.student::before {
+    background: radial-gradient(ellipse at 50% 0%, rgba(37,99,235,0.12) 0%, transparent 70%);
+  }
+  .portal-card.student:hover {
+    box-shadow: 0 12px 40px rgba(37,99,235,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+    border-color: rgba(37,99,235,0.7);
+  }
+
+  /* Instructor card */
+  .portal-card.instructor {
+    background: linear-gradient(145deg, #2a1010 0%, #1a0a0a 100%);
+    border: 1px solid rgba(204,31,31,0.4);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .portal-card.instructor::before {
+    background: radial-gradient(ellipse at 50% 0%, rgba(204,31,31,0.15) 0%, transparent 70%);
+  }
+  .portal-card.instructor:hover {
+    box-shadow: 0 12px 40px rgba(204,31,31,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+    border-color: rgba(204,31,31,0.7);
+  }
+
+  .portal-icon {
+    font-size: 36px;
+    line-height: 1;
+    position: relative; z-index: 1;
+  }
+
+  .portal-label {
+    position: relative; z-index: 1;
+    text-align: center;
+  }
+  .portal-label .title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .portal-label .desc {
+    font-size: 12px;
+    color: var(--gray);
+    letter-spacing: 0.5px;
+  }
+
+  .portal-arrow {
+    position: relative; z-index: 1;
+    font-size: 18px;
+    opacity: 0.4;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .portal-card:hover .portal-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  .portal-card.student .portal-arrow { color: #60a5fa; }
+  .portal-card.instructor .portal-arrow { color: var(--red2); }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 56px;
+    text-align: center;
+    animation: fadeUp 0.7s ease 0.6s both;
+  }
+  .footer-line {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .footer-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0.6;
+  }
+  .footer p {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(138,154,176,0.5);
+  }
+  .footer .year {
+    color: var(--gold);
+    opacity: 0.6;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 480px) {
+    .portals { grid-template-columns: 1fr; max-width: 320px; }
+    .headline h1 { font-size: 52px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="diagonal"></div>
+
+<div class="page">
+
+  <div class="dept-badge">
+    <div class="shield">🔥</div>
+    <span>Georgia OEMST Certified Program</span>
+  </div>
+
+  <div class="logo-wrap">
+    <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADIAMgDASIAAhEBAxEB/8QAGwABAAMBAQEBAAAAAAAAAAAAAAQFBgMCAf/EADYQAAICAQMCBAQEBQQDAAAAAAABAgMEERIhBTFBUWETInGBkTJCobEUIzNSwdHwBhUk4fH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A/VIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB9AAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdVtkLY81clJejPkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB1W2QtjzVyUl6M+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdVtkLY81clJejPkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdVtkLY81clJejPkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdVtkLY81clJejPkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAdVtkLY81clJejPkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//Z" alt="TFD Logo" />
+  </div>
+
+  <div class="headline">
+    <h1>Tifton <span>Fire</span><br>Department</h1>
+  </div>
+  <p class="sub">EMR Initial Education · Training Portal</p>
+
+  <div class="divider">
+    <span>Select Your Portal</span>
+  </div>
+
+  <div class="portals">
+    <a class="portal-card student" href="EMR_Student_Portal.html">
+      <div class="portal-icon">🎓</div>
+      <div class="portal-label">
+        <span class="title">Student</span>
+        <span class="desc">Exams, grades & resources</span>
+      </div>
+      <div class="portal-arrow">→</div>
+    </a>
+
+    <a class="portal-card instructor" href="attendance-tracker-firebase.html">
+      <div class="portal-icon">👨‍🏫</div>
+      <div class="portal-label">
+        <span class="title">Instructor</span>
+        <span class="desc">Attendance, grades & admin</span>
+      </div>
+      <div class="portal-arrow">→</div>
+    </a>
+  </div>
+
+  <div class="footer">
+    <div class="footer-line">
+      <div class="footer-dot"></div>
+      <div class="footer-dot"></div>
+      <div class="footer-dot"></div>
+    </div>
+    <p>Tifton Fire Department &nbsp;·&nbsp; <span class="year">Recruit Class 2026</span> &nbsp;·&nbsp; Georgia OEMST</p>
+  </div>
+
+</div>
+
+</body>
+</html>
