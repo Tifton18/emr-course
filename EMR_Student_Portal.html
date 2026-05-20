@@ -252,8 +252,6 @@ body {
   .cert-del-btn { background:none;border:1px solid #fca5a5;border-radius:8px;color:#f87171;padding:7px 10px;font-size:13px;cursor:pointer;transition:all 0.2s; }
   .cert-del-btn:hover { background:#fee2e2;border-color:#dc2626;color:#dc2626; }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 </head>
 <body>
  
@@ -269,7 +267,7 @@ body {
     <input class="modal-input" id="siName" type="text" placeholder="Enter your full name…" autocomplete="off" />
     <label class="modal-label" for="siId">Student ID</label>
     <input class="modal-input" id="siId" type="text" placeholder="e.g. TFD-001" autocomplete="off" style="text-transform:uppercase;letter-spacing:1px;" />
-    <div class="modal-error" id="siError">Name or Student ID not found. Please check your entry.</div>
+    <div class="modal-error" id="siError">Name or Student ID not recognized. Please check and try again.</div>
     <button class="modal-btn" id="siBtn" onclick="attemptSignIn()">Sign In</button>
     <div class="modal-footer">Contact your instructor if you have trouble signing in.</div>
   </div>
@@ -423,21 +421,9 @@ const FB = {
   apiKey: "AIzaSyBQGGn1JcsyVRuIovHhIMEm0q4kP48OjMw",
   projectId: "class-attendance-72cd9",
   storageBucket: "class-attendance-72cd9.firebasestorage.app",
-  authDomain: "class-attendance-72cd9.firebaseapp.com",
 };
-
-// Initialize Firebase for Auth (portal uses REST for Firestore but SDK for Auth)
-if (!firebase.apps.length) { firebase.initializeApp(FB); }
-const portalAuth = firebase.auth();
  
  
-// ── PORTAL AUTH ─────────────────────────────────────────────────────────────
-// The class passcode is stored as a Firebase Auth account:
-//   Email: class2026@tiftonfire.emr  (create this in Firebase Console → Auth)
-//   Password: whatever you set as the class passcode for students
-// Students enter the passcode — the portal signs in with this shared account
-const PORTAL_CLASS_EMAIL = 'class2026@tiftonfire.emr';
-
 // ── EXAM DEFINITIONS ─────────────────────────────────
 // Exams are loaded dynamically from Firebase (managed via Content Manager in tracker)
 // Fallback defaults used if Firebase has no exam data yet
@@ -904,57 +890,58 @@ function showSignIn() {
 }
  
 function attemptSignIn() {
-  const nameVal  = document.getElementById('siName').value.trim();
-  const idVal    = document.getElementById('siId').value.trim().toUpperCase();
-  const error    = document.getElementById('siError');
-
-  error.style.display = 'none';
-  if (!nameVal) { error.textContent = 'Please enter your full name.';  error.style.display = 'block'; return; }
-  if (!idVal)   { error.textContent = 'Please enter your Student ID.'; error.style.display = 'block'; return; }
-
-  completeStudentSignIn(nameVal, idVal, error);
-}
-
-
-function completeStudentSignIn(nameVal, idVal, error) {
-  // Normalize ID: uppercase, strip spaces, add dash if missing
-  function normalizeId(raw) {
-    raw = raw.toUpperCase().replace(/\s/g,'');
-    if (/^TFD\d+$/.test(raw)) raw = 'TFD-' + raw.slice(3);
-    return raw;
-  }
-  const normId = normalizeId(idVal);
-  const normName = nameVal.toLowerCase().replace(/\s+/g,' ').trim();
-
-  const match = STUDENT_ROSTER.find(s => {
-    const sName = s.name.toLowerCase().replace(/\s+/g,' ').trim();
-    const sId   = normalizeId(s.id);
-    return sName === normName && sId === normId;
-  });
-
+  const nameVal = document.getElementById("siName").value.trim();
+  const idVal   = document.getElementById("siId").value.trim().toUpperCase();
+  const error   = document.getElementById("siError");
+  const btn     = document.getElementById("siBtn");
+ 
+  error.style.display = "none";
+ 
+  // Find matching roster entry — forgiving on spacing, case, and ID format
+  // Normalize ID: uppercase, strip spaces, add dash if missing (e.g. "tfd001" -> "TFD-001")
+  const normalizeId = raw => raw.toUpperCase().replace(/\s/g,'').replace(/^(TFD)(\d+)$/, 'TFD-$2');
+  const normalizeName = raw => raw.trim().toLowerCase().replace(/\s+/g,' ');
+  const idNorm = normalizeId(idVal);
+  const nameNorm = normalizeName(nameVal);
+ 
+  const match = STUDENT_ROSTER.find(s =>
+    normalizeName(s.name) === nameNorm &&
+    s.name.trim() !== ""
+  );
+ 
+  // Debug log to help diagnose mismatches
+  console.log('Sign in attempt:', { entered: {name: nameNorm, id: idNorm} });
+  console.log('Roster entries:', STUDENT_ROSTER.map(s => ({ id: normalizeId(s.id), name: normalizeName(s.name) })));
+ 
   if (!match) {
-    error.textContent = 'Name or Student ID not found on the roster. Check your entry or contact your instructor.';
-    error.style.display = 'block';
+    error.style.display = "block";
+    document.getElementById("siId").value = "";
+    document.getElementById("siId").focus();
     return;
   }
-
+ 
+  // Success — save to localStorage so they stay signed in
   currentSession = { id: match.id, name: match.name };
   currentStudent = match.name;
-  try { localStorage.setItem('tfd_session', JSON.stringify({ name: match.name, id: match.id })); } catch(e) {}
-
-  const header = document.getElementById('portalHeader');
-  header.classList.add('visible');
-  document.getElementById('portalAvatar').textContent = match.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('portalUserName').textContent = match.name;
-  document.getElementById('portalUserId').textContent = 'Student ID: ' + match.id;
-
-  const modal = document.getElementById('signinModal');
-  if (modal) modal.style.display = 'none';
-
+  try { localStorage.setItem('tfd_session', JSON.stringify(currentSession)); } catch(e) {}
+  document.getElementById("signInModal").classList.add("hidden");
+ 
+  // Show portal header
+  const header = document.getElementById("portalHeader");
+  header.classList.add("visible");
+  document.getElementById("portalAvatar").textContent = match.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  document.getElementById("portalUserName").textContent = match.name;
+  document.getElementById("portalUserId").textContent = "Student ID: " + match.id;
+ 
+  // Hide hero sign-in button, show main content
+  document.getElementById("signInHeroBtn").style.display = "none";
+  document.querySelector(".main").style.display = "block";
+ 
+  // Load grades
+  renderCourseTabs();
   loadStudentData(match.name);
 }
-
-
+ 
 function signOut() {
   currentSession = null;
   currentStudent = "";
