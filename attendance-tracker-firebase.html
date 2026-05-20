@@ -235,12 +235,12 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
  
 <div id="syncBar"></div>
 <div id="syncLabel">Connecting…</div>
-<div id="loadingOverlay" style="display:none;"><div class="spinner"></div><p>Connecting to cloud…</p></div>
+<div id="loadingOverlay"><div class="spinner"></div><p>Connecting to cloud…</p></div>
  
 <!-- INSTRUCTOR LOGIN -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-card">
-    <div class="login-logo"><div class="login-logo-circle">\ud83d\udd12</div></div>
+    <div class="login-logo"><div class="login-logo-circle">🔒</div></div>
     <div class="login-title">Instructor Sign In</div>
     <div class="login-sub">Tifton Fire Department · EMR Program</div>
     <label class="login-label" for="loginPw">Password</label>
@@ -253,7 +253,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
 <!-- INSTRUCTOR BAR -->
 <div class="instructor-bar hidden" id="instructorBar">
   <div>
-    <div class="instructor-bar-name">\ud83d\udc68‍\ud83c\udfeb Instructor</div>
+    <div class="instructor-bar-name">👨‍🏫 Instructor</div>
     <div class="instructor-bar-sub">Tifton Fire Department · EMR Program</div>
   </div>
   <button class="btn-instructor-signout" onclick="instructorSignOut()">Sign Out</button>
@@ -275,8 +275,8 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <button class="tab-btn" onclick="switchTab('grades',this)">Grades</button>
     <button class="tab-btn" onclick="switchTab('analysis',this)">Item Analysis</button>
     <button class="tab-btn" onclick="switchTab('summary',this)">Summary</button>
-    <button class="tab-btn" onclick="switchTab('content',this)">\ud83d\udccb Content</button>
-    <button class="tab-btn" onclick="switchTab('archives',this)">\ud83d\uddc2 Archives</button>
+    <button class="tab-btn" onclick="switchTab('content',this)">📋 Content</button>
+    <button class="tab-btn" onclick="switchTab('archives',this)">🗂 Archives</button>
   </div>
 </div>
  
@@ -371,7 +371,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <div class="cm-section" style="margin-bottom:28px;">
       <div class="cm-section-header">
         <div>
-          <div class="cm-section-title">\ud83d\udcda Courses</div>
+          <div class="cm-section-title">📚 Courses</div>
           <div class="cm-section-sub">Add, rename, reorder, or change the color of courses. Changes reflect immediately in the portal after saving.</div>
         </div>
       </div>
@@ -383,7 +383,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <!-- EXAMS SECTION -->
     <div class="cm-section">
       <div class="cm-section-header">
-        <div><div class="cm-section-title">\ud83c\udf93 Exams</div><div class="cm-section-sub">Add, remove, or reorder exams shown in the student portal</div></div>
+        <div><div class="cm-section-title">🎓 Exams</div><div class="cm-section-sub">Add, remove, or reorder exams shown in the student portal</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('exams')">+ Add Exam</button>
       </div>
       <div id="cm-exams"></div>
@@ -391,7 +391,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
  
     <div class="cm-section">
       <div class="cm-section-header">
-        <div><div class="cm-section-title">\ud83d\udccb Announcements</div><div class="cm-section-sub">Messages shown at the top of the student portal</div></div>
+        <div><div class="cm-section-title">📋 Announcements</div><div class="cm-section-sub">Messages shown at the top of the student portal</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('announcements')">+ Add</button>
       </div>
       <div id="cm-announcements"></div>
@@ -399,7 +399,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
  
     <div class="cm-section">
       <div class="cm-section-header">
-        <div><div class="cm-section-title">\ud83d\udd17 Links</div><div class="cm-section-sub">External reference links for students</div></div>
+        <div><div class="cm-section-title">🔗 Links</div><div class="cm-section-sub">External reference links for students</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('links')">+ Add</button>
       </div>
       <div id="cm-links"></div>
@@ -407,7 +407,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
  
     <div class="cm-section">
       <div class="cm-section-header">
-        <div><div class="cm-section-title">\ud83d\udcc4 Resources</div><div class="cm-section-sub">PDFs and study materials (paste a URL or Google Drive share link)</div></div>
+        <div><div class="cm-section-title">📄 Resources</div><div class="cm-section-sub">PDFs and study materials (paste a URL or Google Drive share link)</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('resources')">+ Add</button>
       </div>
       <div id="cm-resources"></div>
@@ -415,14 +415,14 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
  
     <div class="cm-section">
       <div class="cm-section-header">
-        <div><div class="cm-section-title">\ud83d\udcca Slides</div><div class="cm-section-sub">PowerPoint files — enter filename as uploaded to GitHub (e.g. Week1_Slides.pptx)</div></div>
+        <div><div class="cm-section-title">📊 Slides</div><div class="cm-section-sub">PowerPoint files — enter filename as uploaded to GitHub (e.g. Week1_Slides.pptx)</div></div>
         <button class="cm-add-btn" onclick="cmAddItem('slides')">+ Add</button>
       </div>
       <div id="cm-slides"></div>
     </div>
  
     <div class="cm-save-bar">
-      <button class="cm-save-btn" onclick="savePortalContent()">\ud83d\udcbe Save &amp; Publish to Portal</button>
+      <button class="cm-save-btn" onclick="savePortalContent()">💾 Save &amp; Publish to Portal</button>
     </div>
   </div>
  
@@ -515,7 +515,7 @@ table.grades-table { width:100%;border-collapse:collapse;font-size:13px; }
     <span style="color:#6366f1">E — Excused</span>
   </div>
   <button class="export-btn" onclick="exportReport()">⬇ Export / Print</button>
-  <button class="export-btn" onclick="switchTab('archives',document.querySelector('[onclick*=archives]'))" style="border-color:#bfdbfe;color:#1d6fdb;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#f0f6ff'">\ud83d\uddc2 Archives & Reset</button>
+  <button class="export-btn" onclick="switchTab('archives',document.querySelector('[onclick*=archives]'))" style="border-color:#bfdbfe;color:#1d6fdb;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#f0f6ff'">🗂 Archives & Reset</button>
 </div>
  
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -1083,7 +1083,7 @@ function renderSummary(){
       <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
         ${wavg!==null?`<span style="font-size:18px;font-weight:bold;color:${lc}">${wavg}%</span>`:''}
         <span class="letter-badge" style="color:${lc};border-color:${lc};background:${lc}11">${letter}</span>
-        <button onclick="showResetModal('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">\ud83d\uddd1 Reset Exams</button>
+        <button onclick="showResetModal('${escHtml(student.name)}')" title="Delete exam submissions" style="background:none;border:1px solid #fca5a5;border-radius:6px;color:#f87171;padding:4px 8px;font-size:11px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">🗑 Reset Exams</button>
       </div></div>${attStats}${gradesRow}`;
     // Add practice exam attempts to card (search all courses)
     const allDefs = Object.values(EXAM_DEFS).flat();
@@ -1096,7 +1096,7 @@ function renderSummary(){
     if (practiceAttempts.length > 0) {
       const practiceHtml = document.createElement('div');
       practiceHtml.style.cssText = 'margin-top:10px;padding-top:10px;border-top:1px solid #e6f0fb;';
-      practiceHtml.innerHTML = '<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">\ud83d\udcdd Practice Exams (ungraded)</div>'
+      practiceHtml.innerHTML = '<div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">📝 Practice Exams (ungraded)</div>'
         + '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
         + practiceAttempts.map(p => {
             const pct = p.result.pct;
@@ -1149,10 +1149,10 @@ async function loadStudentCertsForSummary(studentName, cardEl) {
     if (certs.length === 0) return;
     certs.sort((a,b) => b.uploadedAt.localeCompare(a.uploadedAt));
     const certsHtml = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #e6f0fb;">
-      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">\ud83c\udfc5 Certificates (${certs.length})</div>
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b82a0;margin-bottom:8px;">🏅 Certificates (${certs.length})</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;">
         ${certs.map(c => {
-          const icon = c.fileType === 'pdf' ? '\ud83d\udcc4' : '\ud83d\uddbc️';
+          const icon = c.fileType === 'pdf' ? '📄' : '🖼️';
           const date = c.uploadedAt ? new Date(c.uploadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
           return `<a href="${c.downloadUrl}" target="_blank" style="display:flex;align-items:center;gap:6px;background:#f0f6ff;border:1px solid #bfdbfe;border-radius:8px;padding:6px 12px;text-decoration:none;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#bfdbfe'">
             <span>${icon}</span>
@@ -1245,8 +1245,7 @@ async function confirmResetSelected(studentName) {
   if (checkboxes.length === 0) { alert('No exams selected.'); return; }
   const toDelete = [...checkboxes].map(cb => _resetModalDocs[parseInt(cb.dataset.idx)]);
   const labels = toDelete.map(d => d.examLabel).join(', ');
-  if (!confirm(`Delete "${labels}" for ${studentName}?\
-This cannot be undone.`)) return;
+  if (!confirm(`Delete "${labels}" for ${studentName}?\nThis cannot be undone.`)) return;
   document.getElementById('examResetModal').remove();
   setSyncStatus('syncing', 'Deleting…');
   let deleted = 0;
@@ -1535,7 +1534,7 @@ function buildAnswerBreakdown(q) {
         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
         const isCorrect = def === ps.correctDef;
         const barColor = count > 0 ? (isCorrect ? '#4ade80' : '#f87171') : '#e2e8f0';
-        const icon = count > 0 ? (isCorrect ? '✓' : '✗') : (isCorrect ? '★' : '');
+        const icon = count > 0 ? (isCorrect ? '\u2713' : '\u2717') : (isCorrect ? '\u2605' : '');
         const iconColor = isCorrect ? '#16a34a' : count > 0 ? '#dc2626' : '#94a3b8';
         html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">'
           + '<div style="width:14px;font-size:10px;font-weight:700;color:' + iconColor + ';text-align:center;flex-shrink:0;">' + icon + '</div>'
@@ -1893,10 +1892,10 @@ async function loadPortalContent() {
   // Seed default EMR exams if none saved yet
   if (portalContent.emr.exams.length === 0) {
     portalContent.emr.exams = [
-      { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'\ud83d\udccb', weight:'25% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management', active:true },
-      { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'\ud83d\udcdd', weight:'30% (Midterm)',      topics:'All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED', active:true },
-      { id:'week3',   name:'Week 3 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'\ud83d\udccb', weight:'25% (Module Exams)', topics:'Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies', active:true },
-      { id:'final',   name:'Final Exam',    file:'EMR_Final_Exam.html',   questions:'120', time:'120 min', passing:'70%', category:'final',   color:'#f87171', icon:'\ud83c\udf93', weight:'40% (Final)',        topics:'Comprehensive — all course topics', active:true },
+      { id:'week1',   name:'Week 1 Exam',   file:'EMR_Week1_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'EMS Systems · Anatomy & Physiology · Lifting & Moving · Airway Management', active:true },
+      { id:'midterm', name:'Midterm Exam',  file:'EMR_Midterm_Exam.html', questions:'50',  time:'50 min',  passing:'70%', category:'midterm', color:'#f97316', icon:'📝', weight:'30% (Midterm)',      topics:'All Week 1 topics + Ventilation · Circulation · Cardiac Emergencies · CPR & AED', active:true },
+      { id:'week3',   name:'Week 3 Exam',   file:'EMR_Week4_Exam.html',   questions:'25',  time:'25 min',  passing:'70%', category:'module',  color:'#fbbf24', icon:'📋', weight:'25% (Module Exams)', topics:'Trauma · Musculoskeletal Injuries · Head & Spine · Environmental & Behavioral Emergencies', active:true },
+      { id:'final',   name:'Final Exam',    file:'EMR_Final_Exam.html',   questions:'120', time:'120 min', passing:'70%', category:'final',   color:'#f87171', icon:'🎓', weight:'40% (Final)',        topics:'Comprehensive — all course topics', active:true },
     ];
   }
 }
@@ -1915,7 +1914,7 @@ async function savePortalContent() {
  
 function cmAddItem(section) {
   const defaults = {
-    exams:         { id:'', name:'', file:'', questions:'25', time:'25 min', passing:'70%', category:'module', color:'#fbbf24', icon:'\ud83d\udccb', weight:'', topics:'', active:true },
+    exams:         { id:'', name:'', file:'', questions:'25', time:'25 min', passing:'70%', category:'module', color:'#fbbf24', icon:'📋', weight:'', topics:'', active:true },
     announcements: { text:'', type:'info' },
     links:         { title:'', url:'', description:'' },
     resources:     { title:'', url:'', description:'' },
@@ -1972,7 +1971,7 @@ function renderCourseManager() {
         <button onclick="cmMoveCourse(${i},-1)" ${i===0?'disabled':''} style="background:none;border:none;color:${i===0?'#2d3f6b':'#93adc8'};cursor:${i===0?'default':'pointer'};font-size:12px;line-height:1;">▲</button>
         <button onclick="cmMoveCourse(${i},1)" ${i===portalContent.courses.length-1?'disabled':''} style="background:none;border:none;color:${i===portalContent.courses.length-1?'#2d3f6b':'#93adc8'};cursor:${i===portalContent.courses.length-1?'default':'pointer'};font-size:12px;line-height:1;">▼</button>
       </div>
-      <input type="text" value="${escHtml(c.icon||'\ud83d\udcda')}" maxlength="2"
+      <input type="text" value="${escHtml(c.icon||'📚')}" maxlength="2"
         onchange="cmUpdateCourse(${i},'icon',this.value)"
         style="width:40px;text-align:center;font-size:18px;background:#162236;border:1px solid #2d4a7a;border-radius:6px;color:#e2e8f0;padding:4px;" />
       <input type="text" value="${escHtml(c.label)}"
@@ -1985,7 +1984,7 @@ function renderCourseManager() {
         <span style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;color:${c.color};background:${c.color}22;border:1px solid ${c.color};">${c.label}</span>
       </div>
       <button onclick="cmDeleteCourse(${i})" title="Remove course"
-        style="background:none;border:1px solid #f87171;border-radius:6px;color:#f87171;padding:4px 8px;font-size:12px;cursor:pointer;">\ud83d\uddd1</button>
+        style="background:none;border:1px solid #f87171;border-radius:6px;color:#f87171;padding:4px 8px;font-size:12px;cursor:pointer;">🗑</button>
     </div>
   `).join('') + `
     <button onclick="cmAddCourse()"
@@ -2018,7 +2017,7 @@ function cmMoveCourse(i, dir) {
  
 function cmAddCourse() {
   if (!portalContent.courses) portalContent.courses = COURSES.map(c=>({...c}));
-  const icons = ['\ud83d\ude92','\ud83e\udea2','\ud83c\udf0a','\ud83c\udfd4️','⚡','\ud83e\uddef','\ud83d\udee0️','\ud83d\udce1'];
+  const icons = ['🚒','🪢','🌊','🏔️','⚡','🧯','🛠️','📡'];
   const colors = ['#0891b2','#16a34a','#9333ea','#e11d48','#ea580c','#ca8a04'];
   const idx = portalContent.courses.length;
   const newId = 'course_' + Date.now();
@@ -2227,14 +2226,6 @@ function renderContentManager() {
 function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
  
 // Start Firebase load immediately — don't block on auth
-// Safety timeout: if Firebase hasn't loaded in 8 seconds, force-hide the overlay
-setTimeout(() => {
-  const overlay = document.getElementById('loadingOverlay');
-  if (overlay && overlay.style.display !== 'none') {
-    overlay.style.display = 'none';
-    setSyncStatus('error', '✗ Connection timeout — check internet');
-  }
-}, 8000);
 loadFromFirebase();
  
 document.addEventListener('DOMContentLoaded', () => {
@@ -2327,7 +2318,7 @@ async function renderArchives() {
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button onclick="viewArchiveDetail('${a.id}')" style="padding:7px 16px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#1e3a5f;font-size:13px;cursor:pointer;">View records</button>
-            <button onclick="generateAuditPackages('${a.id}')" style="padding:7px 16px;border:1px solid #b45309;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:700;cursor:pointer;">\ud83d\udce6 Audit Packages</button>
+            <button onclick="generateAuditPackages('${a.id}')" style="padding:7px 16px;border:1px solid #b45309;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:700;cursor:pointer;">📦 Audit Packages</button>
             <button onclick="downloadArchiveHTML('${a.id}')" style="padding:7px 16px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#1e3a5f;font-size:13px;cursor:pointer;">⬇ Class Report</button>
             <button onclick="deleteArchive('${a.id}','${a.docName}','${a.className}')" style="padding:7px 16px;border:1px solid #fca5a5;border-radius:8px;background:#f8fafc;color:#dc2626;font-size:13px;cursor:pointer;">Delete</button>
           </div>
@@ -2346,8 +2337,7 @@ async
 // ── Archive creation flow ─────────────────────────────────────────────────────
 async function beginArchiveFlow() {
   const className = data.className || 'My Class';
-  const name = prompt(`Archive name (edit or press OK):\
-`, className + ' — ' + new Date().getFullYear());
+  const name = prompt(`Archive name (edit or press OK):\n`, className + ' — ' + new Date().getFullYear());
   if (!name) return;
   setSyncStatus('syncing', 'Creating archive…');
   const examDefs = Object.values(EXAM_DEFS).flat();
@@ -2437,10 +2427,7 @@ async function beginArchiveFlow() {
     if (!resp.ok) throw new Error(await resp.text());
     setSyncStatus('saved', '✓ Archive saved');
     setTimeout(()=>setSyncStatus('',''), 2000);
-    const doReset = confirm('Ready to reset for the new class?\
-\
-This will clear: students, attendance, grades, and exam submissions.\
-Portal content and course structure will be kept.');
+    const doReset = confirm('Ready to reset for the new class?\n\nThis will clear: students, attendance, grades, and exam submissions.\nPortal content and course structure will be kept.');
     if (doReset) await performReset();
     renderArchives();
   } catch(e) {
@@ -2530,7 +2517,7 @@ async function renderArchiveDetail(el) {
             <div style="font-size:18px;font-weight:700;color:#1e3a5f;">${s.name}</div>
             <div style="font-size:12px;color:#6b82a0;">ID: ${s.tfdId||s.id} · ${a.className} · Archived ${date}</div>
           </div>
-          <button onclick="downloadStudentAuditPackage('${archiveDetailId}','${s.id}')" style="padding:7px 14px;border:1px solid #b45309;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:700;cursor:pointer;">\ud83d\udcc4 Download Audit Record</button>
+          <button onclick="downloadStudentAuditPackage('${archiveDetailId}','${s.id}')" style="padding:7px 14px;border:1px solid #b45309;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:700;cursor:pointer;">📄 Download Audit Record</button>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
           ${[['Overall',s.overall!==null?s.overall+'%':'—'],['Status',s.overall!==null?s.overall>=70?'Pass':'Fail':'—'],['Attendance',present+'/'+(present+absent+late)+' days'],['Certs',s.certs.length]].map(([l,v])=>`
@@ -2541,7 +2528,7 @@ async function renderArchiveDetail(el) {
         </div>
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">\ud83d\udccb Exam Results</div>
+            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">📋 Exam Results</div>
             <div style="overflow-x:auto;">
               <table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <thead><tr style="border-bottom:1px solid #e2e8f0;">
@@ -2556,7 +2543,7 @@ async function renderArchiveDetail(el) {
             </div>
           </div>
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">\ud83d\udcc5 Attendance</div>
+            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">📅 Attendance</div>
             <div style="padding:16px;display:flex;gap:24px;flex-wrap:wrap;">
               ${[['Present',present,'#16a34a'],['Absent',absent,'#dc2626'],['Late/Tardy',late,'#d97706'],['Total Days',days.length,'#6b82a0']].map(([l,v,c])=>`
                 <div style="text-align:center;">
@@ -2566,7 +2553,7 @@ async function renderArchiveDetail(el) {
             </div>
           </div>
           ${quizRows ? `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">\ud83d\udcdd Quiz / Grade Scores</div>
+            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">📝 Quiz / Grade Scores</div>
             <div style="overflow-x:auto;">
               <table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <thead><tr style="border-bottom:1px solid #e2e8f0;">
@@ -2579,7 +2566,7 @@ async function renderArchiveDetail(el) {
             </div>
           </div>` : ''}
           <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">\ud83c\udfc5 Documents & Certificates</div>
+            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;font-size:13px;font-weight:700;color:#1e3a5f;background:#f8fafc;">🏅 Documents & Certificates</div>
             ${certRows ? `<div style="overflow-x:auto;">
               <table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <thead><tr style="border-bottom:1px solid #e2e8f0;">
@@ -2697,7 +2684,7 @@ async function renderArchiveDetail(el) {
         <div style="font-size:16px;font-weight:700;color:#1e3a5f;">${a.className}</div>
         <div style="font-size:12px;color:#6b82a0;">Archived ${date}</div>
       </div>
-      <button onclick="generateAuditPackages('${a.id}')" style="padding:7px 14px;border:1px solid #b45309;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:700;cursor:pointer;">\ud83d\udce6 Audit Packages</button>
+      <button onclick="generateAuditPackages('${a.id}')" style="padding:7px 14px;border:1px solid #b45309;border-radius:8px;background:#fff7ed;color:#b45309;font-size:13px;font-weight:700;cursor:pointer;">📦 Audit Packages</button>
       <button onclick="downloadArchiveHTML('${a.id}')" style="padding:7px 14px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#1e3a5f;font-size:13px;cursor:pointer;">⬇ Class Report</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
@@ -2908,5 +2895,526 @@ async function downloadArchiveHTML(id) {
   <h2>Individual Student Records</h2>
   ${studentSections}
   <div class="footer">Generated ${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})} · Tifton Fire Department EMR Program · ${a.className}</div>
+</body>
+</html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = a.className.replace(/[^a-z0-9]/gi,'_') + '_Archive_Report.html';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+// ── Per-student audit package generator ──────────────────────────────────────
+// Fetch a remote file and embed it as a base64 data URI — makes audit docs self-contained forever
+async function fetchAsBase64DataURI(url) {
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch(e) {
+    console.warn('fetchAsBase64DataURI failed:', url, e);
+    return null;
+  }
+}
+async function generateStudentAuditHTML(s, a, examDefs) {
+  const archiveDate = a.archivedAt ? new Date(a.archivedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
+  const generatedAt = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  // Exam scores
+  const gradedDefs  = examDefs.filter(d => ['module','midterm','final'].includes(d.category));
+  const practiceDefs = examDefs.filter(d => d.category === 'practice');
+  const sKey = s.name.toLowerCase().trim();
+  const sExams = (a.examResults || {})[sKey] || {};
+  let earned = 0, possible = 0;
+  gradedDefs.forEach(d => {
+    const r = sExams[d.assignId];
+    if (r) { earned += r.pct; possible += 100; }
+  });
+  const overall = possible > 0 ? Math.round(earned / possible * 100) : null;
+  const passing = overall !== null && overall >= 70;
+  // Attendance detail
+  const days = Object.keys(a.attendance || {}).sort();
+  let present=0, absent=0, late=0, excused=0;
+  const attRows = days.map(d => {
+    const raw = (a.attendance[d]||{})[s.id] || '';
+    const cfg = STATUS_CONFIG[raw] || {};
+    if (raw==='present') present++;
+    else if (raw==='absent') absent++;
+    else if (raw==='late') late++;
+    else if (raw==='excused') excused++;
+    const label = cfg.label || '—';
+    const color = cfg.color || '#94a3b8';
+    const dateStr = new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    return `<tr><td>${dateStr}</td><td style="text-align:center;font-weight:700;color:${color}">${label}</td><td style="text-align:center;color:#64748b">${raw||'—'}</td></tr>`;
+  }).join('');
+  // Graded exam rows
+  const gradedRows = gradedDefs.map(d => {
+    const r = sExams[d.assignId];
+    if (!r) return `<tr><td>${d.label}</td><td colspan="4" style="text-align:center;color:#94a3b8">No submission on record</td></tr>`;
+    const dt = r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+    const pass = r.pct >= 70;
+    return `<tr>
+      <td>${d.label}</td>
+      <td style="text-align:center;font-weight:700;color:${pass?'#15803d':'#b91c1c'}">${r.pct}%</td>
+      <td style="text-align:center">${r.score}/${r.total}</td>
+      <td style="text-align:center;font-weight:700;color:${pass?'#15803d':'#b91c1c'}">${pass?'PASS':'FAIL'}</td>
+      <td style="text-align:center;color:#64748b">${dt}</td>
+    </tr>`;
+  }).join('');
+  // Practice exam rows
+  const practiceRows = practiceDefs.map(d => {
+    const r = sExams[d.assignId];
+    if (!r) return '';
+    const dt = r.submittedAt ? new Date(r.submittedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+    return `<tr>
+      <td>${d.label}</td>
+      <td style="text-align:center">${r.pct}%</td>
+      <td style="text-align:center">${r.score}/${r.total}</td>
+      <td style="text-align:center;color:#64748b">${dt}</td>
+    </tr>`;
+  }).join('');
+  // Quiz/assignment rows
+  const assignments = a.assignments || [];
+  const scores = a.scores || {};
+  const quizRows = assignments.map(asn => {
+    const val = (scores[String(s.id)]||{})[asn.id];
+    if (val === undefined || val === null) return '';
+    return `<tr><td>${asn.name||asn.id}</td><td style="text-align:center">${val}</td><td style="text-align:center">${asn.maxScore||'—'}</td></tr>`;
+  }).join('');
+  // Certificate / document rows — embed as base64 for permanent self-contained files
+  const certs = (a.certificates || {})[s.name] || [];
+  const certRowsData = await Promise.all(certs.map(async c => {
+    const dt = c.uploadedAt ? new Date(c.uploadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+    let embedLink = '—';
+    if (c.downloadUrl) {
+      const dataURI = await fetchAsBase64DataURI(c.downloadUrl);
+      if (dataURI) {
+        // Inline embed: PDFs open in browser, images display, others download
+        embedLink = `<a href="${dataURI}" download="${(c.certName||'document').replace(/[^a-z0-9._-]/gi,'_')}" target="_blank" style="color:#1d4ed8;text-decoration:none;font-weight:600;">View / Download ↗</a>`;
+      } else {
+        // Fallback: original URL (may expire but better than nothing)
+        embedLink = `<a href="${c.downloadUrl}" target="_blank" style="color:#b45309;text-decoration:none;font-weight:600;">Open Link ↗</a>`;
+      }
+    }
+    return `<tr>
+      <td>${c.certName||'Document'}</td>
+      <td style="text-align:center">${c.fileType||'—'}</td>
+      <td style="text-align:center">${embedLink}</td>
+      <td style="text-align:center;color:#64748b">${dt}</td>
+    </tr>`;
+  }));
+  const certRows = certRowsData.join('');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Student Audit Record — ${s.name}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#1a2744;background:#fff;padding:32px;max-width:960px;margin:0 auto}
+  .header-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #1e3a5f;flex-wrap:wrap}
+  .agency{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#b45309;margin-bottom:4px}
+  .doc-title{font-size:22px;font-weight:700;color:#1e3a5f;margin-bottom:2px}
+  .doc-sub{font-size:12px;color:#6b82a0}
+  .badge{padding:8px 20px;border-radius:8px;font-size:14px;font-weight:700;text-align:center;white-space:nowrap}
+  .badge.pass{background:#dcfce7;color:#15803d;border:2px solid #16a34a}
+  .badge.fail{background:#fee2e2;color:#b91c1c;border:2px solid #dc2626}
+  .badge.pending{background:#f1f5f9;color:#64748b;border:2px solid #e2e8f0}
+  .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:28px}
+  .info-card{background:#f0f6ff;border-radius:10px;padding:14px 16px;border-left:3px solid #1e3a5f}
+  .info-val{font-size:20px;font-weight:700;color:#1e3a5f}
+  .info-lbl{font-size:11px;color:#6b82a0;margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+  .section{margin-bottom:28px}
+  .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1e3a5f;padding:10px 14px;background:#f0f6ff;border-left:4px solid #1e3a5f;border-radius:0 6px 6px 0;margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{text-align:left;padding:8px 10px;font-size:10px;color:#6b82a0;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;background:#f8fafc;font-weight:700}
+  td{padding:9px 10px;border-bottom:1px solid #f1f5f9;color:#334155}
+  tr:last-child td{border-bottom:none}
+  .att-summary{display:flex;gap:28px;flex-wrap:wrap;padding:14px 0;margin-bottom:12px}
+  .att-stat{text-align:center}
+  .att-val{font-size:22px;font-weight:700}
+  .att-lbl{font-size:11px;color:#94a3b8;margin-top:2px}
+  .notice{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:12px;color:#92400e;margin-bottom:20px}
+  .footer{margin-top:40px;padding-top:16px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .footer-left{font-size:10px;color:#94a3b8;line-height:1.6}
+  .footer-seal{font-size:10px;font-weight:700;color:#1e3a5f;text-align:right;line-height:1.6}
+  @media print{
+    body{padding:16px;font-size:12px}
+    .no-print{display:none}
+    .section{page-break-inside:avoid}
+    a{color:#1a2744!important;text-decoration:none}
+    a::after{content:" (" attr(href) ")";font-size:10px;color:#64748b}
+  }
+</style>
+</head>
+<body>
+<div class="no-print" style="background:#1e3a5f;color:#fff;padding:10px 20px;margin:-32px -32px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+  <div style="font-size:13px;font-weight:700">🔒 Official Student Audit Record — Tifton Fire Department</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button onclick="window.print()" style="padding:7px 16px;background:#b45309;border:none;color:#fff;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">🖨 Print / Save as PDF</button>
+  </div>
+</div>
+<div class="header-bar">
+  <div>
+    <div class="agency">Tifton Fire Department · EMR Initial Education Program</div>
+    <div class="doc-title">${s.name}</div>
+    <div class="doc-sub">Student ID: ${s.tfdId||s.id} &nbsp;·&nbsp; ${a.className} &nbsp;·&nbsp; Archived: ${archiveDate}</div>
+  </div>
+  <div class="badge ${overall===null?'pending':passing?'pass':'fail'}">
+    ${overall===null ? 'No grade data' : overall+'% — '+(passing?'PASS':'DID NOT PASS')}
+  </div>
+</div>
+<div class="notice">
+  This is an official student record generated from the Tifton Fire Department EMR Initial Education Program management system.
+  Records reflect final, override-adjusted scores as recorded by the course instructor.
+  Generated: ${generatedAt} · Course: ${a.className}
+</div>
+<div class="info-grid">
+  <div class="info-card">
+    <div class="info-val">${overall !== null ? overall+'%' : '—'}</div>
+    <div class="info-lbl">Overall Grade</div>
+  </div>
+  <div class="info-card">
+    <div class="info-val" style="color:${overall===null?'#64748b':passing?'#15803d':'#b91c1c'}">${overall===null?'—':passing?'Pass':'Did Not Pass'}</div>
+    <div class="info-lbl">Final Status</div>
+  </div>
+  <div class="info-card">
+    <div class="info-val">${present}/${days.length}</div>
+    <div class="info-lbl">Attendance</div>
+  </div>
+  <div class="info-card">
+    <div class="info-val">${certs.length}</div>
+    <div class="info-lbl">Documents on File</div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">📋 Graded Exam Results</div>
+  <table>
+    <thead><tr><th>Exam</th><th style="text-align:center">Score</th><th style="text-align:center">Points</th><th style="text-align:center">Status</th><th style="text-align:center">Date Submitted</th></tr></thead>
+    <tbody>${gradedRows||'<tr><td colspan="5" style="text-align:center;padding:16px;color:#94a3b8">No graded exam submissions on record</td></tr>'}</tbody>
+  </table>
+</div>
+${practiceRows ? `<div class="section">
+  <div class="section-title">📝 Practice Exam Attempts</div>
+  <table>
+    <thead><tr><th>Exam</th><th style="text-align:center">Score</th><th style="text-align:center">Points</th><th style="text-align:center">Date</th></tr></thead>
+    <tbody>${practiceRows}</tbody>
+  </table>
+</div>` : ''}
+${quizRows ? `<div class="section">
+  <div class="section-title">📊 Quiz & Assignment Scores</div>
+  <table>
+    <thead><tr><th>Assignment</th><th style="text-align:center">Score</th><th style="text-align:center">Max Points</th></tr></thead>
+    <tbody>${quizRows}</tbody>
+  </table>
+</div>` : ''}
+<div class="section">
+  <div class="section-title">📅 Attendance Record</div>
+  <div class="att-summary">
+    <div class="att-stat"><div class="att-val" style="color:#16a34a">${present}</div><div class="att-lbl">Present</div></div>
+    <div class="att-stat"><div class="att-val" style="color:#dc2626">${absent}</div><div class="att-lbl">Absent</div></div>
+    <div class="att-stat"><div class="att-val" style="color:#d97706">${late}</div><div class="att-lbl">Late / Tardy</div></div>
+    <div class="att-stat"><div class="att-val" style="color:#6366f1">${excused}</div><div class="att-lbl">Excused</div></div>
+    <div class="att-stat"><div class="att-val">${days.length}</div><div class="att-lbl">Total Days</div></div>
+    <div class="att-stat"><div class="att-val">${days.length>0?Math.round(present/days.length*100):0}%</div><div class="att-lbl">Attendance Rate</div></div>
+  </div>
+  ${attRows ? `<table>
+    <thead><tr><th>Date</th><th style="text-align:center">Code</th><th style="text-align:center">Status</th></tr></thead>
+    <tbody>${attRows}</tbody>
+  </table>` : '<p style="color:#94a3b8;font-size:13px;padding:8px 0">No attendance records on file.</p>'}
+</div>
+<div class="section">
+  <div class="section-title">🏅 Documents & Certificates</div>
+  ${certRows ? `<table>
+    <thead><tr><th>Document Name</th><th style="text-align:center">Type</th><th style="text-align:center">File</th><th style="text-align:center">Date Uploaded</th></tr></thead>
+    <tbody>${certRows}</tbody>
+  </table>` : '<p style="color:#94a3b8;font-size:13px;padding:8px 0">No documents or certificates on file for this student.</p>'}
+</div>
+<div class="footer">
+  <div class="footer-left">
+    Tifton Fire Department · EMR Initial Education Program<br>
+    ${a.className} · Archived ${archiveDate}<br>
+    Generated ${generatedAt} · For official audit use only
+  </div>
+  <div class="footer-seal">
+    GEORGIA OEMST<br>
+    AUDIT RECORD<br>
+    ${a.className}
+  </div>
+</div>
+</body>
+</html>`;
+}
+async function downloadStudentAuditPackage(archiveId, studentId) {
+  const archives = await loadArchives();
+  const a = archives.find(x => x.id === archiveId);
+  if (!a) return;
+  const s = (a.students||[]).find(x => x.id === studentId);
+  if (!s) return;
+  const examDefs = Object.values(EXAM_DEFS).flat();
+  const html = await generateStudentAuditHTML(s, a, examDefs);
+  const safeName = s.name.replace(/[^a-z0-9]/gi,'_');
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `TFD_Audit_${safeName}_${a.className.replace(/[^a-z0-9]/gi,'_')}.html`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+async function generateAuditPackages(archiveId) {
+  const archives = await loadArchives();
+  const a = archives.find(x => x.id === archiveId);
+  if (!a) return;
+  const students = a.students || [];
+  if (students.length === 0) { alert('No students in this archive.'); return; }
+  const examDefs = Object.values(EXAM_DEFS).flat();
+  const mode = await new Promise(resolve => {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+        <div style="font-size:17px;font-weight:700;color:#1e3a5f;margin-bottom:8px">📦 Generate Audit Packages</div>
+        <div style="font-size:13px;color:#6b82a0;margin-bottom:24px">Choose how to generate per-student audit records for <strong>${a.className}</strong> (${students.length} students).</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button onclick="this.closest('[style*=fixed]').dataset.choice='download';this.closest('[style*=fixed]').dispatchEvent(new Event('choose'))" style="padding:14px 18px;background:#1e3a5f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:left">
+            ⬇ Download All — one HTML file per student
+            <div style="font-size:11px;font-weight:400;opacity:.75;margin-top:3px">Files download sequentially to your downloads folder</div>
+          </button>
+          <button onclick="this.closest('[style*=fixed]').dataset.choice='host';this.closest('[style*=fixed]').dispatchEvent(new Event('choose'))" style="padding:14px 18px;background:#b45309;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:left">
+            🔗 Generate Hosted Links — shareable URLs per student
+            <div style="font-size:11px;font-weight:400;opacity:.75;margin-top:3px">Uploads to Firebase Storage · links can be emailed to OEMST</div>
+          </button>
+          <button onclick="this.closest('[style*=fixed]').dataset.choice='both';this.closest('[style*=fixed]').dispatchEvent(new Event('choose'))" style="padding:14px 18px;background:#15803d;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:left">
+            ✅ Both — download files AND generate hosted links
+          </button>
+          <button onclick="this.closest('[style*=fixed]').dataset.choice='cancel';this.closest('[style*=fixed]').dispatchEvent(new Event('choose'))" style="padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#6b82a0;cursor:pointer">Cancel</button>
+        </div>
+      </div>`;
+    modal.addEventListener('choose', () => {
+      document.body.removeChild(modal);
+      resolve(modal.dataset.choice);
+    });
+    document.body.appendChild(modal);
+  });
+  if (!mode || mode === 'cancel') return;
+  const doDownload = mode === 'download' || mode === 'both';
+  const doHost     = mode === 'host'     || mode === 'both';
+  const results = [];
+  const progressEl = document.createElement('div');
+  progressEl.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1e3a5f;color:#fff;padding:14px 20px;border-radius:10px;font-size:13px;z-index:9999;min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,0.3)';
+  progressEl.innerHTML = `<div style="font-weight:700;margin-bottom:6px">Generating audit packages…</div><div id="auditProgress">0/${students.length}</div>`;
+  document.body.appendChild(progressEl);
+  for (let i = 0; i < students.length; i++) {
+    const s = students[i];
+    document.getElementById('auditProgress').textContent = `${i+1}/${students.length} — ${s.name} (embedding documents…)`;
+    const html = await generateStudentAuditHTML(s, a, examDefs);
+    const safeName = s.name.replace(/[^a-z0-9]/gi,'_');
+    const fileName = `TFD_Audit_${safeName}_${a.className.replace(/[^a-z0-9]/gi,'_')}.html`;
+    const blob = new Blob([html], {type:'text/html'});
+    let hostedUrl = null;
+    if (doHost) {
+      try {
+        const storagePath = `audit_packages/${archiveId}/${fileName}`;
+        const ref = storage.ref(storagePath);
+        await ref.put(blob, {contentType:'text/html'});
+        hostedUrl = await ref.getDownloadURL();
+      } catch(e) { console.error('Hosting failed for', s.name, e); }
+    }
+    if (doDownload) {
+      const dlUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = dlUrl;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(dlUrl);
+      await new Promise(r => setTimeout(r, 600)); // stagger downloads
+    }
+    results.push({ name: s.name, id: s.tfdId||s.id, fileName, hostedUrl });
+  }
+  document.body.removeChild(progressEl);
+  // Show results summary with copy-able links
+  if (doHost) {
+    const linkRows = results.map(r =>
+      `<tr>
+        <td style="padding:8px 10px;color:#1e3a5f;font-weight:500">${r.name}</td>
+        <td style="padding:8px;color:#64748b;font-size:11px">${r.id}</td>
+        <td style="padding:8px">${r.hostedUrl
+          ? `<a href="${r.hostedUrl}" target="_blank" style="color:#1d4ed8;font-size:12px;word-break:break-all">${r.hostedUrl.substring(0,60)}…</a>`
+          : '<span style="color:#dc2626;font-size:12px">Upload failed</span>'}</td>
+      </tr>`
+    ).join('');
+    const summaryModal = document.createElement('div');
+    summaryModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto';
+    summaryModal.innerHTML = `
+      <div style="background:#fff;border-radius:14px;padding:28px;max-width:820px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:17px;font-weight:700;color:#1e3a5f">✅ Audit Packages Generated</div>
+            <div style="font-size:12px;color:#6b82a0;margin-top:2px">${a.className} · ${results.length} student records · Share these links with OEMST</div>
+          </div>
+          <button onclick="this.closest('[style*=fixed]').remove()" style="padding:8px 18px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#1e3a5f;cursor:pointer">Close</button>
+        </div>
+        <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:12px;color:#92400e;margin-bottom:16px">
+          ✅ Each audit file is fully self-contained — all documents and certificates are embedded directly in the HTML. Files will open and display correctly with no internet connection required, now or in the future. Share files or links with OEMST auditors via email.
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="border-bottom:2px solid #e2e8f0">
+              <th style="text-align:left;padding:8px 10px;font-size:11px;color:#6b82a0;text-transform:uppercase">Student</th>
+              <th style="text-align:left;padding:8px;font-size:11px;color:#6b82a0;text-transform:uppercase">ID</th>
+              <th style="text-align:left;padding:8px;font-size:11px;color:#6b82a0;text-transform:uppercase">Shareable Audit Link</th>
+            </tr></thead>
+            <tbody>${linkRows}</tbody>
+          </table>
+        </div>
+        <div style="margin-top:16px;text-align:right">
+          <button onclick="
+            const rows = ${JSON.stringify(results)};
+            const text = rows.map(r => r.name + ' ('+r.id+'): ' + (r.hostedUrl||'failed')).join('\\n');
+            navigator.clipboard.writeText(text).then(()=>alert('All links copied to clipboard'));
+          " style="padding:9px 18px;background:#1e3a5f;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">
+            📋 Copy All Links
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(summaryModal);
+  } else {
+    setSyncStatus('saved', `✓ ${results.length} audit packages downloaded`);
+    setTimeout(()=>setSyncStatus('',''), 3000);
+  }
+}
+async function deleteArchive(id, docName, className) {
+  if (!confirm(`Permanently delete archive for "${className}"?\nThis cannot be undone.`)) return;
+  try {
+    const resp = await fetch(`https://firestore.googleapis.com/v1/${docName}?key=${FB_CONFIG.apiKey}`, {method:'DELETE'});
+    if (!resp.ok) throw new Error(await resp.text());
+    setSyncStatus('saved', '✓ Archive deleted');
+    setTimeout(()=>setSyncStatus('',''), 2000);
+    if (archiveDetailId === id) archiveDetailId = null;
+    renderArchives();
+  } catch(e) {
+    alert('Delete failed: ' + e.message);
+  }
+}
+// ── DOCUMENT UPLOAD ──────────────────────────────────────────────────────────
+function openDocUploadModal(studentName, cardEl) {
+  _docUploadStudentName = studentName;
+  _docUploadCardEl = cardEl;
+  document.getElementById('docUploadStudentName').textContent = studentName;
+  document.getElementById('docUploadLabel').value = '';
+  document.getElementById('docUploadFile').value = '';
+  document.getElementById('docUploadProgress').style.display = 'none';
+  document.getElementById('docUploadBar').style.width = '0%';
+  document.getElementById('docUploadStatus').textContent = '';
+  const modal = document.getElementById('docUploadModal');
+  modal.style.display = 'flex';
+}
+function closeDocUploadModal() {
+  document.getElementById('docUploadModal').style.display = 'none';
+  _docUploadStudentName = '';
+  _docUploadCardEl = null;
+}
+async function confirmDocUpload() {
+  const label = document.getElementById('docUploadLabel').value.trim();
+  const fileInput = document.getElementById('docUploadFile');
+  const file = fileInput.files[0];
+  if (!label) { alert('Please enter a document name.'); return; }
+  if (!file)  { alert('Please select a file.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('File is too large. Maximum size is 10MB.'); return; }
+  if (typeof storage === 'undefined' || !storage) {
+    alert('Firebase Storage is not available. Make sure the Storage SDK is loaded and Firebase Storage is enabled in your project.');
+    return;
+  }
+  const progressEl = document.getElementById('docUploadProgress');
+  const barEl      = document.getElementById('docUploadBar');
+  const statusEl   = document.getElementById('docUploadStatus');
+  progressEl.style.display = 'block';
+  statusEl.textContent = 'Uploading…';
+  try {
+    // Sanitize filename and build storage path
+    const ext = file.name.split('.').pop().toLowerCase();
+    const safeName = _docUploadStudentName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const safeLabel = label.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const timestamp = Date.now();
+    const storagePath = `student_docs/${safeName}/${safeLabel}_${timestamp}.${ext}`;
+    // Upload to Firebase Storage with progress
+    const storageRef = storage.ref(storagePath);
+    const uploadTask = storageRef.put(file);
+    await new Promise((resolve, reject) => {
+      uploadTask.on('state_changed',
+        snapshot => {
+          const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          barEl.style.width = pct + '%';
+          statusEl.textContent = `Uploading… ${pct}%`;
+        },
+        reject,
+        resolve
+      );
+    });
+    statusEl.textContent = 'Getting download URL…';
+    const downloadUrl = await storageRef.getDownloadURL();
+    // Save record to Firestore certificates collection
+    statusEl.textContent = 'Saving record…';
+    const fileType = ['pdf'].includes(ext) ? 'pdf' : 'image';
+    const body = {
+      fields: {
+        studentName: { stringValue: _docUploadStudentName },
+        certName:    { stringValue: label },
+        downloadUrl: { stringValue: downloadUrl },
+        fileType:    { stringValue: fileType },
+        uploadedAt:  { stringValue: new Date().toISOString() },
+        storagePath: { stringValue: storagePath },
+        docType:     { stringValue: 'document' },
+      }
+    };
+    const resp = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${FB_CONFIG.projectId}/databases/(default)/documents/certificates?key=${FB_CONFIG.apiKey}`,
+      { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) }
+    );
+    if (!resp.ok) throw new Error(await resp.text());
+    barEl.style.width = '100%';
+    statusEl.textContent = 'Upload complete ✓';
+    setSyncStatus('saved', '✓ Document uploaded');
+    setTimeout(() => setSyncStatus('', ''), 2500);
+    // Refresh the cert list on that student card
+    if (_docUploadCardEl) {
+      const existing = _docUploadCardEl.querySelector('[data-certs]');
+      if (existing) existing.remove();
+      await loadStudentCertsForSummary(_docUploadStudentName, _docUploadCardEl);
+    }
+    setTimeout(closeDocUploadModal, 800);
+  } catch(e) {
+    console.error('Upload error:', e);
+    let msg = e.message || String(e);
+    if (msg.includes('storage/unauthorized') || msg.includes('permission') || msg.includes('403')) {
+      msg = 'Upload failed — Firebase Storage rules are blocking this upload. In the Firebase Console go to Storage → Rules and allow writes to student_docs/.';
+    } else if (msg.includes('storage/unknown') || msg.includes('CORS')) {
+      msg = 'Upload failed — Storage may not be enabled for this project. Enable Firebase Storage in the Firebase Console.';
+    } else if (!window.storage || typeof window.storage === 'undefined') {
+      msg = 'Upload failed — Firebase Storage SDK not loaded. Check your internet connection.';
+    }
+    statusEl.textContent = msg;
+    barEl.style.background = '#dc2626';
+    setSyncStatus('error', '✗ Upload failed');
+  }
+}
+// Close modal on backdrop click
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('docUploadModal');
+  if (modal) {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) closeDocUploadModal();
+    });
+  }
+});
+</script>
 </body>
 </html>
